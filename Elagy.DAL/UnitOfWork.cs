@@ -1,0 +1,44 @@
+﻿using Elagy.Core.Entities;
+using Elagy.Core.IRepositories;
+using Elagy.DAL.Data;
+using Elagy.DAL.Repositories;
+using System;
+using System.Threading.Tasks;
+
+namespace Elagy.DAL
+{
+    public class UnitOfWork : IUnitOfWork
+    {
+        private readonly ApplicationDbContext _context;
+
+        public IGenericRepository<Patient> Patients { get; private set; }
+        public IGenericRepository<ServiceProvider> ServiceProviders { get; private set; }
+        public IGenericRepository<SuperAdmin> SuperAdmins { get; private set; }
+        public IGenericRepository<ServiceAsset> ServiceAssets { get; private set; }
+        public IGenericRepository<HotelAsset> HotelAssets { get; private set; }
+        public IGenericRepository<HospitalAsset> HospitalAssets { get; private set; }
+        public IGenericRepository<CarRentalAsset> CarRentalAssets { get; private set; }
+
+        public UnitOfWork(ApplicationDbContext context)
+        {
+            _context = context;
+            Patients = new GenericRepository<Patient>(_context);
+            ServiceProviders = new GenericRepository<ServiceProvider>(_context);
+            SuperAdmins = new GenericRepository<SuperAdmin>(_context);
+            ServiceAssets = new GenericRepository<ServiceAsset>(_context);
+            HotelAssets = new GenericRepository<HotelAsset>(_context);
+            HospitalAssets = new GenericRepository<HospitalAsset>(_context);
+            CarRentalAssets = new GenericRepository<CarRentalAsset>(_context);
+        }
+
+        public async Task<int> CompleteAsync()
+        {
+            return await _context.SaveChangesAsync();
+        }
+
+        public void Dispose()
+        {
+            _context.Dispose();
+        }
+    }
+}

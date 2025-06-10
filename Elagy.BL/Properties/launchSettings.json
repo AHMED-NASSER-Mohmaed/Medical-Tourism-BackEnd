@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Elagy.BL": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:50821;http://localhost:50822"
+    }
+  }
+}
