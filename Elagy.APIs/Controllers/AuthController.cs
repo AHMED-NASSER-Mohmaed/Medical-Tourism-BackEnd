@@ -29,36 +29,71 @@ namespace Elagy.APIs.Controllers
             return HandleAuthResult(result);
         }
 
+
+
         [HttpPost("register-hotel-provider")]
-        public async Task<ActionResult> RegisterHotelProvider([FromBody] HotelProviderRegistrationRequestDto model)
+        public async Task<ActionResult> RegisterHotelProvider(
+            [FromForm] HotelProviderRegistrationRequestDto model,
+            [FromForm] List<IFormFile> files)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var result = await _authService.RegisterHotelProviderAsync(model);
+
+            var fileValidationResult = ValidateFiles(files, 2, 2 * 1024 * 1024); // 2 files, 2MB each
+            if (!fileValidationResult.Success)
+            {
+                return BadRequest(new AuthResultDto { Errors = fileValidationResult.Errors });
+            }
+
+
+            var result = await _authService.RegisterHotelProviderAsync(model, files);
             return HandleAuthResult(result);
         }
+
 
         [HttpPost("register-hospital-provider")]
-        public async Task<ActionResult> RegisterHospitalProvider([FromBody] HospitalProviderRegistrationRequestDto model)
+        public async Task<ActionResult> RegisterHospitalProvider(
+            [FromForm] HospitalProviderRegistrationRequestDto model
+            , [FromForm] List<IFormFile> files)
         {
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var result = await _authService.RegisterHospitalProviderAsync(model);
+
+             
+
+            var fileValidationResult = ValidateFiles(files, 2, 2 * 1024 * 1024); // 2 files, 2MB each
+            if (!fileValidationResult.Success)
+            {
+                return BadRequest(new AuthResultDto { Errors = fileValidationResult.Errors });
+            }
+
+            var result = await _authService.RegisterHospitalProviderAsync(model,files);
             return HandleAuthResult(result);
         }
 
+
         [HttpPost("register-car-rental-provider")]
-        public async Task<ActionResult> RegisterCarRentalProvider([FromBody] CarRentalProviderRegistrationRequestDto model)
+        public async Task<ActionResult> RegisterCarRentalProvider(
+            [FromForm] CarRentalProviderRegistrationRequestDto model,
+            [FromForm] List<IFormFile> files)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var result = await _authService.RegisterCarRentalProviderAsync(model);
+            
+            var fileValidationResult = ValidateFiles(files, 2, 2 * 1024 * 1024); // 2 files, 2MB each
+            if (!fileValidationResult.Success)
+            {
+                return BadRequest(new AuthResultDto { Errors = fileValidationResult.Errors });
+            }
+
+            var result = await _authService.RegisterCarRentalProviderAsync(model,files);
             return HandleAuthResult(result);
         }
 
@@ -81,6 +116,30 @@ namespace Elagy.APIs.Controllers
             var result = await _authService.ConfirmEmailAsync(userId, token);
             // You might redirect to a success/failure page here in a real app
             return HandleAuthResult(result);
+        }
+
+
+        [HttpGet("confirm-new-email")]
+        public async Task<IActionResult> ConfirmNewEmail(
+        [FromQuery] string userId,
+        [FromQuery] string newEmail, // <--- IMPORTANT: New email from the URL
+        [FromQuery] string token)
+            {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(newEmail) || string.IsNullOrEmpty(token))
+            {
+                return BadRequest(new AuthResultDto { Success = false, Errors = new[] { "Invalid confirmation link provided (missing parameters)." } });
+            }
+
+            var result = await _authService.ConfirmNewEmailAsync(userId, newEmail, token);
+
+            if (result.Success)
+            {
+                return Ok(result); // Or Redirect to a success page
+            }
+            else
+            {
+                return BadRequest(result); // Or Redirect to an error page
+            }
         }
 
         // --- Password Management Endpoints ---

@@ -1,4 +1,5 @@
 ﻿using Elagy.Core.DTOs.Auth;
+using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Shared;
 using Elagy.Core.DTOs.User;
 using Elagy.Core.Enums;
@@ -14,20 +15,17 @@ namespace Elagy.Core.IServices
         Task<AuthResultDto> ActivateUserAccountAsync(string userId);
         Task<AuthResultDto> DeactivateUserAccountAsync(string userId);
         Task<AuthResultDto> ApproveServiceProviderAccountAsync(string providerId);
-        Task<AuthResultDto> RejectServiceProviderAccountAsync(string providerId, string? rejectionReason); // Corrected
+        Task<AuthResultDto> RejectServiceProviderAccountAsync(string providerId, string? rejectionReason); 
 
-        Task<IEnumerable<PatientDto>> GetPatientsForAdminDashboardAsync(
-            int page, int limit, string? searchQuery = null, UserStatus? status = null); // Corrected
 
-        Task<IEnumerable<HotelProviderProfileDto>> GetHotelProvidersForAdminDashboardAsync(
-            int page, int limit, string? searchQuery = null, UserStatus? userStatus = null, VerificationStatus? assetStatus = null); // Corrected
+        Task<PagedResponseDto<PatientDto>> GetPatientsForAdminDashboardAsync(PaginationParameters paginationParameters); 
+        Task< PagedResponseDto<HotelProviderProfileDto>> GetHotelProvidersForAdminDashboardAsync(PaginationParameters paginationParameters); 
+        Task<PagedResponseDto<HospitalProviderProfileDto>> GetHospitalProvidersForAdminDashboardAsync(PaginationParameters paginationParameters); 
+        Task<PagedResponseDto<CarRentalProviderProfileDto>> GetCarRentalProvidersForAdminDashboardAsync(PaginationParameters paginationParameters); 
 
-        Task<IEnumerable<HospitalProviderProfileDto>> GetHospitalProvidersForAdminDashboardAsync(
-            int page, int limit, string? searchQuery = null, UserStatus? userStatus = null, VerificationStatus? assetStatus = null); // Corrected
 
-        Task<IEnumerable<CarRentalProviderProfileDto>> GetCarRentalProvidersForAdminDashboardAsync(
-            int page, int limit, string? searchQuery = null, UserStatus? userStatus = null, VerificationStatus? assetStatus = null); // Corrected
 
+        //----------------- i will remove them soon ----------------------
         Task<PatientDto> GetPatientDetailsForAdminAsync(string patientId);
         Task<HotelProviderProfileDto> GetHotelProviderDetailsForAdminAsync(string providerId);
         Task<HospitalProviderProfileDto> GetHospitalProviderDetailsForAdminAsync(string providerId);
@@ -35,6 +33,5 @@ namespace Elagy.Core.IServices
 
         Task<AuthResultDto> AdminChangeUserEmailAsync(string userId, string newEmail); // newEmail is not nullable
         Task<AuthResultDto> AdminResetUserPasswordAsync(string userId);
-        Task<AuthResultDto> AdminSetAssetVerificationStatusAsync(string assetId, VerificationStatus status, string? notes = null); // Corrected
-    }
+     }
 }

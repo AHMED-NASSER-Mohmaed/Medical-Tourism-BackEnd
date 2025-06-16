@@ -8,7 +8,7 @@ namespace Elagy.APIs.Controllers
 {
     [Route("api/[controller]")]
     // Protect this controller, allowing only ServiceProviders that are Hotel type
-    [Authorize(Roles = "ServiceProvider")] // Assuming a generic ServiceProvider role for all providers
+    [Authorize(Roles = "HotelServiceProvider")] // Assuming a generic ServiceProvider role for all providers
     public class HotelProviderController : BaseApiController
     {
         private readonly IHotelProviderService _hotelProviderService;

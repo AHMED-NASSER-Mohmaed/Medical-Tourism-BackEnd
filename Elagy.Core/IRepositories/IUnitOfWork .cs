@@ -23,6 +23,9 @@ namespace Elagy.Core.IRepositories
         IHospitalSpecialtyRepository HospitalSpecialties { get; }
         ///////////////////////////
 
+        IGenericRepository<ImageKitTempFile> ImageKitTempFiles { get; }
+
+
         Task<int> CompleteAsync();
     }
 }

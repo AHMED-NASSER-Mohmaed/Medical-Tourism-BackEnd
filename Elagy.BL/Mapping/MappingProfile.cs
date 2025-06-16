@@ -5,7 +5,7 @@ using Elagy.Core.DTOs.User;
 using Elagy.Core.Entities;
 using Elagy.Core.Enums; // For UserType, AssetType
 using ServiceProvider = Elagy.Core.Entities.ServiceProvider; // Ensure this is the correct namespace for ServiceProvider
-
+//due to the confustion that happent between the serviceprovider  injection service 
 namespace Elagy.BL.Mapping
 {
     public class MappingProfile : Profile
@@ -16,9 +16,20 @@ namespace Elagy.BL.Mapping
 
             // Base User to BaseProfileDto
             CreateMap<User, BaseProfileDto>()
-                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email)) // Map from IdentityUser.Email
-                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName)) // Map from IdentityUser.UserName
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FirstName)) 
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.LastName))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status)) 
+                .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Gender))  
+                .ForMember(dest => dest.DateOfBirth, opt => opt.MapFrom(src => src.DateOfBirth))
                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
+                .ForMember(dest => dest.ImageURL, opt => opt.MapFrom(src => src.ImageURL))
+                .ForMember(dest => dest.UserType, opt => opt.MapFrom(src => src.UserType))
+                .ForMember(dest => dest.Governorate, opt => opt.MapFrom(src => src.UserType))
+                .ForMember(dest => dest.ZipCode, opt => opt.MapFrom(src => src.ZipCode))
+                .ForMember(dest => dest.StreetNumber, opt => opt.MapFrom(src => src.StreetNumber))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email)) 
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName)) 
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.LockoutEnd, opt => opt.MapFrom(src => src.LockoutEnd))
                 .ForMember(dest => dest.EmailConfirmed, opt => opt.MapFrom(src => src.EmailConfirmed))
@@ -40,14 +51,13 @@ namespace Elagy.BL.Mapping
             // ServiceProvider to BaseServiceProviderProfileDto
             CreateMap<ServiceProvider, BaseServiceProviderProfileDto>()
                 .IncludeBase<User, BaseProfileDto>() // Include mappings from BaseProfileDto
-                .ForMember(dest => dest.ProviderDocsURL, opt => opt.MapFrom(src => src.DOCsURL))
+                .ForMember(dest => dest.NationalDocsURL, opt => opt.MapFrom(src => src.NationalURL))
                 .ForMember(dest => dest.AssetId, opt => opt.MapFrom(src => src.ServiceAsset.Id))
                 .ForMember(dest => dest.AssetName, opt => opt.MapFrom(src => src.ServiceAsset.AssetName))
                 .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.ServiceAsset.Description))
                 .ForMember(dest => dest.AssetDocsURL, opt => opt.MapFrom(src => src.ServiceAsset.DocsURL))
                 .ForMember(dest => dest.AssetEmail, opt => opt.MapFrom(src => src.ServiceAsset.Email))
                 .ForMember(dest => dest.AcquisitionDate, opt => opt.MapFrom(src => src.ServiceAsset.AcquisitionDate))
-                .ForMember(dest => dest.VerificationStatus, opt => opt.MapFrom(src => src.ServiceAsset.VerificationStatus))
                 .ForMember(dest => dest.VerificationNotes, opt => opt.MapFrom(src => src.ServiceAsset.VerificationNotes))
                 .ForMember(dest => dest.VerifiedCountryCode, opt => opt.MapFrom(src => src.ServiceAsset.VerifiedCountryCode))
                 .ForMember(dest => dest.AssetType, opt => opt.MapFrom(src => src.ServiceAsset.AssetType))
@@ -94,7 +104,7 @@ namespace Elagy.BL.Mapping
 
             // Registration Request DTOs to Entities
             CreateMap<BaseRegistrationRequestDto, User>()
-                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email)) // late iwill remove it 
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email)) // Often username is email
                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
                 .ForMember(dest => dest.EmailConfirmed, opt => opt.MapFrom(src => false)) // Initially false
@@ -113,16 +123,18 @@ namespace Elagy.BL.Mapping
 
             CreateMap<BaseServiceProviderRegistrationRequestDto, ServiceProvider>()
                 .IncludeBase<BaseRegistrationRequestDto, User>()
-                .ForMember(dest => dest.DOCsURL, opt => opt.MapFrom(src => src.ProviderDocsURL))
+                .ForMember(dest => dest.NationalFeildId, opt => opt.MapFrom(src => src.ProviderNationalFeildId))
+                .ForMember(dest => dest.NationalURL, opt => opt.MapFrom(src => src.ProviderNationalURL))
                 .ForMember(dest => dest.UserType, opt => opt.MapFrom(src => UserType.ServiceProvider))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => UserStatus.EmailUnconfirmed)); // Initial status
 
             // Map registration DTOs to specific ServiceAsset types
             CreateMap<BaseServiceProviderRegistrationRequestDto, ServiceAsset>()
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.AssetEmail)) // Map asset-specific email
-                .ForMember(dest => dest.DocsURL, opt => opt.MapFrom(src => src.AssetDocsURL))
+                .ForMember(dest => dest.DocsURL, opt => opt.MapFrom(src => src.AssetCredentialUrl))
+                .ForMember(dest => dest.DocsURLFeildId, opt => opt.MapFrom(src => src.AssetCredentialFileId))
                 .ForMember(dest => dest.AcquisitionDate, opt => opt.MapFrom(src => DateTime.UtcNow)) // Set acquisition date on creation
-                .ForMember(dest => dest.VerificationStatus, opt => opt.MapFrom(src => VerificationStatus.Pending)) // Initial verification status
+                .ForMember(dest => dest.VerificationStatus, opt => opt.MapFrom(src => VerificationStatus.Pending)) // Initial verification status late i will remove it 
                 .ForMember(dest => dest.Id, opt => opt.Ignore()) // ID will be set to ServiceProvider's ID
                 .ForMember(dest => dest.ServiceProvider, opt => opt.Ignore()) // Will be set manually
                 .IncludeAllDerived();
@@ -133,7 +145,7 @@ namespace Elagy.BL.Mapping
 
             CreateMap<HospitalProviderRegistrationRequestDto, HospitalAsset>()
                 .IncludeBase<BaseServiceProviderRegistrationRequestDto, ServiceAsset>()
-                .ForMember(dest => dest.AssetType, opt => opt.MapFrom(src => AssetType.Hospital));
+                .ForMember(dest => dest.AssetType, opt => opt.MapFrom(src => AssetType.Hospital)); // why i put it here because the basse type dose not know any thing about his child 
 
             CreateMap<CarRentalProviderRegistrationRequestDto, CarRentalAsset>()
                 .IncludeBase<BaseServiceProviderRegistrationRequestDto, ServiceAsset>()
@@ -165,13 +177,12 @@ namespace Elagy.BL.Mapping
                 .ForMember(dest => dest.ConcurrencyStamp, opt => opt.Ignore())
                 .ForMember(dest => dest.LockoutEnd, opt => opt.Ignore())
                 .ForMember(dest => dest.AccessFailedCount, opt => opt.Ignore())
-                .ForMember(dest => dest.TwoFactorEnabled, opt => opt.Ignore())
-                .ForMember(dest => dest.DOCsURL, opt => opt.MapFrom(src => src.ProviderDocsURL)); // Map SP specific field
+                .ForMember(dest => dest.TwoFactorEnabled, opt => opt.Ignore());
+
 
             CreateMap<BaseServiceProviderProfileUpdateDto, ServiceAsset>()
                  .ForMember(dest => dest.Id, opt => opt.Ignore()) // ID remains same
                  .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.AssetEmail)) // Map asset-specific email
-                 .ForMember(dest => dest.DocsURL, opt => opt.MapFrom(src => src.AssetDocsURL))
                  .ForMember(dest => dest.AcquisitionDate, opt => opt.Ignore()) // Date fixed on creation
                  .ForMember(dest => dest.AssetType, opt => opt.Ignore()); // Type fixed on creation
 

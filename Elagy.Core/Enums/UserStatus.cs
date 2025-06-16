@@ -1,18 +1,4 @@
-﻿/*
-namespace Elagy.Core.Enums
-{
-    public enum UserStatus
-    {
-        PendingEmailConfirmation = 0, 
-        PendingAdminApproval = 1,      
-        Active = 2, 
-        Deactive = 3,
-        Suspended = 4
-    }
-}
-*/
-
-namespace Elagy.Core.Enums
+﻿namespace Elagy.Core.Enums
 {
     public enum UserStatus
     {

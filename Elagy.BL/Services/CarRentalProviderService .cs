@@ -36,7 +36,7 @@ namespace Elagy.BL.Services
         {
             // Corrected query: Ensure Include is called directly on the IQueryable from AsQueryable()
             var provider = await _unitOfWork.ServiceProviders.AsQueryable()
-                                            .Include(sp => sp.ServiceAsset) // This should now work
+                                            .Include(sp => sp.ServiceAsset) 
                                             .SingleOrDefaultAsync(sp => sp.Id == providerId);
 
             if (provider == null || provider.ServiceAsset == null || provider.ServiceAsset.AssetType != AssetType.CarRental)

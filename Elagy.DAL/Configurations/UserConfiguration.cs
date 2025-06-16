@@ -18,8 +18,6 @@ namespace Elagy.DAL.Configurations
             builder.Property(u => u.FirstName).IsRequired().HasMaxLength(100);
             builder.Property(u => u.LastName).IsRequired().HasMaxLength(100);
             builder.Property(u => u.PhoneNumber).IsRequired(false);
-            builder.Property(u => u.NationalId).HasMaxLength(20).IsRequired(false);
-            builder.Property(u => u.PassportId).HasMaxLength(20).IsRequired(false);
             builder.Property(u => u.ImageURL).IsRequired(false);
             builder.Property(u => u.ImageId).IsRequired(false);
             builder.Property(u => u.Gender).IsRequired(false);

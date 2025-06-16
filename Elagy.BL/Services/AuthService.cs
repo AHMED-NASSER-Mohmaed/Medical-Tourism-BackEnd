@@ -1,44 +1,60 @@
 ﻿using AutoMapper;
 using Elagy.Core.DTOs.Auth;
+using Elagy.Core.DTOs.Files;
 using Elagy.Core.DTOs.Shared;
 using Elagy.Core.Entities;
-using ServiceProvider= Elagy.Core.Entities.ServiceProvider;
 using Elagy.Core.Enums;
+using Elagy.Core.Helpers;
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
 using IEmailService = Elagy.Core.Helpers.IEmailService;
 using IJwtTokenGenerator = Elagy.Core.Helpers.IJwtTokenGenerator;
-using Microsoft.Extensions.Logging; // Add this line if it's missing
+using ServiceProvider= Elagy.Core.Entities.ServiceProvider;
 
 namespace Elagy.BL.Services
 {
     public class AuthService : IAuthService
     {
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
+        private readonly IFileStorageservice _imageStorage;
+
         private readonly ILogger<AuthService> _logger;
 
         public AuthService(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
+            RoleManager<IdentityRole> roleManager,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IEmailService emailService,
             IJwtTokenGenerator jwtTokenGenerator,
+            IFileStorageservice imageStorage,
             ILogger<AuthService> logger)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
             _signInManager = signInManager;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _emailService = emailService;
             _jwtTokenGenerator = jwtTokenGenerator;
+            _imageStorage = imageStorage;
             _logger = logger;
         }
 
@@ -54,18 +70,55 @@ namespace Elagy.BL.Services
                 return new AuthResultDto { Success = false, Errors = new[] { "Email already registered." } };
             }
 
-            var user = createUser(); // Create specific user type (Patient, ServiceProvider, SuperAdmin)
+            var user = createUser(); // Create specific user type (Patient, ServiceProvider, SuperAdmin) -- builder
             _mapper.Map(model, user); // Map common properties
             user.UserType = userType;
             user.Status = UserStatus.EmailUnconfirmed; // Initial status
 
             var result = await _userManager.CreateAsync(user, model.Password);
 
+            //if identity faild to create a new role
             if (!result.Succeeded)
             {
                 _logger.LogError($"User creation failed for {user.Email}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
                 return new AuthResultDto { Success = false, Errors = result.Errors.Select(e => e.Description) };
             }
+
+            //after creating successfully 
+            //we need to the role to the calim 
+
+            string roleName = user.UserType.ToString();
+            if (!await _roleManager.RoleExistsAsync(roleName))
+            {
+                _logger.LogError($"Role '{roleName}' does not exist. Cannot assign user '{user.Email}' to it. Ensure roles are seeded.");
+                await _userManager.DeleteAsync(user);
+                return new AuthResultDto { Success = false, Errors = new[] { $"Configuration Error: Role '{roleName}' not found." } };
+            }
+
+
+            var roleResult = await _userManager.AddToRoleAsync(user, roleName);
+
+            if (!roleResult.Succeeded)
+            {
+                _logger.LogError($"Failed to add user {user.Email} to role {roleName}: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
+                await _userManager.DeleteAsync(user);
+                return new AuthResultDto { Success = false, Errors = new[] { $"Failed to assign user to role '{roleName}'." } };
+            }
+
+
+            //addd user type (optianal)
+
+
+            var userTypeClaim = new Claim("UserType", user.UserType.ToString());
+            var addUserTypeClaimResult = await _userManager.AddClaimAsync(user, userTypeClaim);
+            if (!addUserTypeClaimResult.Succeeded)
+            {
+                _logger.LogWarning($"Failed to add UserType claim '{user.UserType}' to user {user.Email}: {string.Join(", ", addUserTypeClaimResult.Errors.Select(e => e.Description))}. Registration will proceed without this claim.");
+                // Decide if this failure is critical enough to rollback. For UserType, usually not.
+                //not necessarally for roleback
+            }
+
+
 
             // Send email confirmation
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -81,42 +134,110 @@ namespace Elagy.BL.Services
             return await RegisterUserBaseAsync<Patient, PatientRegistrationRequestDto>(model, UserType.Patient, () => new Patient());
         }
 
-        public async Task<AuthResultDto> RegisterHotelProviderAsync(HotelProviderRegistrationRequestDto model)
+        public async Task<AuthResultDto> RegisterHotelProviderAsync(HotelProviderRegistrationRequestDto model,List<IFormFile> files)
         {
-            return await RegisterServiceProviderAsync<HotelAsset, HotelProviderRegistrationRequestDto>(model, AssetType.Hotel, () => new HotelAsset());
+            return await RegisterServiceProviderAsync<HotelAsset, HotelProviderRegistrationRequestDto>(model, AssetType.Hotel, () => new HotelAsset(),files);
         }
 
-        public async Task<AuthResultDto> RegisterHospitalProviderAsync(HospitalProviderRegistrationRequestDto model)
+        public async Task<AuthResultDto> RegisterHospitalProviderAsync(HospitalProviderRegistrationRequestDto model,List<IFormFile> files)
         {
-            return await RegisterServiceProviderAsync<HospitalAsset, HospitalProviderRegistrationRequestDto>(model, AssetType.Hospital, () => new HospitalAsset());
+            return await RegisterServiceProviderAsync<HospitalAsset, HospitalProviderRegistrationRequestDto>(model, AssetType.Hospital, () => new HospitalAsset(),files);
         }
 
-        public async Task<AuthResultDto> RegisterCarRentalProviderAsync(CarRentalProviderRegistrationRequestDto model)
+        public async Task<AuthResultDto> RegisterCarRentalProviderAsync(CarRentalProviderRegistrationRequestDto model, List<IFormFile> files)
         {
-            return await RegisterServiceProviderAsync<CarRentalAsset, CarRentalProviderRegistrationRequestDto>(model, AssetType.CarRental, () => new CarRentalAsset());
+            return await RegisterServiceProviderAsync<CarRentalAsset, CarRentalProviderRegistrationRequestDto>(model, AssetType.CarRental, () => new CarRentalAsset(),files);
         }
 
-        private async Task<AuthResultDto> RegisterServiceProviderAsync<TAsset, TDto>(TDto model, AssetType assetType, Func<TAsset> createAsset)
+        private async Task HandelDeleting(List<FileUploadResponseDto> Files)
+        {
+            var list = new List<string> { };
+
+            if(Files[0].Success)
+                list.Add(Files[0].Id.ToString());
+
+            if (Files[1].Success)
+                list.Add(Files[0].Id.ToString());
+
+            await _imageStorage.DeleteMultipleFilesAsync(list);
+        }
+
+
+        private async Task<AuthResultDto> RegisterServiceProviderAsync<TAsset, TDto>(TDto model, AssetType assetType, Func<TAsset> createAsset,  List<IFormFile> files)
             where TAsset : ServiceAsset
             where TDto : BaseServiceProviderRegistrationRequestDto
         {
             var userExists = await _userManager.FindByEmailAsync(model.Email);
+
+
             if (userExists != null)
             {
                 return new AuthResultDto { Success = false, Errors = new[] { "Email already registered." } };
             }
 
-            var serviceProvider = _mapper.Map<ServiceProvider>(model);
-            serviceProvider.UserType = UserType.ServiceProvider;
-            serviceProvider.Status = UserStatus.EmailUnconfirmed; // Initial status
+           
+            var Result = await _imageStorage.UploadMultipleFilesAsync(files);
 
+            //if over all success
+            if (!Result.OverallSuccess)
+                    HandelDeleting(Result.UploadResults);               
+                
+ 
+            var serviceProvider = _mapper.Map<ServiceProvider>(model);
+            serviceProvider.NationalURL = Result.UploadResults[0].Url;
+            serviceProvider.UserType = UserType.ServiceProvider;
+            serviceProvider.NationalFeildId = Result.UploadResults[0].Id;
+            serviceProvider.Status = UserStatus.EmailUnconfirmed;
+
+
+ 
             var result = await _userManager.CreateAsync(serviceProvider, model.Password);
 
             if (!result.Succeeded)
             {
+                //handel Delete for Docs
+                HandelDeleting(Result.UploadResults);
+
                 _logger.LogError($"Service Provider creation failed for {serviceProvider.Email}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
                 return new AuthResultDto { Success = false, Errors = result.Errors.Select(e => e.Description) };
             }
+
+            
+            string roleName = MapAssetTypeToUserType(assetType).ToString();
+
+            if (!await _roleManager.RoleExistsAsync(roleName))
+            {
+                _logger.LogError($"Role '{roleName}' does not exist. Cannot assign user '{serviceProvider.Email}' to it. Ensure roles are seeded.");
+                await _userManager.DeleteAsync(serviceProvider);
+                HandelDeleting(Result.UploadResults);
+                return new AuthResultDto { Success = false, Errors = new[] { $"Configuration Error: Role '{roleName}' not found." } };
+            }
+
+
+            var roleResult = await _userManager.AddToRoleAsync(serviceProvider, roleName);
+
+            if (!roleResult.Succeeded)
+            {
+                _logger.LogError($"Failed to add user {serviceProvider.Email} to role {roleName}: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
+                await _userManager.DeleteAsync(serviceProvider);
+                HandelDeleting(Result.UploadResults);
+                return new AuthResultDto { Success = false, Errors = new[] { $"Failed to assign user to role '{roleName}'." } };
+            }
+
+
+             
+            var userTypeClaim = new Claim("UserType", serviceProvider.UserType.ToString());
+            var addUserTypeClaimResult = await _userManager.AddClaimAsync(serviceProvider, userTypeClaim);
+            if (!addUserTypeClaimResult.Succeeded)
+            {
+                _logger.LogWarning($"Failed to add UserType claim '{serviceProvider.UserType}' to user {serviceProvider.Email}: {string.Join(", ", addUserTypeClaimResult.Errors.Select(e => e.Description))}. Registration will proceed without this claim.");
+                // Decide if this failure is critical enough to rollback. For UserType, usually not.
+                //not necessarally for roleback
+            }
+
+
+
+
 
             // Create the associated ServiceAsset
             var serviceAsset = createAsset();
@@ -125,21 +246,33 @@ namespace Elagy.BL.Services
             serviceAsset.ServiceProvider = serviceProvider; // Link to the provider
             serviceAsset.AssetType = assetType;
             serviceAsset.AcquisitionDate = DateTime.UtcNow; // Set creation date
-            serviceAsset.VerificationStatus = VerificationStatus.Pending; // Initial verification status
+            serviceAsset.VerificationStatus = VerificationStatus.Pending; // Initial verification status // late iwill delete it
+            serviceAsset.DocsURL= Result.UploadResults[1].Url;
+            serviceAsset.DocsURLFeildId= Result.UploadResults[1].Id;
+
+
 
             try
             {
+               
+
                 await _unitOfWork.ServiceAssets.AddAsync(serviceAsset);
                 await _unitOfWork.CompleteAsync(); // Save the asset and link
             }
             catch (DbUpdateException dbEx)
             {
+                //handelDelete
+                HandelDeleting(Result.UploadResults);
+
                 _logger.LogError(dbEx, $"Failed to create ServiceAsset for {serviceProvider.Email}. Rolling back user creation.");
                 await _userManager.DeleteAsync(serviceProvider); // Rollback user creation
                 return new AuthResultDto { Success = false, Errors = new[] { "Failed to create associated asset. Please try again." } };
             }
             catch (Exception ex)
             {
+                //handelDelete
+                HandelDeleting(Result.UploadResults);
+
                 _logger.LogError(ex, $"Unexpected error creating ServiceAsset for {serviceProvider.Email}. Rolling back user creation.");
                 await _userManager.DeleteAsync(serviceProvider); // Rollback user creation
                 return new AuthResultDto { Success = false, Errors = new[] { "An unexpected error occurred during asset creation." } };
@@ -153,6 +286,21 @@ namespace Elagy.BL.Services
             _logger.LogInformation($"Service Provider {serviceProvider.Email} registered successfully with asset. Confirmation email sent. Awaiting admin approval.");
             return new AuthResultDto { Success = true, Message = "Registration successful. Please confirm your email. Your account will be active after admin approval." };
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         public async Task<AuthResultDto> RegisterSuperAdminAsync(SuperAdminRegistrationRequestDto model)
         {
@@ -169,22 +317,44 @@ namespace Elagy.BL.Services
             return result;
         }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // --- Login Method ---
         public async Task<AuthResultDto> LoginAsync(LoginRequestDto model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
+
             if (user == null)
             {
+                // Do not reveal if the email exists or not
                 return new AuthResultDto { Success = false, Errors = new[] { "Invalid credentials." } };
             }
 
-            // Check if email is confirmed
+            // If the email is not confirmed, check if the user's current Email matches the login email
             if (!await _userManager.IsEmailConfirmedAsync(user))
             {
-                return new AuthResultDto { Success = false, Errors = new[] { "Email not confirmed. Please check your inbox for the confirmation link." } };
+                // If the user's email was changed by admin, don't show "Email not confirmed"
+                if (string.Equals(user.Email, model.Email, StringComparison.OrdinalIgnoreCase))
+                {
+                    return new AuthResultDto { Success = false, Errors = new[] { "Email not confirmed. Please check your inbox for the confirmation link." } };
+                }
+                // If the email does not match, treat as invalid credentials
+                return new AuthResultDto { Success = false, Errors = new[] { "Invalid credentials." } };
             }
 
-            // Check account status
+            // Check account status 
             if (user.Status == UserStatus.Deactivated)
             {
                 return new AuthResultDto { Success = false, Errors = new[] { "Your account has been deactivated. Please contact support." } };
@@ -229,7 +399,7 @@ namespace Elagy.BL.Services
             {
                 // Update UserStatus after email confirmation
                 //|| user.UserType == UserType.SuperAdmin
-                if (user.UserType == UserType.Patient )
+                if (user.UserType == UserType.Patient)
                 {
                     user.Status = UserStatus.Active; // Patients/SuperAdmins become active immediately
                 }
@@ -247,7 +417,69 @@ namespace Elagy.BL.Services
             return new AuthResultDto { Success = false, Errors = result.Errors.Select(e => e.Description) };
         }
 
+
+
         // --- Password Management ---
+
+
+        /// <summary>
+        /// Confirms a new email address after an admin-initiated change.
+        /// Includes extensive logging for debugging token issues.
+        /// </summary>
+        public async Task<AuthResultDto> ConfirmNewEmailAsync(string userId, string newEmail, string token)
+        {
+            var currentUtcTimeConf = DateTime.UtcNow; // Capture time at confirmation start
+
+            _logger.LogInformation($"[{currentUtcTimeConf:yyyy-MM-dd HH:mm:ss.fff UTC} CONF] ConfirmNewEmailAsync: Received - userId: '{userId}'");
+            _logger.LogInformation($"[{currentUtcTimeConf:yyyy-MM-dd HH:mm:ss.fff UTC} CONF] Received - rawNewEmail: '{newEmail}' (Length: {newEmail.Length}) - Hex: {BitConverter.ToString(Encoding.UTF8.GetBytes(newEmail))}");
+            _logger.LogInformation($"[{currentUtcTimeConf:yyyy-MM-dd HH:mm:ss.fff UTC} CONF] Received - rawToken: '{token}' (Length: {token.Length}) - Hex: {BitConverter.ToString(Encoding.UTF8.GetBytes(token))}");
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                _logger.LogError($"[{currentUtcTimeConf:yyyy-MM-dd HH:mm:ss.fff UTC} CONF] User not found for ID: '{userId}'.");
+                return new AuthResultDto { Success = false, Errors = new[] { "User not found." } };
+            }
+
+            // Log user's security stamp at the point of confirmation
+            var securityStampAtConfirmation = await _userManager.GetSecurityStampAsync(user);
+            _logger.LogInformation($"[{currentUtcTimeConf:yyyy-MM-dd HH:mm:ss.fff UTC} CONF] User '{user.Email}' (ID: '{user.Id}') security stamp at confirmation: '{securityStampAtConfirmation}'");
+
+
+            var decodedToken = Uri.UnescapeDataString(token);
+            var decodedNewEmail = Uri.UnescapeDataString(newEmail); // Unescape the newEmail parameter as well!
+
+            _logger.LogInformation($"[{currentUtcTimeConf:yyyy-MM-dd HH:mm:ss.fff UTC} CONF] Decoded - decodedNewEmail: '{decodedNewEmail}' (Length: {decodedNewEmail.Length}) - Hex: {BitConverter.ToString(Encoding.UTF8.GetBytes(decodedNewEmail))}");
+            _logger.LogInformation($"[{currentUtcTimeConf:yyyy-MM-dd HH:mm:ss.fff UTC} CONF] Decoded - decodedToken: '{decodedToken}' (Length: {decodedToken.Length}) - Hex: {BitConverter.ToString(Encoding.UTF8.GetBytes(decodedToken))}");
+
+
+            // --- THE CRITICAL CALL TO VALIDATE TOKEN AND CHANGE EMAIL ---
+            var result = await _userManager.ChangeEmailAsync(user, decodedNewEmail, decodedToken);
+
+            if (result.Succeeded)
+            {
+                // Optionally, update user status here if needed, similar to initial confirmation
+                if (user.Status == UserStatus.EmailUnconfirmed || user.Status == UserStatus.Pending) // Allow confirmation from these states
+                {
+                    user.Status = UserStatus.Active; // Or whatever status means confirmed in your app
+                    await _userManager.UpdateAsync(user);
+                    _logger.LogInformation($"[{currentUtcTimeConf:yyyy-MM-dd HH:mm:ss.fff UTC} CONF] User status updated to '{user.Status}' for '{user.Email}'.");
+                }
+
+                _logger.LogInformation($"[{currentUtcTimeConf:yyyy-MM-dd HH:mm:ss.fff UTC} CONF] New email '{decodedNewEmail}' confirmed successfully for user '{user.Email}'.");
+                return new AuthResultDto { Success = true, Message = "Your new email address has been confirmed successfully." };
+            }
+            else
+            {
+                // Log the specific Identity errors for "Invalid token."
+                var errors = result.Errors.Select(e => $"Code: {e.Code}, Description: {e.Description}").ToList();
+                _logger.LogError($"[{currentUtcTimeConf:yyyy-MM-dd HH:mm:ss.fff UTC} CONF] New email confirmation failed for user '{user.Email}' (new: '{decodedNewEmail}'). Errors: {string.Join("; ", errors)}");
+
+                return new AuthResultDto { Success = false, Errors = result.Errors.Select(e => e.Description) };
+            }
+        }
+
+
         public async Task<AuthResultDto> ForgotPasswordAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -367,5 +599,19 @@ namespace Elagy.BL.Services
             }
             return result.Succeeded;
         }
+
+
+        private RoleApps MapAssetTypeToUserType(AssetType assetType)
+        {
+            return assetType switch
+            {
+                AssetType.Hospital => RoleApps.HospitalServiceProvider,
+                AssetType.Hotel => RoleApps.HotelServiceProvider,
+                AssetType.CarRental => RoleApps.CarRentalServiceProvider,
+                _ => throw new ArgumentOutOfRangeException(nameof(assetType), $"Unsupported AssetType for role mapping: {assetType}")
+            };
+        }
+
+
     }
 }

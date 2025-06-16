@@ -2,7 +2,7 @@
 {
     public class HospitalAsset : ServiceAsset
     {
-        // Navigation properties for medical specialties/departments can be added here
+        // Navigation properties for medical specialties/departments/clinics can be added here
         // e.g., public ICollection<MedicalSpecialty> MedicalSpecialties { get; set; }
 
         public int NumberOfDepartments { get; set; }
