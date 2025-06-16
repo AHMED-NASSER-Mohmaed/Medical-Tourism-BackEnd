@@ -8,7 +8,7 @@ namespace Elagy.APIs.Controllers
 {
     [Route("api/[controller]")]
     // Protect this controller, allowing only ServiceProviders that are CarRental type
-    [Authorize(Roles = "ServiceProvider")] // Assuming a generic ServiceProvider role for all providers
+    [Authorize(Roles = "CarRentalServiceProvider")] // Assuming a generic ServiceProvider role for all providers
     public class CarRentalProviderController : BaseApiController
     {
         private readonly ICarRentalProviderService _carRentalProviderService;

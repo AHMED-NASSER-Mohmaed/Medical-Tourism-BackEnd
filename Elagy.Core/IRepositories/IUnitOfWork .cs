@@ -15,6 +15,9 @@ namespace Elagy.Core.IRepositories
         IGenericRepository<HospitalAsset> HospitalAssets { get; }
         IGenericRepository<CarRentalAsset> CarRentalAssets { get; }
 
+        IGenericRepository<ImageKitTempFile> ImageKitTempFiles { get; }
+
+
         Task<int> CompleteAsync();
     }
 }

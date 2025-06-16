@@ -11,11 +11,16 @@ namespace Elagy.Core.Entities
         public string AssetName { get; set; }
         public string Description { get; set; }
         public string DocsURL { get; set; } // Credential paper documentation for the asset
+        public string DocsURLFeildId { get; set; } // Credential paper documentation for the asset
         public string Email { get; set; } // Asset-specific email (e.g., hotel reception email)
 
         public DateTime AcquisitionDate { get; set; } // Date of asset acquisition/establishment
 
+        //verfication
         public VerificationStatus VerificationStatus { get; set; } // Status of asset verification by SuperAdmin
+        //verfication
+
+
         public string VerificationNotes { get; set; } // Notes regarding verification status
         public string VerifiedCountryCode { get; set; }
 

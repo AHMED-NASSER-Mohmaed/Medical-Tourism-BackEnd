@@ -2,8 +2,11 @@
 {
     public class ServiceProvider : User
     {
-        public string DOCsURL { get; set; } // Documents for the ServiceProvider company/individual
+        public string NationalURL { get; set; } 
+        public string NationalFeildId { get; set; } 
         // Navigation property for the one-to-one relationship with ServiceAsset
+
+
         public ServiceAsset ServiceAsset { get; set; }
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Elagy.Core.DTOs.Pagination;
 
 namespace Elagy.APIs.Controllers
 {
@@ -36,6 +37,8 @@ namespace Elagy.APIs.Controllers
             // _authService = authService;
         }
 
+
+
         // --- Super Admin Profile ---
         [HttpGet("profile")]
         public async Task<ActionResult<SuperAdminDto>> GetProfile()
@@ -50,6 +53,10 @@ namespace Elagy.APIs.Controllers
             }
             return Ok(profile);
         }
+
+
+
+
 
         // --- Admin Add Functionality (delegating to specific services) ---
         [HttpPost("add-patient")]
@@ -84,6 +91,8 @@ namespace Elagy.APIs.Controllers
             return HandleAuthResult(result);
         }
 
+
+
         // --- User Status Management ---
         [HttpPut("activate-user/{userId}")]
         public async Task<ActionResult> ActivateUser(string userId)
@@ -113,7 +122,8 @@ namespace Elagy.APIs.Controllers
             return HandleAuthResult(result);
         }
 
-        // --- Profile Details Retrieval for Admin Dashboard Modals ---
+
+        /*    // --- Profile Details Retrieval for Admin Dashboard Modals ---
         [HttpGet("patients/{patientId}")]
         public async Task<ActionResult<PatientDto>> GetPatientDetails(string patientId)
         {
@@ -129,28 +139,83 @@ namespace Elagy.APIs.Controllers
             if (profile == null) return NotFound("Hotel Provider not found.");
             return Ok(profile);
         }
-        // ... (similar for Hospital and Car Rental providers) ...
+
+*/
+
 
         // --- Listing/Filtering for Dashboard Tabs ---
         [HttpGet("patients")]
-        public async Task<ActionResult<IEnumerable<PatientDto>>> GetPatients(
-            [FromQuery] int page = 1, [FromQuery] int limit = 10,
-            [FromQuery] string searchQuery = null, [FromQuery] UserStatus? status = null)
+        public async Task<ActionResult< PagedResponseDto<PatientDto>>> GetPatients(
+            [FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10,
+            [FromQuery] string SearchTerm = null, [FromQuery] UserStatus? UserStatus = null)
         {
-            var patients = await _superAdminService.GetPatientsForAdminDashboardAsync(page, limit, searchQuery, status);
+            var Filter = new PaginationParameters();
+            Filter.PageNumber = PageNumber ;
+            Filter.PageSize = PageSize;
+            Filter.SearchTerm = SearchTerm;
+            Filter.UserStatus = UserStatus;
+
+            var patients = await _superAdminService.GetPatientsForAdminDashboardAsync(Filter);
             return Ok(patients);
         }
 
         [HttpGet("hotel-providers")]
         public async Task<ActionResult<IEnumerable<HotelProviderProfileDto>>> GetHotelProviders(
-            [FromQuery] int page = 1, [FromQuery] int limit = 10,
-            [FromQuery] string searchQuery = null, [FromQuery] UserStatus? userStatus = null,
-            [FromQuery] VerificationStatus? assetStatus = null)
+            [FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10,
+            [FromQuery] string SearchTerm = null, [FromQuery] UserStatus? UserStatus = null)
         {
-            var providers = await _superAdminService.GetHotelProvidersForAdminDashboardAsync(page, limit, searchQuery, userStatus, assetStatus);
+            var Filter = new PaginationParameters();
+            Filter.PageNumber = PageNumber;
+            Filter.PageSize = PageSize;
+            Filter.SearchTerm = SearchTerm;
+            Filter.UserStatus = UserStatus;
+
+            var providers = await _superAdminService.GetHotelProvidersForAdminDashboardAsync(Filter);
             return Ok(providers);
         }
-        // ... (similar for Hospital and Car Rental providers) ...
+
+
+        [HttpGet("hospital-providers")]
+        public async Task<ActionResult<IEnumerable<HotelProviderProfileDto>>> GetHospitalProviders(
+        [FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10,
+        [FromQuery] string SearchTerm = null, [FromQuery] UserStatus? UserStatus = null)
+        {
+            var Filter = new PaginationParameters();
+            Filter.PageNumber = PageNumber;
+            Filter.PageSize = PageSize;
+            Filter.SearchTerm = SearchTerm;
+            Filter.UserStatus = UserStatus;
+
+            var providers = await _superAdminService.GetHospitalProvidersForAdminDashboardAsync(Filter);
+            return Ok(providers);
+        }
+
+
+        [HttpGet("CarRental-providers")]
+        public async Task<ActionResult<IEnumerable<HotelProviderProfileDto>>> GetCarRentalProviders(
+        [FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10,
+        [FromQuery] string SearchTerm = null, [FromQuery] UserStatus? UserStatus = null)
+        {
+            var Filter = new PaginationParameters();
+            Filter.PageNumber = PageNumber;
+            Filter.PageSize = PageSize;
+            Filter.SearchTerm = SearchTerm;
+            Filter.UserStatus = UserStatus;
+
+            var providers = await _superAdminService.GetCarRentalProvidersForAdminDashboardAsync(Filter);
+            return Ok(providers);
+        }
+
+        // --- End Of Listing/Filtering for Dashboard Tabs ---
+
+
+
+
+
+
+
+
+
 
         // --- Admin Initiated Email/Password Changes ---
         [HttpPut("change-user-email")]
@@ -161,6 +226,7 @@ namespace Elagy.APIs.Controllers
             return HandleAuthResult(result);
         }
 
+
         [HttpPost("reset-user-password/{userId}")]
         public async Task<ActionResult> AdminResetUserPassword(string userId)
         {
@@ -168,11 +234,19 @@ namespace Elagy.APIs.Controllers
             return HandleAuthResult(result);
         }
 
-        [HttpPut("set-asset-verification-status/{assetId}")]
+
+
+
+
+/*        [HttpPut("set-asset-verification-status/{assetId}")]
         public async Task<ActionResult> SetAssetVerificationStatus(string assetId, [FromQuery] VerificationStatus status, [FromBody] string notes = null)
         {
             var result = await _superAdminService.AdminSetAssetVerificationStatusAsync(assetId, status, notes);
             return HandleAuthResult(result);
         }
+*/
+
+
+
     }
 }

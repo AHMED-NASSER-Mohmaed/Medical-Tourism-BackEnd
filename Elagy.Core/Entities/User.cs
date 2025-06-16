@@ -10,8 +10,6 @@ namespace Elagy.Core.Entities
         public string LastName { get; set; }
         // Email property is inherited from IdentityUser.
         public string Nationality { get; set; }
-        public string NationalId { get; set; }
-        public string PassportId { get; set; }
         public string ImageId { get; set; }
         public string ImageURL { get; set; }
         public string Gender { get; set; }

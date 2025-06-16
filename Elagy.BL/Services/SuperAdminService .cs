@@ -1,16 +1,18 @@
 ﻿using AutoMapper;
 using Elagy.Core.DTOs.Auth;
+using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Shared;
 using Elagy.Core.DTOs.User;
 using Elagy.Core.Entities;
-using ServiceProvider = Elagy.Core.Entities.ServiceProvider; // Ensure this is the correct namespace for ServiceProvider
 using Elagy.Core.Enums;
+using Elagy.Core.Helpers; // Required for Guid and DateTime.UtcNow
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore; // Required for .Include() and .ToListAsync()
 using Microsoft.Extensions.Logging; // Add this line if it's missing
-using Elagy.Core.Helpers; // Required for Guid and DateTime.UtcNow
+using System.Text;
+using ServiceProvider = Elagy.Core.Entities.ServiceProvider; // Ensure this is the correct namespace for ServiceProvider
 
 namespace Elagy.BL.Services
 {
@@ -190,85 +192,210 @@ namespace Elagy.BL.Services
 
         // --- Filtering/Listing for Dashboard ---
 
-        private IQueryable<User> ApplyUserFilters(IQueryable<User> query, string searchQuery, UserStatus? status)
+        private IQueryable<User> ApplyUserFilters(IQueryable<User> query, string? searchQuery, UserStatus? status)
         {
-            if (!string.IsNullOrWhiteSpace(searchQuery))
-            {
-                string lowerSearchQuery = searchQuery.ToLower();
-                query = query.Where(u => u.Email.ToLower().Contains(lowerSearchQuery) ||
-                                         u.FirstName.ToLower().Contains(lowerSearchQuery) ||
-                                         u.LastName.ToLower().Contains(lowerSearchQuery) ||
-                                         u.Id.Contains(lowerSearchQuery)); // Search by ID
-            }
+            // --- 1. Apply UserStatus Filter (Independent) ---
+            // This filter is applied regardless of whether a search query is present.
             if (status.HasValue)
             {
                 query = query.Where(u => u.Status == status.Value);
             }
+
+            // --- 2. Apply Search Term Filter (Independent) ---
+            // This filter is applied only if a search query is present.
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                string lowerSearchQuery = searchQuery.Trim().ToLower(); // Trim and convert to lowercase once.
+
+                // Combine search conditions with OR.
+                // Assuming properties like Email, FirstName, LastName, Id are non-nullable strings.
+                query = query.Where(u =>
+                                       u.Email.ToLower().Contains(lowerSearchQuery) ||
+                                       u.FirstName.ToLower().Contains(lowerSearchQuery) ||
+                                       u.LastName.ToLower().Contains(lowerSearchQuery) ||
+                                       u.PhoneNumber.ToLower().Contains(lowerSearchQuery) // Often useful to search phone numbers too
+                                   );
+            }
+
+            // Optional: Apply default sorting here if not done elsewhere for consistent pagination.
+            // query = query.OrderBy(u => u.Email); // Example sorting
+
             return query;
         }
 
-        private IQueryable<ServiceProvider> ApplyServiceProviderFilters(IQueryable<ServiceProvider> query, string searchQuery, UserStatus? userStatus, VerificationStatus? assetStatus)
+        private IQueryable<ServiceProvider> ApplyServiceProviderFilters(IQueryable<ServiceProvider> query, string? searchQuery, UserStatus? userStatus)
         {
-            // Ensure ServiceAsset is included for filtering on its properties
+            // Ensure ServiceAsset is included for filtering on its properties, and for later mapping
             query = query.Include(sp => sp.ServiceAsset);
 
-            if (!string.IsNullOrWhiteSpace(searchQuery))
-            {
-                string lowerSearchQuery = searchQuery.ToLower();
-                query = query.Where(sp => sp.Email.ToLower().Contains(lowerSearchQuery) ||
-                                         sp.FirstName.ToLower().Contains(lowerSearchQuery) ||
-                                         sp.LastName.ToLower().Contains(lowerSearchQuery) ||
-                                         sp.Id.Contains(lowerSearchQuery) ||
-                                         (sp.ServiceAsset != null && (sp.ServiceAsset.AssetName.ToLower().Contains(lowerSearchQuery) ||
-                                                                       sp.ServiceAsset.Description.ToLower().Contains(lowerSearchQuery) ||
-                                                                       sp.ServiceAsset.LocationDescription.ToLower().Contains(lowerSearchQuery))));
-            }
+            // --- 1. Apply UserStatus Filter (Independent of search query) ---
             if (userStatus.HasValue)
             {
                 query = query.Where(sp => sp.Status == userStatus.Value);
             }
-            if (assetStatus.HasValue)
+
+            // --- 2. Apply Search Term Filter ---
+            if (!string.IsNullOrWhiteSpace(searchQuery))
             {
-                query = query.Where(sp => sp.ServiceAsset != null && sp.ServiceAsset.VerificationStatus == assetStatus.Value);
+                string lowerSearchQuery = searchQuery.Trim().ToLower(); // Trim any whitespace
+
+                 
+                query = query.Where(sp =>
+                                        sp.Email.ToLower().Contains(lowerSearchQuery) ||
+                                        sp.FirstName.ToLower().Contains(lowerSearchQuery) ||
+                                        sp.LastName.ToLower().Contains(lowerSearchQuery) ||
+                                        sp.PhoneNumber.ToLower().Contains(lowerSearchQuery) || 
+                                        sp.ServiceAsset.AssetName.ToLower().Contains(lowerSearchQuery)
+                                   );
             }
+
+
             return query;
         }
 
-        public async Task<IEnumerable<PatientDto>> GetPatientsForAdminDashboardAsync(int page, int limit, string searchQuery = null, UserStatus? status = null)
+        public async Task<PagedResponseDto<PatientDto>> GetPatientsForAdminDashboardAsync(PaginationParameters RquestParams)
         {
+
+            // 1. Start with the base query for Patients
             var query = _unitOfWork.Patients.AsQueryable().OfType<Patient>(); // Use AsQueryable()
-            query = ApplyUserFilters(query.Cast<User>(), searchQuery, status).OfType<Patient>(); // Apply filters, cast back to Patient
-            return _mapper.Map<IEnumerable<PatientDto>>(await query.Skip((page - 1) * limit).Take(limit).ToListAsync());
+
+            // 2. Apply filters (cast to User for filtering, then back to Patient)
+            // Ensure ApplyUserFilters handles the filtering correctly on IQueryable<User>
+            query = ApplyUserFilters(query.Cast<User>(), RquestParams.SearchTerm, RquestParams.UserStatus).OfType<Patient>(); // Apply filters, cast back to Patient
+
+            // --- CRITICAL STEP: Get the total count AFTER all filters are applied ---
+            var totalCount = await query.CountAsync(); // calculation against DB
+
+
+            // calculation against DB
+            var res = await query  
+           .Skip((RquestParams.PageNumber - 1) * RquestParams.PageSize)
+           .Take(RquestParams.PageSize)
+           .ToListAsync(); // This executes the query for the current page
+
+
+
+            // 4. Map the results to DTOs
+            var MappedResult = _mapper.Map<List<PatientDto>>(res); // Ensure you map to List<T> if PagedResponseDto expects a List
+
+
+
+            // 5. Return the PagedResponseDto, which calculates TotalPages internally
+            return new PagedResponseDto<PatientDto>(MappedResult, totalCount, RquestParams.PageNumber, RquestParams.PageSize);
         }
 
-        public async Task<IEnumerable<HotelProviderProfileDto>> GetHotelProvidersForAdminDashboardAsync(int page, int limit, string searchQuery = null, UserStatus? userStatus = null, VerificationStatus? assetStatus = null)
+ 
+        public async Task<PagedResponseDto<HotelProviderProfileDto>> GetHotelProvidersForAdminDashboardAsync(PaginationParameters requestParams) 
         {
-            var query = _unitOfWork.ServiceProviders.AsQueryable() // Use AsQueryable()
-                .OfType<ServiceProvider>() // Filter to only ServiceProvider types
-                .Where(sp => sp.ServiceAsset != null && sp.ServiceAsset.AssetType == AssetType.Hotel); // Filter for Hotel assets
+            var query = _unitOfWork.ServiceProviders.AsQueryable().OfType<ServiceProvider>();
 
-            query = ApplyServiceProviderFilters(query, searchQuery, userStatus, assetStatus);
-            return _mapper.Map<IEnumerable<HotelProviderProfileDto>>(await query.Skip((page - 1) * limit).Take(limit).ToListAsync());
+            
+            query = query.Include(sp => sp.ServiceAsset);
+
+        
+            query = query.Where(sp => sp.ServiceAsset.AssetType == AssetType.Hotel);
+
+
+            query = ApplyServiceProviderFilters(query,requestParams.SearchTerm ,requestParams.UserStatus);
+
+            // --- CRITICAL STEP: Get the total count AFTER all filters are applied ---
+            var totalCount = await query.CountAsync();
+
+            // 4. Apply pagination (Skip and Take)
+            var pagedServiceProviders = await query
+                .Skip((requestParams.PageNumber - 1) * requestParams.PageSize)
+                .Take(requestParams.PageSize)
+                .ToListAsync(); // This executes the query for the current page
+
+            // 5. Map the results to DTOs
+            // Make sure your AutoMapper configuration maps ServiceProvider to HotelProviderProfileDto.
+            var MappedResult = _mapper.Map<List<HotelProviderProfileDto>>(pagedServiceProviders);
+
+            // 6. Return the PagedResponseDto, which calculates TotalPages internally
+            return new PagedResponseDto<HotelProviderProfileDto>(
+                MappedResult,
+                totalCount ,
+                requestParams.PageNumber,
+                requestParams.PageSize
+            );
         }
 
-        public async Task<IEnumerable<HospitalProviderProfileDto>> GetHospitalProvidersForAdminDashboardAsync(int page, int limit, string searchQuery = null, UserStatus? userStatus = null, VerificationStatus? assetStatus = null)
+        public async Task<PagedResponseDto<HospitalProviderProfileDto>> GetHospitalProvidersForAdminDashboardAsync(PaginationParameters requestParams) 
         {
-            var query = _unitOfWork.ServiceProviders.AsQueryable()
-                .OfType<ServiceProvider>()
-                .Where(sp => sp.ServiceAsset != null && sp.ServiceAsset.AssetType == AssetType.Hospital);
+            // 1. Start with the base query for ServiceProviders
+            IQueryable<ServiceProvider> query = _unitOfWork.ServiceProviders
+                .AsQueryable()
+                .OfType<ServiceProvider>(); // Ensures we're working with ServiceProvider entities
 
-            query = ApplyServiceProviderFilters(query, searchQuery, userStatus, assetStatus);
-            return _mapper.Map<IEnumerable<HospitalProviderProfileDto>>(await query.Skip((page - 1) * limit).Take(limit).ToListAsync());
+            // 2. Apply the fixed filter for Hospital assets
+            //    Include ServiceAsset first, as it's needed for this filter (and likely for mapping).
+            query = query
+                .Include(sp => sp.ServiceAsset) // Eager load ServiceAsset if needed for AssetType filter and mapping
+                .Where(sp => sp.ServiceAsset.AssetType == AssetType.Hospital); // Filter for Hospital assets
+
+
+            // 3. Apply additional dynamic filters (searchQuery, userStatus) using the helper function
+            query = ApplyServiceProviderFilters(query,requestParams.SearchTerm ,requestParams.UserStatus );
+
+            // --- CRITICAL STEP: Get the total count AFTER all filters are applied ---
+            var totalCount= await query.CountAsync();
+
+            // 4. Apply pagination (Skip and Take)
+            var pagedServiceProviders = await query
+                .Skip((requestParams.PageNumber - 1) * requestParams.PageSize)
+                .Take(requestParams.PageSize)
+                .ToListAsync(); // This executes the query for the current page
+
+            // 5. Map the results to DTOs
+            // Make sure your AutoMapper configuration maps ServiceProvider to HospitalProviderProfileDto.
+            var MappedResult = _mapper.Map<List<HospitalProviderProfileDto>>(pagedServiceProviders);
+
+            // 6. Return the PagedResponseDto, which calculates TotalPages internally
+            return new PagedResponseDto<HospitalProviderProfileDto>(
+                MappedResult,
+                totalCount ,
+                requestParams.PageNumber,
+                requestParams.PageSize
+            );
         }
 
-        public async Task<IEnumerable<CarRentalProviderProfileDto>> GetCarRentalProvidersForAdminDashboardAsync(int page, int limit, string searchQuery = null, UserStatus? userStatus = null, VerificationStatus? assetStatus = null)
+        public async Task<PagedResponseDto<CarRentalProviderProfileDto>> GetCarRentalProvidersForAdminDashboardAsync(PaginationParameters requestParams)  
         {
-            var query = _unitOfWork.ServiceProviders.AsQueryable()
-                .OfType<ServiceProvider>()
-                .Where(sp => sp.ServiceAsset != null && sp.ServiceAsset.AssetType == AssetType.CarRental);
+            // 1. Start with the base query for ServiceProviders
+            IQueryable<ServiceProvider> query = _unitOfWork.ServiceProviders
+                .AsQueryable()
+                .OfType<ServiceProvider>(); // Ensures we're working with ServiceProvider entities
 
-            query = ApplyServiceProviderFilters(query, searchQuery, userStatus, assetStatus);
-            return _mapper.Map<IEnumerable<CarRentalProviderProfileDto>>(await query.Skip((page - 1) * limit).Take(limit).ToListAsync());
+            // 2. Apply the fixed filter for CarRental assets
+            //    Include ServiceAsset first, as it's needed for this filter (and likely for mapping).
+            query = query
+                .Include(sp => sp.ServiceAsset) // Eager load ServiceAsset if needed for AssetType filter and mapping
+                .Where(sp => sp.ServiceAsset != null && sp.ServiceAsset.AssetType == AssetType.CarRental); // Filter for CarRental assets
+
+
+            // 3. Apply additional dynamic filters (searchQuery, userStatus) using the helper function
+            query = ApplyServiceProviderFilters(query,requestParams.SearchTerm , requestParams.UserStatus );
+
+            // --- CRITICAL STEP: Get the total count AFTER all filters are applied ---
+            var totalCount = await query.CountAsync();
+
+            // 4. Apply pagination (Skip and Take)
+            var pagedServiceProviders = await query
+                .Skip((requestParams.PageNumber - 1) * requestParams.PageSize)
+                .Take(requestParams.PageSize)
+                .ToListAsync(); // This executes the query for the current page
+
+            // 5. Map the results to DTOs
+            // Make sure your AutoMapper configuration maps ServiceProvider to CarRentalProviderProfileDto.
+            var MappedResult = _mapper.Map<List<CarRentalProviderProfileDto>>(pagedServiceProviders);
+
+            // 6. Return the PagedResponseDto, which calculates TotalPages internally
+            return new PagedResponseDto<CarRentalProviderProfileDto>(
+                MappedResult,
+                totalCount ,
+                requestParams.PageNumber,
+                requestParams.PageSize
+            );
         }
 
 
@@ -295,35 +422,148 @@ namespace Elagy.BL.Services
 
 
         // --- Admin-initiated Email/Password Changes and Asset Verification ---
+        /*  public async Task<AuthResultDto> AdminChangeUserEmailAsync(string userId, string newEmail)
+          {
+              var user = await _userManager.FindByIdAsync(userId);
+              if (user == null)
+              {
+                  return new AuthResultDto { Success = false, Errors = new[] { "User not found." } };
+              }
+
+              // Check if new email is already taken by another user
+              var existingUserWithNewEmail = await _userManager.FindByEmailAsync(newEmail);
+              if (existingUserWithNewEmail != null && existingUserWithNewEmail.Id != user.Id)
+              {
+                  return new AuthResultDto { Success = false, Errors = new[] { "New email address is already taken by another user." } };
+              }
+
+              // Generate a token for email change. Admin initiated, so no current password needed.
+              var token = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
+              // IMPORTANT: Replace with your actual frontend URL
+              var confirmationLink = $"YOUR_FRONTEND_APP_URL/confirm-new-email?userId={user.Id}&newEmail={Uri.EscapeDataString(newEmail)}&token={Uri.EscapeDataString(token)}";
+
+              await _emailService.SendEmailAsync(newEmail, "Confirm Your New Email Address (Admin Initiated)", $"Your email address was changed by an administrator. Please confirm your new email by clicking this link: <a href='{confirmationLink}'>link</a>");
+
+              // Optionally, mark user's EmailConfirmed to false until they confirm new email.
+              // This is a security measure to prevent login with unconfirmed new email.
+              user.EmailConfirmed = false;
+              await _userManager.UpdateAsync(user);
+
+              _logger.LogInformation($"Admin initiated email change for user {user.Email} to {newEmail}. Confirmation email sent to new address.");
+              return new AuthResultDto { Success = true, Message = "Email change initiated. Confirmation email sent to the new address. User needs to confirm the new email to activate it." };
+          }
+  */
+
+
+
+        /// <summary>
+        /// Initiates an email address change for a user by an administrator.
+        /// Sends a confirmation link to the new email and a notification to the old email.
+        /// Includes extensive logging for debugging token issues.
+        /// </summary>
+        /// <param name="userId">The ID of the user whose email is being changed.</param>
+        /// <param name="newEmail">The new email address to assign to the user.</param>
+        /// <returns>AuthResultDto indicating success or failure of the initiation.</returns>
         public async Task<AuthResultDto> AdminChangeUserEmailAsync(string userId, string newEmail)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
+                _logger.LogWarning($"[{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss.fff UTC} GEN] AdminChangeUserEmailAsync: User not found for ID '{userId}'.");
                 return new AuthResultDto { Success = false, Errors = new[] { "User not found." } };
             }
 
-            // Check if new email is already taken by another user
+            string oldEmail = user.Email;
+            var currentUtcTimeGen = DateTime.UtcNow;
+
+            _logger.LogInformation($"[{currentUtcTimeGen:yyyy-MM-dd HH:mm:ss.fff UTC} GEN] AdminChangeUserEmailAsync: Initiating change for User ID: '{user.Id}'");
+            _logger.LogInformation($"[{currentUtcTimeGen:yyyy-MM-dd HH:mm:ss.fff UTC} GEN] OLD Email (User Object): '{oldEmail}' (Length: {oldEmail.Length}) - Hex: {BitConverter.ToString(Encoding.UTF8.GetBytes(oldEmail))}");
+            _logger.LogInformation($"[{currentUtcTimeGen:yyyy-MM-dd HH:mm:ss.fff UTC} GEN] NEW Email (Input Param): '{newEmail}' (Length: {newEmail.Length}) - Hex: {BitConverter.ToString(Encoding.UTF8.GetBytes(newEmail))}");
+
+            // Check if the new email is already taken by another user
             var existingUserWithNewEmail = await _userManager.FindByEmailAsync(newEmail);
             if (existingUserWithNewEmail != null && existingUserWithNewEmail.Id != user.Id)
             {
+                _logger.LogWarning($"[{currentUtcTimeGen:yyyy-MM-dd HH:mm:ss.fff UTC} GEN] New email '{newEmail}' is already taken by another user.");
                 return new AuthResultDto { Success = false, Errors = new[] { "New email address is already taken by another user." } };
             }
 
-            // Generate a token for email change. Admin initiated, so no current password needed.
+            // Log user's security stamp BEFORE token generation and BEFORE any DB updates
+            var securityStampAtTokenGen = await _userManager.GetSecurityStampAsync(user);
+            _logger.LogInformation($"[{currentUtcTimeGen:yyyy-MM-dd HH:mm:ss.fff UTC} GEN] Security Stamp AT TOKEN GENERATION: '{securityStampAtTokenGen}'");
+
+            // --- CRITICAL STEP: Generate the token *before* any updates to the user object in the database ---
+            // This token is generated against the *current* security stamp of the user.
             var token = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
-            // IMPORTANT: Replace with your actual frontend URL
+            _logger.LogInformation($"[{currentUtcTimeGen:yyyy-MM-dd HH:mm:ss.fff UTC} GEN] Generated Token (raw from UserManager): '{token}' (Length: {token.Length}) - Hex: {BitConverter.ToString(Encoding.UTF8.GetBytes(token))}");
+
+            // The confirmationLink uses the 'token' that was generated *before* any potential DB updates to the user object.
             var confirmationLink = $"YOUR_FRONTEND_APP_URL/confirm-new-email?userId={user.Id}&newEmail={Uri.EscapeDataString(newEmail)}&token={Uri.EscapeDataString(token)}";
+            _logger.LogInformation($"[{currentUtcTimeGen:yyyy-MM-dd HH:mm:ss.fff UTC} GEN] Full Confirmation Link generated: '{confirmationLink}'");
 
-            await _emailService.SendEmailAsync(newEmail, "Confirm Your New Email Address (Admin Initiated)", $"Your email address was changed by an administrator. Please confirm your new email by clicking this link: <a href='{confirmationLink}'>link</a>");
+            // --- Step 1: Send Confirmation to the NEW Email Address ---
+            _logger.LogInformation($"[{currentUtcTimeGen:yyyy-MM-dd HH:mm:ss.fff UTC} GEN] Attempting to send confirmation email to new address: '{newEmail}'.");
+            try
+            {
+                if (_emailService == null)
+                {
+                    _logger.LogError($"[{currentUtcTimeGen:yyyy-MM-dd HH:mm:ss.fff UTC} GEN] _emailService is NULL. Confirmation email cannot be sent.");
+                    return new AuthResultDto { Success = false, Errors = new[] { "Email service is not available." } };
+                }
 
-            // Optionally, mark user's EmailConfirmed to false until they confirm new email.
-            // This is a security measure to prevent login with unconfirmed new email.
-            user.EmailConfirmed = false;
-            await _userManager.UpdateAsync(user);
+                await _emailService.SendEmailAsync(
+                    newEmail,
+                    "Confirm Your New Email Address (Admin Initiated)",
+                    $"Your email address for [Your App Name] was changed by an administrator. " +
+                    $"Please confirm your new email by clicking this link: <a href='{confirmationLink}'>link</a>. " +
+                    $"If you did not request this change, please contact support immediately."
+                );
+                _logger.LogInformation($"[{currentUtcTimeGen:yyyy-MM-dd HH:mm:ss.fff UTC} GEN] Confirmation email sent successfully (or completed execution) to new address: '{newEmail}'.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"[{currentUtcTimeGen:yyyy-MM-dd HH:mm:ss.fff UTC} GEN] EXCEPTION during sending confirmation email to new address '{newEmail}' for user '{userId}'.");
+                return new AuthResultDto { Success = false, Errors = new[] { "Failed to send confirmation email to the new address due to an error." } };
+            }
 
-            _logger.LogInformation($"Admin initiated email change for user {user.Email} to {newEmail}. Confirmation email sent to new address.");
-            return new AuthResultDto { Success = true, Message = "Email change initiated. Confirmation email sent to the new address. User needs to confirm the new email to activate it." };
+            // --- Step 2: Send Notification to the OLD Email Address (Crucial Security Step) ---
+            if (!string.Equals(oldEmail, newEmail, StringComparison.OrdinalIgnoreCase)) // Only notify if email actually changed
+            {
+                _logger.LogInformation($"[{currentUtcTimeGen:yyyy-MM-dd HH:mm:ss.fff UTC} GEN] Attempting to send notification email to old address: '{oldEmail}'.");
+                try
+                {
+                    if (_emailService == null)
+                    {
+                        _logger.LogError($"[{currentUtcTimeGen:yyyy-MM-dd HH:mm:ss.fff UTC} GEN] _emailService is NULL. Old email notification cannot be sent.");
+                    }
+                    else
+                    {
+                        await _emailService.SendEmailAsync(
+                            oldEmail,
+                            "Account Email Address Changed (Action Required if Unauthorized)",
+                            $"This is an important security notification for your account with [Your App Name]. " +
+                            $"Your email address has been changed from '{oldEmail}' to '{newEmail}' by an administrator. " +
+                            $"If you did not authorize this change, please contact our support team immediately at [Your Support Contact Info or Link]."
+                        );
+                        _logger.LogInformation($"[{currentUtcTimeGen:yyyy-MM-dd HH:mm:ss.fff UTC} GEN] Notification email sent successfully (or completed execution) to old address: '{oldEmail}'.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"[{currentUtcTimeGen:yyyy-MM-dd HH:mm:ss.fff UTC} GEN] EXCEPTION during sending notification email to old address '{oldEmail}' for user '{userId}'. This is a critical security warning.");
+                }
+            }
+
+ 
+
+            _logger.LogInformation($"[{currentUtcTimeGen:yyyy-MM-dd HH:mm:ss.fff UTC} GEN] AdminChangeUserEmailAsync completed for user {oldEmail} -> {newEmail}. Confirmation email sent to new, notification to old. User's DB state (Email and EmailConfirmed) is awaiting confirmation.");
+            return new AuthResultDto
+            {
+                Success = true,
+                Message = "Email change initiated. Confirmation email sent to the new address. " +
+                          "A notification has also been sent to the old email address for security. " +
+                          "The user needs to confirm the new email to activate it."
+            };
         }
 
         public async Task<AuthResultDto> AdminResetUserPasswordAsync(string userId)
@@ -355,7 +595,7 @@ namespace Elagy.BL.Services
             return new AuthResultDto { Success = false, Errors = resetResult.Errors.Select(e => e.Description) };
         }
 
-        public async Task<AuthResultDto> AdminSetAssetVerificationStatusAsync(string assetId, VerificationStatus status, string notes = null)
+/*        public async Task<AuthResultDto> AdminSetAssetVerificationStatusAsync(string assetId, VerificationStatus status, string notes = null)
         {
             var asset = await _unitOfWork.ServiceAssets.GetByIdAsync(assetId);
             if (asset == null)
@@ -370,7 +610,7 @@ namespace Elagy.BL.Services
 
             _logger.LogInformation($"Asset {assetId} verification status set to {status} by admin.");
             return new AuthResultDto { Success = true, Message = $"Asset verification status updated to {status}." };
-        }
+        }*/
 
         // Helper method to generate a random password
         private string GenerateRandomPassword()
@@ -385,5 +625,7 @@ namespace Elagy.BL.Services
                 .Select(s => s[random.Next(s.Length)]).ToArray());
             return password;
         }
+
+
     }
 }

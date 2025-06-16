@@ -22,6 +22,38 @@ namespace Elagy.DAL.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Elagy.Core.Entities.ImageKitTempFile", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ImageKitFilePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ImageKitUrl")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<bool>("IsConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime>("UploadedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ImageKitTempFiles", (string)null);
+                });
+
             modelBuilder.Entity("Elagy.Core.Entities.ServiceAsset", b =>
                 {
                     b.Property<string>("Id")
@@ -43,6 +75,10 @@ namespace Elagy.DAL.Migrations
                         .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("DocsURL")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DocsURLFeildId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
@@ -137,10 +173,6 @@ namespace Elagy.DAL.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("NationalId")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
                     b.Property<string>("Nationality")
                         .HasColumnType("nvarchar(max)");
 
@@ -151,10 +183,6 @@ namespace Elagy.DAL.Migrations
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("PassportId")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
@@ -431,7 +459,11 @@ namespace Elagy.DAL.Migrations
                 {
                     b.HasBaseType("Elagy.Core.Entities.User");
 
-                    b.Property<string>("DOCsURL")
+                    b.Property<string>("NationalFeildId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NationalURL")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

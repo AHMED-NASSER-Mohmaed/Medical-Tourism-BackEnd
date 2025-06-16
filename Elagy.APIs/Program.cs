@@ -5,6 +5,7 @@ using Elagy.Core.Entities;
 using Elagy.Core.Helpers; // for intefaceses like IEmailService, IJwtTokenGenerator, etc.
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
+using Elagy.Core.Temps;
 using Elagy.DAL;
 using Elagy.DAL.Data;
 using Microsoft.AspNetCore.Identity;
@@ -14,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection; // Add for service collection ac
 using Microsoft.Extensions.Logging; // Add for logging in seed
 using System;
 using System.Security.Claims;
+using System.Threading.RateLimiting;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,8 +39,8 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     options.Password.RequireDigit = true;
     options.Password.RequiredLength = 6;
     options.Password.RequireNonAlphanumeric = false; // For simplicity in dev, consider true for production
-    options.Password.RequireUppercase = false; // For simplicity in dev, consider true for production
-    options.Password.RequireLowercase = false; // For simplicity in dev, consider true for production
+    options.Password.RequireUppercase = false;       // For simplicity in dev, consider true for production
+    options.Password.RequireLowercase = false;       // For simplicity in dev, consider true for production
 
     // Lockout settings
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
@@ -47,6 +49,13 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders(); // For email confirmation, password reset tokens
+
+// --- Customize Email Confirmation Token Lifespan Here ---
+// The default email confirmation token provider uses DataProtectorTokenProviderOptions.
+builder.Services.Configure<DataProtectionTokenProviderOptions>(o =>
+{
+    o.TokenLifespan = TimeSpan.FromDays(3); 
+});
 
 // Configure Dependency Injection for Services and Unit of Work
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -126,7 +135,6 @@ builder.Services.AddAuthentication(options =>
 // Add Authorization services
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("RequireSuperAdminRole", policy => policy.RequireRole("SuperAdmin"));
     options.AddPolicy("RequirePatientRole", policy => policy.RequireRole("Patient"));
     options.AddPolicy("RequireServiceProviderRole", policy => policy.RequireRole("ServiceProvider"));
     // Add other specific policies as needed
@@ -152,6 +160,37 @@ builder.Services.AddCors(options =>
 
 
 
+builder.Services.Configure<ImageKitSettings>(builder.Configuration.GetSection(ImageKitSettings.ImageKitSectionName));
+
+
+builder.Services.AddHttpClient<IFileStorageservice, ImageKitFileStorageService>(client =>
+{
+    client.Timeout = TimeSpan.FromMinutes(3); // Example: 5 minutes for large uploads
+});
+builder.Services.AddRateLimiter(rateLimiterOptions =>
+{
+    rateLimiterOptions.AddPolicy("IpUploadLimit", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString(),
+            factory: key => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 2, // Max 2 requests per minute per IP
+                Window = TimeSpan.FromMinutes(1),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0 // No queueing, reject immediately
+            })
+        );
+
+    rateLimiterOptions.OnRejected = (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.WriteAsync("Too many requests from this IP. Please try again later.", cancellationToken);
+        return ValueTask.CompletedTask;
+    };
+});
+
+
+
 
 var app = builder.Build();
 
@@ -165,7 +204,7 @@ using (var scope = app.Services.CreateScope())
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var logger = services.GetRequiredService<ILogger<Program>>(); // Logger for Program.cs scope
 
-        await DbInitializer.SeedRolesAsync(userManager, roleManager, logger);
+        await DbInitializer.SeedRoles(userManager, roleManager, logger);
         await DbInitializer.SeedSuperAdminAsync(userManager, roleManager, logger);
     }
     catch (Exception ex)
@@ -175,6 +214,8 @@ using (var scope = app.Services.CreateScope())
     }
 }
 // --- End Data Seeding ---
+
+
 
 
 // Configure the HTTP request pipeline.

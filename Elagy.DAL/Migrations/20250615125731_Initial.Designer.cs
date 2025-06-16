@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Elagy.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250609132939_InitialElagyDbSetup")]
-    partial class InitialElagyDbSetup
+    [Migration("20250615125731_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,38 @@ namespace Elagy.DAL.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Elagy.Core.Entities.ImageKitTempFile", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ImageKitFilePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ImageKitUrl")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<bool>("IsConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime>("UploadedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ImageKitTempFiles", (string)null);
+                });
 
             modelBuilder.Entity("Elagy.Core.Entities.ServiceAsset", b =>
                 {
@@ -46,6 +78,10 @@ namespace Elagy.DAL.Migrations
                         .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("DocsURL")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DocsURLFeildId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
@@ -85,11 +121,9 @@ namespace Elagy.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ServiceAssets");
+                    b.ToTable("ServiceAssets", (string)null);
 
-                    b.HasDiscriminator<int>("AssetType");
-
-                    b.UseTphMappingStrategy();
+                    b.UseTptMappingStrategy();
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.User", b =>
@@ -142,10 +176,6 @@ namespace Elagy.DAL.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("NationalId")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
                     b.Property<string>("Nationality")
                         .HasColumnType("nvarchar(max)");
 
@@ -156,10 +186,6 @@ namespace Elagy.DAL.Migrations
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("PassportId")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
@@ -204,9 +230,7 @@ namespace Elagy.DAL.Migrations
 
                     b.ToTable("AspNetUsers", (string)null);
 
-                    b.HasDiscriminator<int>("UserType");
-
-                    b.UseTphMappingStrategy();
+                    b.UseTptMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -374,7 +398,7 @@ namespace Elagy.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasDiscriminator().HasValue(2);
+                    b.ToTable("CarRentalAssets", (string)null);
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.HospitalAsset", b =>
@@ -393,7 +417,7 @@ namespace Elagy.DAL.Migrations
                     b.Property<int>("NumberOfDepartments")
                         .HasColumnType("int");
 
-                    b.HasDiscriminator().HasValue(1);
+                    b.ToTable("HospitalAssets", (string)null);
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.HotelAsset", b =>
@@ -409,7 +433,7 @@ namespace Elagy.DAL.Migrations
                     b.Property<int?>("StarRating")
                         .HasColumnType("int");
 
-                    b.HasDiscriminator().HasValue(0);
+                    b.ToTable("HotelAssets", (string)null);
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.Patient", b =>
@@ -423,20 +447,35 @@ namespace Elagy.DAL.Migrations
                     b.Property<float>("Height")
                         .HasColumnType("real");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<float>("Weight")
                         .HasColumnType("real");
 
-                    b.HasDiscriminator().HasValue(0);
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Patients", (string)null);
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.ServiceProvider", b =>
                 {
                     b.HasBaseType("Elagy.Core.Entities.User");
 
-                    b.Property<string>("DOCsURL")
+                    b.Property<string>("NationalFeildId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasDiscriminator().HasValue(1);
+                    b.Property<string>("NationalURL")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ServiceProviders", (string)null);
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.SuperAdmin", b =>
@@ -447,7 +486,12 @@ namespace Elagy.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasDiscriminator().HasValue(2);
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("SuperAdmins", (string)null);
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.ServiceAsset", b =>
@@ -510,6 +554,72 @@ namespace Elagy.DAL.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.CarRentalAsset", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.ServiceAsset", null)
+                        .WithOne()
+                        .HasForeignKey("Elagy.Core.Entities.CarRentalAsset", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.HospitalAsset", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.ServiceAsset", null)
+                        .WithOne()
+                        .HasForeignKey("Elagy.Core.Entities.HospitalAsset", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.HotelAsset", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.ServiceAsset", null)
+                        .WithOne()
+                        .HasForeignKey("Elagy.Core.Entities.HotelAsset", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.Patient", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.User", null)
+                        .WithOne()
+                        .HasForeignKey("Elagy.Core.Entities.Patient", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Elagy.Core.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.ServiceProvider", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.User", null)
+                        .WithOne()
+                        .HasForeignKey("Elagy.Core.Entities.ServiceProvider", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Elagy.Core.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.SuperAdmin", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.User", null)
+                        .WithOne()
+                        .HasForeignKey("Elagy.Core.Entities.SuperAdmin", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Elagy.Core.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.ServiceProvider", b =>

@@ -31,5 +31,36 @@ namespace Elagy.APIs.Controllers
         {
             return User.FindFirstValue(ClaimTypes.NameIdentifier);
         }
+
+
+        /// <summary>
+        /// Validates uploaded files for count and size.
+        /// </summary>
+        /// <param name="files">List of uploaded files</param>
+        /// <param name="expectedCount">Expected number of files</param>
+        /// <param name="maxFileSize">Maximum allowed file size in bytes</param>
+        /// <returns>Validation result with success flag and error messages</returns>
+        protected (bool Success, List<string> Errors) ValidateFiles(List<IFormFile> files, int expectedCount, long maxFileSize)
+        {
+            var errors = new List<string>();
+
+            if (files == null || files.Count != expectedCount)
+            {
+                errors.Add($"Exactly {expectedCount} files are required.");
+            }
+            else
+            {
+                for (int i = 0; i < files.Count; i++)
+                {
+                    if (files[i].Length > maxFileSize)
+                    {
+                        errors.Add($"File {i + 1} exceeds the maximum allowed size of {maxFileSize / (1024 * 1024)}MB.");
+                    }
+                }
+            }
+
+            return (errors.Count == 0, errors);
+        }
+
     }
 }
