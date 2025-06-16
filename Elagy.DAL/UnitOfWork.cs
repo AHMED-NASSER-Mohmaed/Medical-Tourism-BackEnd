@@ -19,6 +19,13 @@ namespace Elagy.DAL
         public IGenericRepository<HospitalAsset> HospitalAssets { get; private set; }
         public IGenericRepository<CarRentalAsset> CarRentalAssets { get; private set; }
 
+        public ISpecialtyRepository Specialties { get; private set; }
+
+        public IDoctorRepository Doctors { get; private set; }
+
+        public IHospitalRepository Hospitals { get; private set; }
+        public IHospitalSpecialtyRepository HospitalSpecialties { get; private set; }
+
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
@@ -29,6 +36,12 @@ namespace Elagy.DAL
             HotelAssets = new GenericRepository<HotelAsset>(_context);
             HospitalAssets = new GenericRepository<HospitalAsset>(_context);
             CarRentalAssets = new GenericRepository<CarRentalAsset>(_context);
+            //////////////////
+            Specialties = new SpecialtyRepository(_context);
+            Doctors = new DoctorRepository(_context);
+            Hospitals = new HospitalRepository(_context);
+            HospitalSpecialties = new HospitalSpecialtyRepository(_context);
+
         }
 
         public async Task<int> CompleteAsync()

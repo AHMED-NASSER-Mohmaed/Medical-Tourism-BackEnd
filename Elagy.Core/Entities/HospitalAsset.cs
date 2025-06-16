@@ -9,5 +9,6 @@
         public bool HasEmergencyRoom { get; set; }
         public bool IsTeachingHospital { get; set; }
         public bool EmergencyServices { get; set; } // Indicates if 24/7 emergency services are available
+        public ICollection<HospitalSpecialty> HospitalSpecialties { get; set; }
     }
 }

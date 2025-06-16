@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
-using Elagy.Core.Entities;
 using Elagy.Core.DTOs.Auth;
+using Elagy.Core.DTOs.SpecialtyDTO;
 using Elagy.Core.DTOs.User;
+using Elagy.Core.Entities;
 using Elagy.Core.Enums; // For UserType, AssetType
 using ServiceProvider = Elagy.Core.Entities.ServiceProvider; // Ensure this is the correct namespace for ServiceProvider
 
@@ -183,6 +184,12 @@ namespace Elagy.BL.Mapping
 
             CreateMap<CarRentalProviderProfileUpdateDto, CarRentalAsset>()
                 .IncludeBase<BaseServiceProviderProfileUpdateDto, ServiceAsset>();
+            ///////////////////////////
+            CreateMap<Specialty, SpecialtyDto>().ReverseMap(); // For CRUD and nested views
+            CreateMap<SpecialtyCreateDto, Specialty>();
+            CreateMap<SpecialtyUpdateDto, Specialty>();
+            
+
         }
     }
 }

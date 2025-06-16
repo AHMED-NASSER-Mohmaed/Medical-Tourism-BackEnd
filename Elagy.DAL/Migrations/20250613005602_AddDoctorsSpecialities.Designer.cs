@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Elagy.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250609132939_InitialElagyDbSetup")]
-    partial class InitialElagyDbSetup
+    [Migration("20250613005602_AddDoctorsSpecialities")]
+    partial class AddDoctorsSpecialities
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,31 @@ namespace Elagy.DAL.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Elagy.Core.Entities.HospitalSpecialty", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("HospitalAssetId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("SpecialtyId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SpecialtyId");
+
+                    b.HasIndex("HospitalAssetId", "SpecialtyId")
+                        .IsUnique();
+
+                    b.ToTable("HospitalSpecialties", (string)null);
+                });
 
             modelBuilder.Entity("Elagy.Core.Entities.ServiceAsset", b =>
                 {
@@ -85,11 +110,31 @@ namespace Elagy.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ServiceAssets");
+                    b.ToTable("ServiceAssets", (string)null);
 
-                    b.HasDiscriminator<int>("AssetType");
+                    b.UseTptMappingStrategy();
+                });
 
-                    b.UseTphMappingStrategy();
+            modelBuilder.Entity("Elagy.Core.Entities.Specialty", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Specialties", (string)null);
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.User", b =>
@@ -204,9 +249,7 @@ namespace Elagy.DAL.Migrations
 
                     b.ToTable("AspNetUsers", (string)null);
 
-                    b.HasDiscriminator<int>("UserType");
-
-                    b.UseTphMappingStrategy();
+                    b.UseTptMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -374,7 +417,7 @@ namespace Elagy.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasDiscriminator().HasValue(2);
+                    b.ToTable("CarRentalAssets", (string)null);
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.HospitalAsset", b =>
@@ -393,7 +436,7 @@ namespace Elagy.DAL.Migrations
                     b.Property<int>("NumberOfDepartments")
                         .HasColumnType("int");
 
-                    b.HasDiscriminator().HasValue(1);
+                    b.ToTable("HospitalAssets", (string)null);
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.HotelAsset", b =>
@@ -409,7 +452,45 @@ namespace Elagy.DAL.Migrations
                     b.Property<int?>("StarRating")
                         .HasColumnType("int");
 
-                    b.HasDiscriminator().HasValue(0);
+                    b.ToTable("HotelAssets", (string)null);
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.Doctor", b =>
+                {
+                    b.HasBaseType("Elagy.Core.Entities.User");
+
+                    b.Property<string>("Bio")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("HospitalSpecialtyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MedicalLicenseNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Qualification")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("SpecialtyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("YearsOfExperience")
+                        .HasColumnType("int");
+
+                    b.HasIndex("HospitalSpecialtyId");
+
+                    b.HasIndex("SpecialtyId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Doctors", (string)null);
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.Patient", b =>
@@ -423,10 +504,15 @@ namespace Elagy.DAL.Migrations
                     b.Property<float>("Height")
                         .HasColumnType("real");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<float>("Weight")
                         .HasColumnType("real");
 
-                    b.HasDiscriminator().HasValue(0);
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Patients", (string)null);
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.ServiceProvider", b =>
@@ -434,9 +520,15 @@ namespace Elagy.DAL.Migrations
                     b.HasBaseType("Elagy.Core.Entities.User");
 
                     b.Property<string>("DOCsURL")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasDiscriminator().HasValue(1);
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ServiceProviders", (string)null);
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.SuperAdmin", b =>
@@ -447,7 +539,31 @@ namespace Elagy.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasDiscriminator().HasValue(2);
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("SuperAdmins", (string)null);
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.HospitalSpecialty", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.HospitalAsset", "HospitalAsset")
+                        .WithMany("HospitalSpecialties")
+                        .HasForeignKey("HospitalAssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Elagy.Core.Entities.Specialty", "Specialty")
+                        .WithMany("HospitalSpecialties")
+                        .HasForeignKey("SpecialtyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("HospitalAsset");
+
+                    b.Navigation("Specialty");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.ServiceAsset", b =>
@@ -510,6 +626,118 @@ namespace Elagy.DAL.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.CarRentalAsset", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.ServiceAsset", null)
+                        .WithOne()
+                        .HasForeignKey("Elagy.Core.Entities.CarRentalAsset", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.HospitalAsset", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.ServiceAsset", null)
+                        .WithOne()
+                        .HasForeignKey("Elagy.Core.Entities.HospitalAsset", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.HotelAsset", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.ServiceAsset", null)
+                        .WithOne()
+                        .HasForeignKey("Elagy.Core.Entities.HotelAsset", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.Doctor", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.HospitalSpecialty", "HospitalSpecialty")
+                        .WithMany("Doctors")
+                        .HasForeignKey("HospitalSpecialtyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Elagy.Core.Entities.User", null)
+                        .WithOne()
+                        .HasForeignKey("Elagy.Core.Entities.Doctor", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Elagy.Core.Entities.Specialty", "Specialty")
+                        .WithMany("Doctors")
+                        .HasForeignKey("SpecialtyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Elagy.Core.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("HospitalSpecialty");
+
+                    b.Navigation("Specialty");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.Patient", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.User", null)
+                        .WithOne()
+                        .HasForeignKey("Elagy.Core.Entities.Patient", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Elagy.Core.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.ServiceProvider", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.User", null)
+                        .WithOne()
+                        .HasForeignKey("Elagy.Core.Entities.ServiceProvider", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Elagy.Core.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.SuperAdmin", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.User", null)
+                        .WithOne()
+                        .HasForeignKey("Elagy.Core.Entities.SuperAdmin", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Elagy.Core.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.HospitalSpecialty", b =>
+                {
+                    b.Navigation("Doctors");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.Specialty", b =>
+                {
+                    b.Navigation("Doctors");
+
+                    b.Navigation("HospitalSpecialties");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.HospitalAsset", b =>
+                {
+                    b.Navigation("HospitalSpecialties");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.ServiceProvider", b =>

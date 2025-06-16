@@ -16,13 +16,15 @@ namespace Elagy.DAL.Data
         public DbSet<Patient> Patients { get; set; }
         public DbSet<ServiceProvider> ServiceProviders { get; set; }
         public DbSet<SuperAdmin> SuperAdmins { get; set; }
-
+        public DbSet<Doctor> Doctors { get; set; }
         // DbSets for ServiceAsset hierarchy
         public DbSet<ServiceAsset> ServiceAssets { get; set; }
         public DbSet<CarRentalAsset> CarRentalAssets { get; set; }
         public DbSet<HospitalAsset> HospitalAssets { get; set; }
         public DbSet<HotelAsset> HotelAssets { get; set; }
 
+        public DbSet<Specialty> Specialties { get; set; }
+        public DbSet<HospitalSpecialty> HospitalSpecialties { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -32,11 +34,15 @@ namespace Elagy.DAL.Data
             builder.ApplyConfiguration(new PatientConfiguration()); // New Patient configuration
             builder.ApplyConfiguration(new ServiceProviderConfiguration()); // Modified SP configuration
             builder.ApplyConfiguration(new SuperAdminConfiguration()); // New SuperAdmin configuration
+            builder.ApplyConfiguration(new DoctorConfiguration());
 
             builder.ApplyConfiguration(new ServiceAssetConfiguration()); // Base ServiceAsset configuration
             builder.ApplyConfiguration(new CarRentalAssetConfiguration()); // Modified CarRental configuration
             builder.ApplyConfiguration(new HospitalAssetConfiguration()); // Modified Hospital configuration
             builder.ApplyConfiguration(new HotelAssetConfiguration()); // Modified Hotel configuration
+
+            builder.ApplyConfiguration(new SpecialtyConfiguration());
+            builder.ApplyConfiguration(new HospitalSpecialtyConfiguration());
 
             // Configure Patient's specific properties precision if needed (as done before)
             builder.Entity<Patient>().Property(p => p.Height).HasColumnType("real");

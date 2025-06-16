@@ -14,6 +14,14 @@ namespace Elagy.Core.IRepositories
         IGenericRepository<HotelAsset> HotelAssets { get; }
         IGenericRepository<HospitalAsset> HospitalAssets { get; }
         IGenericRepository<CarRentalAsset> CarRentalAssets { get; }
+        /// <summary>
+        /// ///////////////////////////////
+        /// </summary>
+        ISpecialtyRepository Specialties { get; }
+        IDoctorRepository Doctors { get; }
+        IHospitalRepository Hospitals { get; }
+        IHospitalSpecialtyRepository HospitalSpecialties { get; }
+        ///////////////////////////
 
         Task<int> CompleteAsync();
     }

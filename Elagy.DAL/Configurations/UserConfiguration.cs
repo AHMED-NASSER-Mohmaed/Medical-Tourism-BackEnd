@@ -32,6 +32,8 @@ namespace Elagy.DAL.Configurations
             builder.HasMany<Patient>().WithOne(); // EF Core often handles this, but explicit mapping can be useful.
             builder.HasMany<ServiceProvider>().WithOne();
             builder.HasMany<SuperAdmin>().WithOne();
+            builder.HasMany<Doctor>().WithOne();
+
         }
     }
 }
