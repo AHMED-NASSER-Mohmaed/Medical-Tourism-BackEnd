@@ -19,10 +19,10 @@ namespace Elagy.APIs.Controllers
     [EnableRateLimiting("IpUploadLimit")]
     public class MediaController : ControllerBase  
     {
-        private readonly IFileStorageservice _fileStorageService;
+        private readonly IFileStorageService _fileStorageService;
         private readonly ILogger<MediaController> _logger;
 
-        public MediaController(IFileStorageservice fileStorageService, ILogger<MediaController> logger)
+        public MediaController(IFileStorageService fileStorageService, ILogger<MediaController> logger)
         {
             _fileStorageService = fileStorageService;
             _logger = logger;
@@ -34,7 +34,6 @@ namespace Elagy.APIs.Controllers
         // Request body size limit for the entire request (e.g., 20MB total for all files combined)
         [RequestSizeLimit(20 * 1024 * 1024)] // Example: 20 MB total limit for all files in one request
         // You can use [DisableRequestSizeLimit] if you want to bypass the global filter, but if you have a limit here, it's enforced.
-
         public async Task<ActionResult<MultipleFileUploadResponseDto>> UploadFiles(
             [FromForm] IEnumerable<IFormFile> files,
             [FromForm] string? subFolder = null) // Optional: category like "general"

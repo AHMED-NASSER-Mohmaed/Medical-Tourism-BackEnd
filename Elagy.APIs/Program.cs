@@ -163,7 +163,7 @@ builder.Services.AddCors(options =>
 builder.Services.Configure<ImageKitSettings>(builder.Configuration.GetSection(ImageKitSettings.ImageKitSectionName));
 
 
-builder.Services.AddHttpClient<IFileStorageservice, ImageKitFileStorageService>(client =>
+builder.Services.AddHttpClient<IFileStorageService, ImageKitFileStorageService>(client =>
 {
     client.Timeout = TimeSpan.FromMinutes(3); // Example: 5 minutes for large uploads
 });

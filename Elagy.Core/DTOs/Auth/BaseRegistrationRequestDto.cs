@@ -30,13 +30,6 @@ namespace Elagy.Core.DTOs.Auth
 
         public string Nationality { get; set; }
 
-
-        //public string NationalId { get; set; }
-        //public string PassportId { get; set; }
-
-        public string? NationalImageKitFileId { get; set; } // ImageKit fileId
-        public string? NationalImageUrl { get; set; } // ImageKit URL
-
         [Required]
         public string Gender { get; set; }
         [Required]

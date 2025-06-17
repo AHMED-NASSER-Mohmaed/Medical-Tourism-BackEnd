@@ -20,21 +20,19 @@ namespace Elagy.APIs.Controllers
         private readonly IHotelProviderService _hotelProviderService; // For admin-adding providers
         private readonly IHospitalProviderService _hospitalProviderService;
         private readonly ICarRentalProviderService _carRentalProviderService;
-        // private readonly IAuthService _authService; // If you want to delegate admin auth ops
 
         public SuperAdminController(ISuperAdminService superAdminService,
                                     IPatientService patientService,
                                     IHotelProviderService hotelProviderService,
                                     IHospitalProviderService hospitalProviderService,
                                     ICarRentalProviderService carRentalProviderService
-                                    /*, IAuthService authService */)
+                                     )
         {
             _superAdminService = superAdminService;
             _patientService = patientService;
             _hotelProviderService = hotelProviderService;
             _hospitalProviderService = hospitalProviderService;
             _carRentalProviderService = carRentalProviderService;
-            // _authService = authService;
         }
 
 
@@ -57,8 +55,9 @@ namespace Elagy.APIs.Controllers
 
 
 
+        #region  --- Admin Add Functionality (delegating to specific services) ---
 
-        // --- Admin Add Functionality (delegating to specific services) ---
+
         [HttpPost("add-patient")]
         public async Task<ActionResult> AddPatientByAdmin([FromBody] PatientRegistrationRequestDto model)
         {
@@ -91,9 +90,11 @@ namespace Elagy.APIs.Controllers
             return HandleAuthResult(result);
         }
 
+        #endregion
 
 
-        // --- User Status Management ---
+
+        #region --- User Status Management ---
         [HttpPut("activate-user/{userId}")]
         public async Task<ActionResult> ActivateUser(string userId)
         {
@@ -122,6 +123,8 @@ namespace Elagy.APIs.Controllers
             return HandleAuthResult(result);
         }
 
+        #endregion
+
 
         /*    // --- Profile Details Retrieval for Admin Dashboard Modals ---
         [HttpGet("patients/{patientId}")]
@@ -143,7 +146,7 @@ namespace Elagy.APIs.Controllers
 */
 
 
-        // --- Listing/Filtering for Dashboard Tabs ---
+        #region --- Listing/Filtering for Dashboard Tabs ---
         [HttpGet("patients")]
         public async Task<ActionResult< PagedResponseDto<PatientDto>>> GetPatients(
             [FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10,
@@ -206,7 +209,7 @@ namespace Elagy.APIs.Controllers
             return Ok(providers);
         }
 
-        // --- End Of Listing/Filtering for Dashboard Tabs ---
+        #endregion --- End Of Listing/Filtering for Dashboard Tabs ---
 
 
 
@@ -217,7 +220,7 @@ namespace Elagy.APIs.Controllers
 
 
 
-        // --- Admin Initiated Email/Password Changes ---
+        #region --- Admin Initiated Email/Password Changes ---
         [HttpPut("change-user-email")]
         public async Task<ActionResult> AdminChangeUserEmail(string userId, [FromBody] string newEmail)
         {
@@ -233,18 +236,22 @@ namespace Elagy.APIs.Controllers
             var result = await _superAdminService.AdminResetUserPasswordAsync(userId);
             return HandleAuthResult(result);
         }
+        
+        #endregion
 
 
 
 
+        /*        [HttpPut("set-asset-verification-status/{assetId}")]
+                public async Task<ActionResult> SetAssetVerificationStatus(string assetId, [FromQuery] VerificationStatus status, [FromBody] string notes = null)
+                {
+                    var result = await _superAdminService.AdminSetAssetVerificationStatusAsync(assetId, status, notes);
+                    return HandleAuthResult(result);
+                }
+        */
 
-/*        [HttpPut("set-asset-verification-status/{assetId}")]
-        public async Task<ActionResult> SetAssetVerificationStatus(string assetId, [FromQuery] VerificationStatus status, [FromBody] string notes = null)
-        {
-            var result = await _superAdminService.AdminSetAssetVerificationStatusAsync(assetId, status, notes);
-            return HandleAuthResult(result);
-        }
-*/
+
+
 
 
 

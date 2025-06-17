@@ -32,7 +32,7 @@ namespace Elagy.BL.Services
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
-        private readonly IFileStorageservice _imageStorage;
+        private readonly IFileStorageService _imageStorage;
 
         private readonly ILogger<AuthService> _logger;
 
@@ -44,7 +44,7 @@ namespace Elagy.BL.Services
             IMapper mapper,
             IEmailService emailService,
             IJwtTokenGenerator jwtTokenGenerator,
-            IFileStorageservice imageStorage,
+            IFileStorageService imageStorage,
             ILogger<AuthService> logger)
         {
             _userManager = userManager;

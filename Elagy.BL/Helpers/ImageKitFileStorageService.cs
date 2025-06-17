@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace Elagy.BL.Helpers
 {
-    public class ImageKitFileStorageService : IFileStorageservice
+    public class ImageKitFileStorageService : IFileStorageService
     {
 
         private readonly HttpClient _httpClient;
