@@ -9,9 +9,9 @@ namespace Elagy.Core.IServices
     {
         // User registration (distinct routes, distinct UIs)
         Task<AuthResultDto> RegisterPatientAsync(PatientRegistrationRequestDto model);
-        Task<AuthResultDto> RegisterHotelProviderAsync(HotelProviderRegistrationRequestDto model, List<IFormFile> files);
-        Task<AuthResultDto> RegisterHospitalProviderAsync(HospitalProviderRegistrationRequestDto model, List<IFormFile> files);
-        Task<AuthResultDto> RegisterCarRentalProviderAsync(CarRentalProviderRegistrationRequestDto model, List<IFormFile> files);
+        Task<AuthResultDto> RegisterHotelProviderAsync(HotelAssetRegistrationRequestDto model, List<IFormFile> files);
+        Task<AuthResultDto> RegisterHospitalProviderAsync(HospitalAssetRegistrationRequestDto model, List<IFormFile> files);
+        Task<AuthResultDto> RegisterCarRentalProviderAsync(CarRentalAssetRegistrationRequestDto model, List<IFormFile> files);
         Task<AuthResultDto> RegisterSuperAdminAsync(SuperAdminRegistrationRequestDto model); // Admin onboarding
 
         // Core Identity operations

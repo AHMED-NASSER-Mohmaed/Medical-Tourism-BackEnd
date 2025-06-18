@@ -139,7 +139,6 @@ namespace Elagy.BL.Services
             var asset = await _unitOfWork.ServiceAssets.GetByIdAsync(providerId);
             if (asset != null)
             {
-                asset.VerificationStatus = VerificationStatus.Verified;
                 _unitOfWork.ServiceAssets.Update(asset);
                 await _unitOfWork.CompleteAsync();
                 _logger.LogInformation($"Service Asset {asset.Id} verification status set to Verified for approved provider {providerId}.");
@@ -175,7 +174,6 @@ namespace Elagy.BL.Services
             var asset = await _unitOfWork.ServiceAssets.GetByIdAsync(providerId);
             if (asset != null)
             {
-                asset.VerificationStatus = VerificationStatus.Rejected;
                 asset.VerificationNotes = rejectionReason;
                 _unitOfWork.ServiceAssets.Update(asset);
                 await _unitOfWork.CompleteAsync();
@@ -244,8 +242,8 @@ namespace Elagy.BL.Services
                                         sp.Email.ToLower().Contains(lowerSearchQuery) ||
                                         sp.FirstName.ToLower().Contains(lowerSearchQuery) ||
                                         sp.LastName.ToLower().Contains(lowerSearchQuery) ||
-                                        sp.PhoneNumber.ToLower().Contains(lowerSearchQuery) || 
-                                        sp.ServiceAsset.AssetName.ToLower().Contains(lowerSearchQuery)
+                                        sp.Phone.ToLower().Contains(lowerSearchQuery) || 
+                                        sp.ServiceAsset.Name.ToLower().Contains(lowerSearchQuery)
                                    );
             }
 

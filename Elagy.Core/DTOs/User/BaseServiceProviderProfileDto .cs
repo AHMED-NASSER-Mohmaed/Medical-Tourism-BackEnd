@@ -12,7 +12,7 @@ namespace Elagy.Core.DTOs.User
         public string AssetId { get; set; } // The Id of the associated asset (will be same as User.Id)
         public string AssetName { get; set; }
         public string Description { get; set; }
-        public string AssetDocsURL { get; set; }
+        public string CredentialDocURL { get; set; }
 
 
         public string AssetEmail { get; set; }
@@ -20,13 +20,13 @@ namespace Elagy.Core.DTOs.User
 
         //public VerificationStatus VerificationStatus { get; set; } // Asset's verification status
         public string VerificationNotes { get; set; }
-        public string VerifiedCountryCode { get; set; }
-        public AssetType AssetType { get; set; } // Discriminator for asset type
         public float Latitude { get; set; }
         public float Longitude { get; set; }
         public string LocationDescription { get; set; }
         public string[] Facilities { get; set; }
-        public string OpeningHours { get; set; }
+        public  TimeOnly OpeningTime { get; set; }
+        public  TimeOnly ClosingTime { get; set; }
         public string[] LanguagesSupported { get; set; }
+        public AssetType AssetType { get; set; } // Discriminator for asset type
     }
 }

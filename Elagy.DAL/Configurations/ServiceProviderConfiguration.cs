@@ -8,18 +8,20 @@ namespace Elagy.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<ServiceProvider> builder)
         {
-            // Map ServiceProvider to its own table (e.g., "ServiceProviders")
-            builder.ToTable("ServiceProviders");
+             builder.ToTable("ServiceProviders");
 
-            // Define the TPT relationship: ServiceProvider's PK is also its FK to User
-            builder.HasBaseType<User>(); // Explicitly state its base type for TPT
+             builder.HasBaseType<User>(); // Explicitly state its base type for TPT
 
-            // One-to-one relationship with ServiceAsset (remains the same)
+            // Property configurations for ServiceProvider specific properties
+            builder.Property(sp => sp.NationalURL).HasMaxLength(1024).IsRequired();
+            builder.Property(sp => sp.NationalFeildId).HasMaxLength(250).IsRequired(); 
+
+            
             builder.HasOne(sp => sp.ServiceAsset)
-                   .WithOne(sa => sa.ServiceProvider)
-                   .HasForeignKey<ServiceAsset>(sa => sa.Id) // ServiceAsset's PK is also its FK to ServiceProvider
-                   .IsRequired()
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .WithOne(a => a.ServiceProvider) // 'a' here refers to Asset
+                   .HasForeignKey<Asset>(a => a.Id) // Asset's PK (Id) is also its FK to ServiceProvider's Id
+                   .IsRequired(false) // Changed to IsRequired(false) because a ServiceProvider might be created before their asset is associated
+                   .OnDelete(DeleteBehavior.Cascade); // Cascade delete if ServiceProvider is deleted
         }
     }
 }

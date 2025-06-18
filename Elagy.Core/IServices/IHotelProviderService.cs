@@ -12,6 +12,6 @@ namespace Elagy.Core.IServices
         Task<HotelProviderProfileDto> UpdateHotelProviderProfileAsync(string providerId, HotelProviderProfileUpdateDto model);
 
         // For Super Admin to add providers directly
-        Task<AuthResultDto> AddHotelProviderByAdminAsync(HotelProviderRegistrationRequestDto model);
+        Task<AuthResultDto> AddHotelProviderByAdminAsync(HotelAssetRegistrationRequestDto model);
     }
 }

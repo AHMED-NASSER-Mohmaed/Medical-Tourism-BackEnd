@@ -11,24 +11,31 @@ namespace Elagy.Core.DTOs.User
         public string LastName { get; set; }
         public string PhoneNumber { get; set; }
         public string Gender { get; set; }
-        public string ZipCode { get; set; }
-        public string StreetNumber { get; set; }
-        public string Governorate { get; set; }
+        #region
+        public string Address { get; set; } // Full address as a single string
+        public string City { get; set; } // City name, not a complex object
+        public Governorate Governorate { get; set; }
+        public Country Country { get; set; } // Country name, not a complex object
+        #endregion
         public DateTime? DateOfBirth { get; set; }
 
 
+
+
+
         // Service Asset common properties that can be updated
-        public string Description { get; set; }
-        public string AssetEmail { get; set; }
+
+        #region //related to location
         public float Latitude { get; set; }
         public float Longitude { get; set; }
-        public string LocationDescription { get; set; }
-        public string[] Facilities { get; set; }
-        public string OpeningHours { get; set; }
-        public string[] LanguagesSupported { get; set; }
+        public string LocationDescription { get; set; } // Detailed description of the asset's physical location
+        #endregion
+        public string[] Facilities { get; set; } // Facilities available at the asset (e.g., parking, Wi-Fi, gym)
+        public Language[] LanguagesSupported { get; set; } // Languages supported by the asset's staff/services
 
-         
-        public string VerifiedCountryCode { get; set; }
+        TimeOnly OpeningTime { get; set; }
+        TimeOnly ClosingTime { get; set; }
+        
     }
 
 }

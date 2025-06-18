@@ -67,7 +67,7 @@ namespace Elagy.APIs.Controllers
         }
 
         [HttpPost("add-hotel-provider")]
-        public async Task<ActionResult> AddHotelProviderByAdmin([FromBody] HotelProviderRegistrationRequestDto model)
+        public async Task<ActionResult> AddHotelProviderByAdmin([FromBody] HotelAssetRegistrationRequestDto model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await _hotelProviderService.AddHotelProviderByAdminAsync(model);
@@ -75,7 +75,7 @@ namespace Elagy.APIs.Controllers
         }
 
         [HttpPost("add-hospital-provider")]
-        public async Task<ActionResult> AddHospitalProviderByAdmin([FromBody] HospitalProviderRegistrationRequestDto model)
+        public async Task<ActionResult> AddHospitalProviderByAdmin([FromBody] HospitalAssetRegistrationRequestDto model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await _hospitalProviderService.AddHospitalProviderByAdminAsync(model);
@@ -83,7 +83,7 @@ namespace Elagy.APIs.Controllers
         }
 
         [HttpPost("add-car-rental-provider")]
-        public async Task<ActionResult> AddCarRentalProviderByAdmin([FromBody] CarRentalProviderRegistrationRequestDto model)
+        public async Task<ActionResult> AddCarRentalProviderByAdmin([FromBody] CarRentalAssetRegistrationRequestDto model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await _carRentalProviderService.AddCarRentalProviderByAdminAsync(model);
@@ -210,8 +210,6 @@ namespace Elagy.APIs.Controllers
         }
 
         #endregion --- End Of Listing/Filtering for Dashboard Tabs ---
-
-
 
 
 

@@ -1,6 +1,6 @@
 ﻿namespace Elagy.Core.Entities
 {
-    public class HotelAsset : ServiceAsset
+    public class HotelAsset : Asset
     {
         public int? StarRating { get; set; } // E.g., 1 to 5 stars
         public bool? HasPool { get; set; }

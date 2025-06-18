@@ -30,17 +30,18 @@ namespace Elagy.DAL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Nationality = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ImageId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ImageURL = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FirstName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    ImageId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    ImageURL = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true),
+                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Address = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Governorate = table.Column<int>(type: "int", nullable: false),
+                    Country = table.Column<int>(type: "int", nullable: false),
+                    Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    ZipCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    StreetNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Governorate = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: true),
                     UserType = table.Column<int>(type: "int", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -60,22 +61,6 @@ namespace Elagy.DAL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ImageKitTempFiles",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    OriginalFileName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    ImageKitUrl = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false),
-                    ImageKitFilePath = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    UploadedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsConfirmed = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ImageKitTempFiles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -189,10 +174,9 @@ namespace Elagy.DAL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    BloodGroup = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    BloodGroup = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
                     Height = table.Column<float>(type: "real", nullable: false),
-                    Weight = table.Column<float>(type: "real", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    Weight = table.Column<float>(type: "real", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -203,11 +187,6 @@ namespace Elagy.DAL.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Patients_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -215,9 +194,8 @@ namespace Elagy.DAL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    NationalURL = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    NationalFeildId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    NationalURL = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false),
+                    NationalFeildId = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -228,11 +206,6 @@ namespace Elagy.DAL.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ServiceProviders_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -240,8 +213,7 @@ namespace Elagy.DAL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Docs = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    Docs = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -252,40 +224,34 @@ namespace Elagy.DAL.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_SuperAdmins_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "ServiceAssets",
+                name: "Assets",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    AssetName = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    DocsURL = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DocsURLFeildId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CredentialDocURL = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true),
+                    CredentialDocId = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
                     AcquisitionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    VerificationStatus = table.Column<int>(type: "int", nullable: false),
-                    VerificationNotes = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    VerifiedCountryCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AssetType = table.Column<int>(type: "int", nullable: false),
+                    VerificationNotes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     Latitude = table.Column<float>(type: "real", nullable: false),
                     Longitude = table.Column<float>(type: "real", nullable: false),
                     LocationDescription = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     Facilities = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    OpeningHours = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    LanguagesSupported = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    LanguagesSupported = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OpeningTime = table.Column<TimeSpan>(type: "time", nullable: false),
+                    ClosingTime = table.Column<TimeSpan>(type: "time", nullable: false),
+                    AssetType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ServiceAssets", x => x.Id);
+                    table.PrimaryKey("PK_Assets", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ServiceAssets_ServiceProviders_Id",
+                        name: "FK_Assets_ServiceProviders_Id",
                         column: x => x.Id,
                         principalTable: "ServiceProviders",
                         principalColumn: "Id",
@@ -296,22 +262,20 @@ namespace Elagy.DAL.Migrations
                 name: "CarRentalAssets",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    OperationalAreas = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    VehicleType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Transmission = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FuelType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RentalPolicies = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AdditionalServices = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CarFeatures = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    OperationalAreas = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FuelTypes = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Models = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Transmission = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    RentalPolicies = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CarRentalAssets", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CarRentalAssets_ServiceAssets_Id",
+                        name: "FK_CarRentalAssets_Assets_Id",
                         column: x => x.Id,
-                        principalTable: "ServiceAssets",
+                        principalTable: "Assets",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -320,19 +284,17 @@ namespace Elagy.DAL.Migrations
                 name: "HospitalAssets",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
                     NumberOfDepartments = table.Column<int>(type: "int", nullable: false),
-                    HasEmergencyRoom = table.Column<bool>(type: "bit", nullable: false),
-                    IsTeachingHospital = table.Column<bool>(type: "bit", nullable: false),
                     EmergencyServices = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_HospitalAssets", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_HospitalAssets_ServiceAssets_Id",
+                        name: "FK_HospitalAssets_Assets_Id",
                         column: x => x.Id,
-                        principalTable: "ServiceAssets",
+                        principalTable: "Assets",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -341,7 +303,7 @@ namespace Elagy.DAL.Migrations
                 name: "HotelAssets",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
                     StarRating = table.Column<int>(type: "int", nullable: true),
                     HasPool = table.Column<bool>(type: "bit", nullable: true),
                     HasRestaurant = table.Column<bool>(type: "bit", nullable: true)
@@ -350,9 +312,9 @@ namespace Elagy.DAL.Migrations
                 {
                     table.PrimaryKey("PK_HotelAssets", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_HotelAssets_ServiceAssets_Id",
+                        name: "FK_HotelAssets_Assets_Id",
                         column: x => x.Id,
-                        principalTable: "ServiceAssets",
+                        principalTable: "Assets",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -395,21 +357,6 @@ namespace Elagy.DAL.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Patients_UserId",
-                table: "Patients",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ServiceProviders_UserId",
-                table: "ServiceProviders",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SuperAdmins_UserId",
-                table: "SuperAdmins",
-                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -440,9 +387,6 @@ namespace Elagy.DAL.Migrations
                 name: "HotelAssets");
 
             migrationBuilder.DropTable(
-                name: "ImageKitTempFiles");
-
-            migrationBuilder.DropTable(
                 name: "Patients");
 
             migrationBuilder.DropTable(
@@ -452,7 +396,7 @@ namespace Elagy.DAL.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "ServiceAssets");
+                name: "Assets");
 
             migrationBuilder.DropTable(
                 name: "ServiceProviders");

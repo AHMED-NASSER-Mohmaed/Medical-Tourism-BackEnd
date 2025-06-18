@@ -7,7 +7,6 @@ using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
 using Elagy.Core.Temps;
 using Elagy.DAL;
-using Elagy.DAL.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration; // Add for configuration access

@@ -7,6 +7,6 @@
         // Navigation property for the one-to-one relationship with ServiceAsset
 
 
-        public ServiceAsset ServiceAsset { get; set; }
+        public Asset ServiceAsset { get; set; }
     }
 }

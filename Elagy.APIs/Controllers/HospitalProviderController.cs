@@ -1,7 +1,7 @@
 ﻿using Elagy.Core.DTOs.User;
 using Elagy.Core.IServices;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization; // For [Authorize] attribute
+using Microsoft.AspNetCore.Authorization;  
 using System.Threading.Tasks;
 
 namespace Elagy.APIs.Controllers
@@ -9,14 +9,19 @@ namespace Elagy.APIs.Controllers
     [Route("api/[controller]")]
     // Protect this controller, allowing only ServiceProviders that are Hospital type
     [Authorize(Roles = "HospitalServiceProvider")] // Assuming a generic ServiceProvider role for all providers
-    public class HospitalProviderController : BaseApiController
+    public class HospitalProviderController : ProfileImageBaseController
     {
         private readonly IHospitalProviderService _hospitalProviderService;
 
-        public HospitalProviderController(IHospitalProviderService hospitalProviderService)
+        public HospitalProviderController(
+            IImageProfile profileImageService,            
+            IHospitalProviderService hospitalProviderService,  
+            ILogger<HospitalProviderController> logger)   
+            : base(profileImageService, logger)                                       
         {
             _hospitalProviderService = hospitalProviderService;
         }
+
 
         [HttpGet("profile")]
         public async Task<ActionResult<HospitalProviderProfileDto>> GetProfile()
