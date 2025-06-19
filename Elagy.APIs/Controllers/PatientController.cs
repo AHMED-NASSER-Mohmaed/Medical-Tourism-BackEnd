@@ -1,7 +1,8 @@
-﻿using Elagy.Core.DTOs.User;
+﻿using Elagy.Core.DTOs.Files;
+using Elagy.Core.DTOs.User;
 using Elagy.Core.IServices;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization; // For [Authorize] attribute
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 namespace Elagy.APIs.Controllers
@@ -11,11 +12,16 @@ namespace Elagy.APIs.Controllers
     public class PatientController : BaseApiController
     {
         private readonly IPatientService _patientService;
+        private readonly IImageProfile _pofileImageService;
 
-        public PatientController(IPatientService patientService)
+        public PatientController(IPatientService patientService, IImageProfile pofileImageService   )
         {
             _patientService = patientService;
+            _pofileImageService = pofileImageService;
         }
+
+ 
+
 
         [HttpGet("profile")]
         public async Task<ActionResult<PatientDto>> GetProfile()
@@ -48,5 +54,9 @@ namespace Elagy.APIs.Controllers
             }
             return Ok(updatedProfile);
         }
+    
+    
+    
+    
     }
 }

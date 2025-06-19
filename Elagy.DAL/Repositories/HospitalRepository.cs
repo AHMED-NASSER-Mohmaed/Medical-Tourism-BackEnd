@@ -1,6 +1,5 @@
 ﻿using Elagy.Core.Entities;
 using Elagy.Core.IRepositories;
-using Elagy.DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

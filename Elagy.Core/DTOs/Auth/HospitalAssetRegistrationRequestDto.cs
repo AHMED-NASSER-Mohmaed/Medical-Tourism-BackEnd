@@ -2,16 +2,19 @@
 
 namespace Elagy.Core.DTOs.Auth
 {
-    public class HospitalProviderRegistrationRequestDto : BaseServiceProviderRegistrationRequestDto
+
+
+    public class HospitalAssetRegistrationRequestDto : BaseAssetRegistrationRequestDto
     {
+        [Required(ErrorMessage = "Please provide the number of departments in the hospital.")]
         public int NumberOfDepartments { get; set; }
-        public bool HasEmergencyRoom { get; set; }
-        public bool IsTeachingHospital { get; set; }
         public bool EmergencyServices { get; set; }
 
-        public HospitalProviderRegistrationRequestDto()
+        public HospitalAssetRegistrationRequestDto()
         {
             AssetType = Enums.AssetType.Hospital; // Default for this DTO
         }
+
+
     }
 }

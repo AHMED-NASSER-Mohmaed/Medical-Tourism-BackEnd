@@ -1,12 +1,15 @@
 ﻿using Elagy.Core.DTOs.User;
+using Elagy.Core.Enums;
 
 public class CarRentalProviderProfileDto : BaseServiceProviderProfileDto
 {
-    public string OperationalAreas { get; set; }
-    public string[] VehicleType { get; set; }
-    public string[] Transmission { get; set; }
-    public string[] FuelType { get; set; }
-    public string[] RentalPolicies { get; set; }
-    public string[] AdditionalServices { get; set; }
-    public string[] CarFeatures { get; set; }
+    public Governorate[] OperationalAreas { get; set; } // Geographic areas where car rental operates
+
+    public FuelType[] FuelTypes { get; set; }
+
+    //Ai generated
+    public string[] Models { get; set; }  // Specific models available for rent (e.g., Toyota Camry, Ford Explorer)
+
+    public TransmissionType Transmission { get; set; }   // "Automatic", "Manual"
+    public string[] RentalPolicies { get; set; } // (e.g., age restrictions, insurance requirements, mileage limits)
 }

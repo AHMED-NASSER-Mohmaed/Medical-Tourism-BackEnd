@@ -82,7 +82,7 @@ namespace Elagy.BL.Services
             return _mapper.Map<CarRentalProviderProfileDto>(provider); // Return updated DTO
         }
 
-        public async Task<AuthResultDto> AddCarRentalProviderByAdminAsync(CarRentalProviderRegistrationRequestDto model)
+        public async Task<AuthResultDto> AddCarRentalProviderByAdminAsync(CarRentalAssetRegistrationRequestDto model)
         {
             var userExists = await _userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
@@ -108,7 +108,6 @@ namespace Elagy.BL.Services
             carRentalAsset.ServiceProvider = serviceProvider; // Link to the provider
             carRentalAsset.AssetType = AssetType.CarRental;
             carRentalAsset.AcquisitionDate = DateTime.UtcNow; // Set creation date
-            carRentalAsset.VerificationStatus = VerificationStatus.Verified; // Admin adds directly to verified
 
             try
             {

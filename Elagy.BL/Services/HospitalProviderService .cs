@@ -81,7 +81,7 @@ namespace Elagy.BL.Services
             return _mapper.Map<HospitalProviderProfileDto>(provider); // Return updated DTO
         }
 
-        public async Task<AuthResultDto> AddHospitalProviderByAdminAsync(HospitalProviderRegistrationRequestDto model)
+        public async Task<AuthResultDto> AddHospitalProviderByAdminAsync(HospitalAssetRegistrationRequestDto model)
         {
             var userExists = await _userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
@@ -107,7 +107,6 @@ namespace Elagy.BL.Services
             hospitalAsset.ServiceProvider = serviceProvider; // Link to the provider
             hospitalAsset.AssetType = AssetType.Hospital;
             hospitalAsset.AcquisitionDate = DateTime.UtcNow; // Set creation date
-            hospitalAsset.VerificationStatus = VerificationStatus.Verified; // Admin adds directly to verified
 
             try
             {

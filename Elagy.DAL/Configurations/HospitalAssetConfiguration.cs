@@ -8,16 +8,12 @@ namespace Elagy.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<HospitalAsset> builder)
         {
-            // Map HospitalAsset to its own table (e.g., "HospitalAssets")
-            builder.ToTable("HospitalAssets");
+            builder.ToTable("HospitalAssets"); // Correct: maps to its own table
 
-            // Define the TPT relationship: HospitalAsset's PK is also its FK to ServiceAsset
-            builder.HasBaseType<ServiceAsset>(); // Explicitly state its base type for TPT
+            builder.HasBaseType<Asset>(); // Correct: explicitly states its base type for TPT
 
-            // ... (rest of HospitalAsset specific property configurations) ...
+            // Property configurations for HospitalAsset specific properties
             builder.Property(ha => ha.NumberOfDepartments).IsRequired();
-            builder.Property(ha => ha.HasEmergencyRoom).IsRequired();
-            builder.Property(ha => ha.IsTeachingHospital).IsRequired();
             builder.Property(ha => ha.EmergencyServices).IsRequired();
         }
     }

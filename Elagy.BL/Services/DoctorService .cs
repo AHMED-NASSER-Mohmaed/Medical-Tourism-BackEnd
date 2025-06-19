@@ -106,8 +106,8 @@ public class DoctorService : IDoctorService
             //ImageId=createDto.ImageId,
             //ImageURL=createDto.ImageURL,
             Gender=createDto.Gender,
-            ZipCode=createDto.ZipCode,
-            StreetNumber=createDto.StreetNumber,
+            //ZipCode=createDto.ZipCode,
+            //StreetNumber=createDto.StreetNumber,
             Governorate=createDto.Governorate,
             DateOfBirth=createDto.DateOfBirth,
             YearsOfExperience=createDto.YearsOfExperience,
@@ -177,15 +177,15 @@ public class DoctorService : IDoctorService
         doctor.PhoneNumber = updateDto.PhoneNumber;
         doctor.FirstName = updateDto.FirstName;
         doctor.LastName = updateDto.LastName;
-        doctor.Nationality = updateDto.Nationality;
+        //doctor.Nationality = updateDto.Nationality;
         //doctor.NationalId = updateDto.NationalId;
         //doctor.PassportId = updateDto.PassportId;
         doctor.ImageURL = updateDto.ImageURL;
         doctor.Gender = updateDto.Gender;
         doctor.Status = updateDto.Status;
-        doctor.ZipCode = updateDto.ZipCode;
-        doctor.StreetNumber = updateDto.StreetNumber;
-        doctor.Governorate = updateDto.Governorate;
+        //doctor.ZipCode = updateDto.ZipCode;
+        //doctor.StreetNumber = updateDto.StreetNumber;
+        //doctor.Governorate = updateDto.Governorate;
         doctor.DateOfBirth = updateDto.DateOfBirth;
 
         var userResult = await _userManager.UpdateAsync(doctor);
@@ -277,7 +277,7 @@ public class DoctorService : IDoctorService
                     hsDto.HospitalAsset = new HospitalMinDto
                     {
                         Id = hospitalAsset.Id,
-                        Name = hospitalAsset.AssetName, // AssetName from ServiceAsset base
+                        //Name = hospitalAsset.AssetName, // AssetName from ServiceAsset base
                      
                     };
                 }

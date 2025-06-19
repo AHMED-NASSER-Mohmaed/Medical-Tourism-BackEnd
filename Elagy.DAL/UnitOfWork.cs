@@ -1,5 +1,5 @@
 ﻿using Elagy.Core.IRepositories;
-using Elagy.DAL.Data;
+using Elagy.Core.Entities;
 using Elagy.DAL.Repositories;
 using System;
 using System.Threading.Tasks;
@@ -14,7 +14,7 @@ namespace Elagy.DAL
         public IGenericRepository<Patient> Patients { get; private set; }
         public IGenericRepository<ServiceProvider> ServiceProviders { get; private set; }
         public IGenericRepository<SuperAdmin> SuperAdmins { get; private set; }
-        public IGenericRepository<ServiceAsset> ServiceAssets { get; private set; }
+        public IGenericRepository<Asset> ServiceAssets { get; private set; }
         public IGenericRepository<HotelAsset> HotelAssets { get; private set; }
         public IGenericRepository<HospitalAsset> HospitalAssets { get; private set; }
         public IGenericRepository<CarRentalAsset> CarRentalAssets { get; private set; }
@@ -27,7 +27,6 @@ namespace Elagy.DAL
         public IHospitalRepository Hospitals { get; private set; }
         public IHospitalSpecialtyRepository HospitalSpecialties { get; private set; }
 
-        public IGenericRepository<ImageKitTempFile> ImageKitTempFiles { get; private set; }
 
 
         public UnitOfWork(ApplicationDbContext context)
@@ -37,18 +36,15 @@ namespace Elagy.DAL
             Patients = new GenericRepository<Patient>(_context);
             ServiceProviders = new GenericRepository<ServiceProvider>(_context);
             SuperAdmins = new GenericRepository<SuperAdmin>(_context);
-            ServiceAssets = new GenericRepository<ServiceAsset>(_context);
-            HotelAssets = new GenericRepository<HotelAsset>(_context); 
+            ServiceAssets = new GenericRepository<Asset>(_context);
+            HotelAssets = new GenericRepository<HotelAsset>(_context);
             HospitalAssets = new GenericRepository<HospitalAsset>(_context);
             CarRentalAssets = new GenericRepository<CarRentalAsset>(_context);
 
+            HospitalSpecialties = new HospitalSpecialtyRepository(_context);
             Specialties = new SpecialtyRepository(_context);
             Doctors = new DoctorRepository(_context);
             Hospitals = new HospitalRepository(_context);
-            HospitalSpecialties = new HospitalSpecialtyRepository(_context);
-
-
-             ImageKitTempFiles = new GenericRepository<ImageKitTempFile>(_context);
 
         }
 

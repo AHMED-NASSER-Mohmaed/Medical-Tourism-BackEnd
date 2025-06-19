@@ -8,13 +8,12 @@ namespace Elagy.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<Patient> builder)
         {
-            // Map Patient to its own table (e.g., "Patients")
-            builder.ToTable("Patients");
-
-            // Define the TPT relationship: Patient's PK is also its FK to User
-            builder.HasBaseType<User>(); // Explicitly state its base type for TPT
-            // The PK is inherited and will also serve as the FK to the base table.
-            // No need to explicitly configure foreign key here if PK is shared.
+ 
+ 
+            // Property configurations for Patient specific properties
+            builder.Property(p => p.BloodGroup).HasMaxLength(10).IsRequired(false);
+            builder.Property(p => p.Height).HasColumnType("real").IsRequired();
+            builder.Property(p => p.Weight).HasColumnType("real").IsRequired();
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Elagy.Core.IRepositories
         IGenericRepository<ServiceProvider> ServiceProviders { get; }
         IGenericRepository<SuperAdmin> SuperAdmins { get; }
 
-        IGenericRepository<ServiceAsset> ServiceAssets { get; } // Access to base ServiceAsset for queries
+        IGenericRepository<Asset> ServiceAssets { get; } // Access to base ServiceAsset for queries
         IGenericRepository<HotelAsset> HotelAssets { get; }
         IGenericRepository<HospitalAsset> HospitalAssets { get; }
         IGenericRepository<CarRentalAsset> CarRentalAssets { get; }
@@ -23,7 +23,6 @@ namespace Elagy.Core.IRepositories
         IHospitalSpecialtyRepository HospitalSpecialties { get; }
         ///////////////////////////
 
-        IGenericRepository<ImageKitTempFile> ImageKitTempFiles { get; }
 
 
         Task<int> CompleteAsync();

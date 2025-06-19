@@ -9,28 +9,40 @@ namespace Elagy.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
-            // Configure the base User table for TPT
-            builder.ToTable("AspNetUsers"); // The default table name for IdentityUser, ensure it's explicitly set.
+            builder.ToTable("AspNetUsers");
 
-            // No discriminator column needed for TPT
+            // RE-ADD THE DISCRIMINATOR FOR TPH
+            builder.HasDiscriminator(u => u.UserType)
+                .HasValue<Patient>(UserType.Patient)
+                .HasValue<ServiceProvider>(UserType.ServiceProvider)
+                .HasValue<SuperAdmin>(UserType.SuperAdmin)
+                .HasValue<Doctor>(UserType.Doctor);
 
-            // Configure specific properties if needed
-            builder.Property(u => u.FirstName).IsRequired().HasMaxLength(100);
-            builder.Property(u => u.LastName).IsRequired().HasMaxLength(100);
-            builder.Property(u => u.PhoneNumber).IsRequired(false);
-            builder.Property(u => u.ImageURL).IsRequired(false);
-            builder.Property(u => u.ImageId).IsRequired(false);
-            builder.Property(u => u.Gender).IsRequired(false);
-            builder.Property(u => u.Nationality).IsRequired(false);
-            builder.Property(u => u.ZipCode).IsRequired(false);
-            builder.Property(u => u.StreetNumber).IsRequired(false);
-            builder.Property(u => u.Governorate).IsRequired(false);
 
-            // Configure derived tables for TPT
-            builder.HasMany<Patient>().WithOne(); // EF Core often handles this, but explicit mapping can be useful.
-            builder.HasMany<ServiceProvider>().WithOne();
-            builder.HasMany<SuperAdmin>().WithOne();
-            builder.HasMany<Doctor>().WithOne();
+
+
+
+            builder.Property(u => u.FirstName).IsRequired().HasMaxLength(20);
+            builder.Property(u => u.LastName).IsRequired().HasMaxLength(20);
+            builder.Property(u => u.ImageId).HasMaxLength(100).IsRequired(false);
+            builder.Property(u => u.ImageURL).HasMaxLength(1024).IsRequired(false);
+            builder.Property(u => u.Gender).IsRequired();
+            builder.Property(u => u.Address).HasMaxLength(500).IsRequired(true);
+            builder.Property(u => u.City).HasMaxLength(100).IsRequired(true);
+            builder.Property(u => u.Governorate)
+                   .HasConversion<int>()
+                   .IsRequired();
+            builder.Property(u => u.Country)
+                   .HasConversion<int>()
+                   .IsRequired();
+            builder.Property(u => u.Phone).HasMaxLength(20).IsRequired(true);
+            builder.Property(u => u.DateOfBirth).IsRequired(true);
+            builder.Property(u => u.Status)
+                   .HasConversion<int>()
+                   .IsRequired();
+            builder.Property(u => u.UserType)
+                   .HasConversion<int>()
+                   .IsRequired();
 
         }
     }

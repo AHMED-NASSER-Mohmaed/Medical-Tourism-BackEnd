@@ -33,7 +33,7 @@ namespace Elagy.APIs.Controllers
 
         [HttpPost("register-hotel-provider")]
         public async Task<ActionResult> RegisterHotelProvider(
-            [FromForm] HotelProviderRegistrationRequestDto model,
+            [FromForm] HotelAssetRegistrationRequestDto model,
             [FromForm] List<IFormFile> files)
         {
             if (!ModelState.IsValid)
@@ -55,7 +55,7 @@ namespace Elagy.APIs.Controllers
 
         [HttpPost("register-hospital-provider")]
         public async Task<ActionResult> RegisterHospitalProvider(
-            [FromForm] HospitalProviderRegistrationRequestDto model
+            [FromForm] HospitalAssetRegistrationRequestDto model
             , [FromForm] List<IFormFile> files)
         {
 
@@ -79,7 +79,7 @@ namespace Elagy.APIs.Controllers
 
         [HttpPost("register-car-rental-provider")]
         public async Task<ActionResult> RegisterCarRentalProvider(
-            [FromForm] CarRentalProviderRegistrationRequestDto model,
+            [FromForm] CarRentalAssetRegistrationRequestDto model,
             [FromForm] List<IFormFile> files)
         {
             if (!ModelState.IsValid)

@@ -1,66 +1,51 @@
 ﻿using Elagy.Core.Entities;
-using Elagy.DAL.Configurations;
+using Elagy.DAL.Configurations; // Assuming your configurations are here
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Elagy.DAL.Data
+public class ApplicationDbContext : IdentityDbContext<User> // Assuming your User entity is the primary Identity user
 {
-    public class ApplicationDbContext : IdentityDbContext<User>
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
-        {
-        }
+    }
 
-        public DbSet<Patient> Patients { get; set; }
-        public DbSet<ServiceProvider> ServiceProviders { get; set; }
-        public DbSet<SuperAdmin> SuperAdmins { get; set; }
+    // DbSets for your entities (optional for TPT base tables, but good practice)
+    public DbSet<Asset> Assets { get; set; }
+    public DbSet<CarRentalAsset> CarRentalAssets { get; set; }
+    public DbSet<HospitalAsset> HospitalAssets { get; set; }
+    public DbSet<HotelAsset> HotelAssets { get; set; }
 
-        public DbSet<Doctor> Doctors { get; set; }
-
-        public DbSet<ServiceAsset> ServiceAssets { get; set; }
-        public DbSet<CarRentalAsset> CarRentalAssets { get; set; }
-        public DbSet<HospitalAsset> HospitalAssets { get; set; }
-        public DbSet<HotelAsset> HotelAssets { get; set; }
-
-
-        public DbSet<Specialty> Specialties { get; set; }
-        public DbSet<HospitalSpecialty> HospitalSpecialties { get; set; }
-
-        public DbSet<ImageKitTempFile> ImageKitTempFiles { get; set; }
+    public DbSet<User> AppUsers { get; set; } // Use a different name than "Users" to avoid conflict with Identity's Users
+    public DbSet<Patient> Patients { get; set; }
+    public DbSet<ServiceProvider> ServiceProviders { get; set; }
+    public DbSet<SuperAdmin> SuperAdmins { get; set; }
+    public DbSet<Doctor> Doctors { get; set; }
+    public DbSet<Specialty> Specialties { get; set; }
+    public DbSet<HospitalSpecialty> HospitalSpecialties { get; set; }
 
 
 
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
 
+    // public DbSet<ImageKitTempFile> ImageKitTempFiles { get; set; } // If you still have this entity
 
-            builder.ApplyConfiguration(new UserConfiguration()); // Base User configuration
-            builder.ApplyConfiguration(new PatientConfiguration()); // New Patient configuration
-            builder.ApplyConfiguration(new ServiceProviderConfiguration()); // Modified SP configuration
-            builder.ApplyConfiguration(new SuperAdminConfiguration()); // New SuperAdmin configuration
-            builder.ApplyConfiguration(new DoctorConfiguration());
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder); // IMPORTANT: Call base.OnModelCreating for Identity configurations
 
-            builder.ApplyConfiguration(new UserConfiguration());
-            builder.ApplyConfiguration(new PatientConfiguration());
-            builder.ApplyConfiguration(new ServiceProviderConfiguration());
-            builder.ApplyConfiguration(new SuperAdminConfiguration());
+        // Apply your custom configurations
+        builder.ApplyConfiguration(new AssetConfiguration());
+        builder.ApplyConfiguration(new CarRentalAssetConfiguration());
+        builder.ApplyConfiguration(new HospitalAssetConfiguration());
+        builder.ApplyConfiguration(new HotelAssetConfiguration());
 
+        builder.ApplyConfiguration(new UserConfiguration());
+        builder.ApplyConfiguration(new PatientConfiguration());
+        builder.ApplyConfiguration(new ServiceProviderConfiguration());
+        builder.ApplyConfiguration(new SuperAdminConfiguration());
+        builder.ApplyConfiguration(new SpecialtyConfiguration());
+        builder.ApplyConfiguration(new HospitalSpecialtyConfiguration());
+        builder.ApplyConfiguration(new DoctorConfiguration());
 
-            builder.ApplyConfiguration(new ServiceAssetConfiguration());
-            builder.ApplyConfiguration(new CarRentalAssetConfiguration());
-            builder.ApplyConfiguration(new HospitalAssetConfiguration());
-            builder.ApplyConfiguration(new HotelAssetConfiguration());
-
-             builder.ApplyConfiguration(new ImageKitTempFileConfiguration());
-
-            builder.ApplyConfiguration(new SpecialtyConfiguration());
-            builder.ApplyConfiguration(new HospitalSpecialtyConfiguration());
-
-
-            builder.Entity<Patient>().Property(p => p.Height).HasColumnType("real");
-            builder.Entity<Patient>().Property(p => p.Weight).HasColumnType("real");
-        }
+        // builder.ApplyConfiguration(new ImageKitTempFileConfiguration()); // If you still have this entity
     }
 }

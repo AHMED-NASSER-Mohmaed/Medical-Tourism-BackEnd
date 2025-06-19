@@ -7,7 +7,6 @@ using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
 using Elagy.Core.Temps;
 using Elagy.DAL;
-using Elagy.DAL.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration; // Add for configuration access
@@ -163,7 +162,7 @@ builder.Services.AddCors(options =>
 builder.Services.Configure<ImageKitSettings>(builder.Configuration.GetSection(ImageKitSettings.ImageKitSectionName));
 
 
-builder.Services.AddHttpClient<IFileStorageservice, ImageKitFileStorageService>(client =>
+builder.Services.AddHttpClient<IFileStorageService, ImageKitFileStorageService>(client =>
 {
     client.Timeout = TimeSpan.FromMinutes(3); // Example: 5 minutes for large uploads
 });

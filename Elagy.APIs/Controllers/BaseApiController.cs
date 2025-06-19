@@ -7,7 +7,7 @@ namespace Elagy.APIs.Controllers
 {
     [ApiController]
     [Route("api/[controller]")] // Base route for all controllers
-    public class BaseApiController : ControllerBase
+    public abstract class BaseApiController : ControllerBase
     {
         // Helper method to return AuthResultDto consistently
         protected ActionResult HandleAuthResult(AuthResultDto result)

@@ -1,4 +1,5 @@
 ﻿using Elagy.Core.Entities;
+using Elagy.Core.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Newtonsoft.Json;
@@ -11,44 +12,50 @@ namespace Elagy.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<CarRentalAsset> builder)
         {
-            // Map CarRentalAsset to its own table (e.g., "CarRentalAssets")
-            builder.ToTable("CarRentalAssets");
+            builder.ToTable("CarRentalAssets"); // Correct: maps to its own table
 
-            // Define the TPT relationship: CarRentalAsset's PK is also its FK to ServiceAsset
-            builder.HasBaseType<ServiceAsset>(); // Explicitly state its base type for TPT
+            builder.HasBaseType<Asset>(); // Correct: explicitly states its base type for TPT
 
-            // ... (rest of CarRentalAsset specific property configurations, including JSON conversions) ...
-            builder.Property(cra => cra.OperationalAreas).IsRequired(false).HasMaxLength(500);
+            // Property configurations for CarRentalAsset specific properties
+            builder.Property(cra => cra.OperationalAreas)
+                .HasConversion(
+                    v => JsonConvert.SerializeObject(v.Select(e => e.ToString()).ToArray()),
+                    v => JsonConvert.DeserializeObject<string[]>(v).Select(s => (Governorate)Enum.Parse(typeof(Governorate), s)).ToArray(),
+                    new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<Governorate[]>(
+                        (c1, c2) => c1.SequenceEqual(c2),
+                        c => c.Aggregate(0, (a, val) => HashCode.Combine(a, (val != null ? val.GetHashCode() : 0))),
+                        c => c.ToArray()));
 
-            builder.Property(e => e.VehicleType)
-                .HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<string[]>(v),
+            builder.Property(cra => cra.FuelTypes)
+                .HasConversion(
+                    v => JsonConvert.SerializeObject(v.Select(e => e.ToString()).ToArray()),
+                    v => JsonConvert.DeserializeObject<string[]>(v).Select(s => (FuelType)Enum.Parse(typeof(FuelType), s)).ToArray(),
+                    new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<FuelType[]>(
+                        (c1, c2) => c1.SequenceEqual(c2),
+                        c => c.Aggregate(0, (a, val) => HashCode.Combine(a, (val != null ? val.GetHashCode() : 0))),
+                        c => c.ToArray()));
+
+            builder.Property(cra => cra.Models)
+                .HasConversion(
+                    v => JsonConvert.SerializeObject(v),
+                    v => JsonConvert.DeserializeObject<string[]>(v),
                     new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<string[]>(
-                        (c1, c2) => c1.SequenceEqual(c2), c => c.Aggregate(0, (a, val) => HashCode.Combine(a, (val != null ? val.GetHashCode() : 0))), c => c.ToArray()));
+                        (c1, c2) => c1.SequenceEqual(c2),
+                        c => c.Aggregate(0, (a, val) => HashCode.Combine(a, (val != null ? val.GetHashCode() : 0))),
+                        c => c.ToArray()));
 
-            builder.Property(e => e.Transmission)
-                .HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<string[]>(v),
+            builder.Property(cra => cra.RentalPolicies)
+                .HasConversion(
+                    v => JsonConvert.SerializeObject(v),
+                    v => JsonConvert.DeserializeObject<string[]>(v),
                     new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<string[]>(
-                        (c1, c2) => c1.SequenceEqual(c2), c => c.Aggregate(0, (a, val) => HashCode.Combine(a, (val != null ? val.GetHashCode() : 0))), c => c.ToArray()));
+                        (c1, c2) => c1.SequenceEqual(c2),
+                        c => c.Aggregate(0, (a, val) => HashCode.Combine(a, (val != null ? val.GetHashCode() : 0))),
+                        c => c.ToArray()));
 
-            builder.Property(e => e.FuelType)
-                .HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<string[]>(v),
-                    new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<string[]>(
-                        (c1, c2) => c1.SequenceEqual(c2), c => c.Aggregate(0, (a, val) => HashCode.Combine(a, (val != null ? val.GetHashCode() : 0))), c => c.ToArray()));
-
-            builder.Property(e => e.RentalPolicies)
-                .HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<string[]>(v),
-                    new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<string[]>(
-                        (c1, c2) => c1.SequenceEqual(c2), c => c.Aggregate(0, (a, val) => HashCode.Combine(a, (val != null ? val.GetHashCode() : 0))), c => c.ToArray()));
-
-            builder.Property(e => e.AdditionalServices)
-                .HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<string[]>(v),
-                    new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<string[]>(
-                        (c1, c2) => c1.SequenceEqual(c2), c => c.Aggregate(0, (a, val) => HashCode.Combine(a, (val != null ? val.GetHashCode() : 0))), c => c.ToArray()));
-
-            builder.Property(e => e.CarFeatures)
-                .HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<string[]>(v),
-                    new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<string[]>(
-                        (c1, c2) => c1.SequenceEqual(c2), c => c.Aggregate(0, (a, val) => HashCode.Combine(a, (val != null ? val.GetHashCode() : 0))), c => c.ToArray()));
+            builder.Property(cra => cra.Transmission)
+                   .HasConversion<string>()
+                   .HasMaxLength(50);
         }
     }
 }

@@ -82,7 +82,7 @@ namespace Elagy.BL.Services
             return _mapper.Map<HotelProviderProfileDto>(provider); // Return updated DTO
         }
 
-        public async Task<AuthResultDto> AddHotelProviderByAdminAsync(HotelProviderRegistrationRequestDto model)
+        public async Task<AuthResultDto> AddHotelProviderByAdminAsync(HotelAssetRegistrationRequestDto model)
         {
             var userExists = await _userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
@@ -108,7 +108,6 @@ namespace Elagy.BL.Services
             hotelAsset.ServiceProvider = serviceProvider; // Link to the provider
             hotelAsset.AssetType = AssetType.Hotel;
             hotelAsset.AcquisitionDate = DateTime.UtcNow; // Set creation date
-            hotelAsset.VerificationStatus = VerificationStatus.Verified; // Admin adds directly to verified
 
             try
             {

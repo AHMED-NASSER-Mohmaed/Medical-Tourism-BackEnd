@@ -32,7 +32,7 @@ namespace Elagy.BL.Services
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
-        private readonly IFileStorageservice _imageStorage;
+        private readonly IFileStorageService _imageStorage;
 
         private readonly ILogger<AuthService> _logger;
 
@@ -44,7 +44,7 @@ namespace Elagy.BL.Services
             IMapper mapper,
             IEmailService emailService,
             IJwtTokenGenerator jwtTokenGenerator,
-            IFileStorageservice imageStorage,
+            IFileStorageService imageStorage,
             ILogger<AuthService> logger)
         {
             _userManager = userManager;
@@ -134,19 +134,19 @@ namespace Elagy.BL.Services
             return await RegisterUserBaseAsync<Patient, PatientRegistrationRequestDto>(model, UserType.Patient, () => new Patient());
         }
 
-        public async Task<AuthResultDto> RegisterHotelProviderAsync(HotelProviderRegistrationRequestDto model,List<IFormFile> files)
+        public async Task<AuthResultDto> RegisterHotelProviderAsync(HotelAssetRegistrationRequestDto model,List<IFormFile> files)
         {
-            return await RegisterServiceProviderAsync<HotelAsset, HotelProviderRegistrationRequestDto>(model, AssetType.Hotel, () => new HotelAsset(),files);
+            return await RegisterServiceProviderAsync<HotelAsset, HotelAssetRegistrationRequestDto>(model, AssetType.Hotel, () => new HotelAsset(),files);
         }
 
-        public async Task<AuthResultDto> RegisterHospitalProviderAsync(HospitalProviderRegistrationRequestDto model,List<IFormFile> files)
+        public async Task<AuthResultDto> RegisterHospitalProviderAsync(HospitalAssetRegistrationRequestDto model,List<IFormFile> files)
         {
-            return await RegisterServiceProviderAsync<HospitalAsset, HospitalProviderRegistrationRequestDto>(model, AssetType.Hospital, () => new HospitalAsset(),files);
+            return await RegisterServiceProviderAsync<HospitalAsset, HospitalAssetRegistrationRequestDto>(model, AssetType.Hospital, () => new HospitalAsset(),files);
         }
 
-        public async Task<AuthResultDto> RegisterCarRentalProviderAsync(CarRentalProviderRegistrationRequestDto model, List<IFormFile> files)
+        public async Task<AuthResultDto> RegisterCarRentalProviderAsync(CarRentalAssetRegistrationRequestDto model, List<IFormFile> files)
         {
-            return await RegisterServiceProviderAsync<CarRentalAsset, CarRentalProviderRegistrationRequestDto>(model, AssetType.CarRental, () => new CarRentalAsset(),files);
+            return await RegisterServiceProviderAsync<CarRentalAsset, CarRentalAssetRegistrationRequestDto>(model, AssetType.CarRental, () => new CarRentalAsset(),files);
         }
 
         private async Task HandelDeleting(List<FileUploadResponseDto> Files)
@@ -164,8 +164,8 @@ namespace Elagy.BL.Services
 
 
         private async Task<AuthResultDto> RegisterServiceProviderAsync<TAsset, TDto>(TDto model, AssetType assetType, Func<TAsset> createAsset,  List<IFormFile> files)
-            where TAsset : ServiceAsset
-            where TDto : BaseServiceProviderRegistrationRequestDto
+            where TAsset : Asset
+            where TDto : BaseAssetRegistrationRequestDto
         {
             var userExists = await _userManager.FindByEmailAsync(model.Email);
 
@@ -231,8 +231,7 @@ namespace Elagy.BL.Services
             if (!addUserTypeClaimResult.Succeeded)
             {
                 _logger.LogWarning($"Failed to add UserType claim '{serviceProvider.UserType}' to user {serviceProvider.Email}: {string.Join(", ", addUserTypeClaimResult.Errors.Select(e => e.Description))}. Registration will proceed without this claim.");
-                // Decide if this failure is critical enough to rollback. For UserType, usually not.
-                //not necessarally for roleback
+                 
             }
 
 
@@ -241,20 +240,20 @@ namespace Elagy.BL.Services
 
             // Create the associated ServiceAsset
             var serviceAsset = createAsset();
+
             _mapper.Map(model, serviceAsset); // Map common asset properties from DTO
+
             serviceAsset.Id = serviceProvider.Id; // Set AssetId to match ServiceProvider's Id (shared PK)
             serviceAsset.ServiceProvider = serviceProvider; // Link to the provider
             serviceAsset.AssetType = assetType;
             serviceAsset.AcquisitionDate = DateTime.UtcNow; // Set creation date
-            serviceAsset.VerificationStatus = VerificationStatus.Pending; // Initial verification status // late iwill delete it
-            serviceAsset.DocsURL= Result.UploadResults[1].Url;
-            serviceAsset.DocsURLFeildId= Result.UploadResults[1].Id;
+            serviceAsset.CredentialDocURL= Result.UploadResults[1].Url;
+            serviceAsset.CredentialDocId= Result.UploadResults[1].Id;
 
 
 
             try
             {
-               
 
                 await _unitOfWork.ServiceAssets.AddAsync(serviceAsset);
                 await _unitOfWork.CompleteAsync(); // Save the asset and link

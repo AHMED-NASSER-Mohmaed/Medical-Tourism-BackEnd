@@ -2,13 +2,13 @@
 
 namespace Elagy.Core.DTOs.Auth
 {
-    public class HotelProviderRegistrationRequestDto : BaseServiceProviderRegistrationRequestDto
+    public class HotelAssetRegistrationRequestDto : BaseAssetRegistrationRequestDto
     {
         public int? StarRating { get; set; }
         public bool? HasPool { get; set; }
         public bool? HasRestaurant { get; set; }
 
-        public HotelProviderRegistrationRequestDto()
+        public HotelAssetRegistrationRequestDto()
         {
             AssetType = Enums.AssetType.Hotel; // Default for this DTO
         }

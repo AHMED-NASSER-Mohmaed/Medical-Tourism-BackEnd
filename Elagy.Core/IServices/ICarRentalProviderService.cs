@@ -9,6 +9,6 @@ namespace Elagy.Core.IServices
     {
         Task<CarRentalProviderProfileDto> GetCarRentalProviderProfileAsync(string providerId);
         Task<CarRentalProviderProfileDto> UpdateCarRentalProviderProfileAsync(string providerId, CarRentalProviderProfileUpdateDto model);
-        Task<AuthResultDto> AddCarRentalProviderByAdminAsync(CarRentalProviderRegistrationRequestDto model);
+        Task<AuthResultDto> AddCarRentalProviderByAdminAsync(CarRentalAssetRegistrationRequestDto model);
     }
 }
