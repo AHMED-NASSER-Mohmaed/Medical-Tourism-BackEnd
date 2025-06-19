@@ -33,8 +33,8 @@ namespace Elagy.Core.DTOs.User
         public string[] Facilities { get; set; } // Facilities available at the asset (e.g., parking, Wi-Fi, gym)
         public Language[] LanguagesSupported { get; set; } // Languages supported by the asset's staff/services
 
-        TimeOnly OpeningTime { get; set; }
-        TimeOnly ClosingTime { get; set; }
+        public TimeOnly OpeningTime { get; set; }
+        public TimeOnly ClosingTime { get; set; }
         
     }
 

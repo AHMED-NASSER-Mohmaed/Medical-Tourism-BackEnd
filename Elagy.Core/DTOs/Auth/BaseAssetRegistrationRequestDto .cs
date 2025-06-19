@@ -24,10 +24,16 @@ namespace Elagy.Core.DTOs.Auth
 
         public string[] Facilities { get; set; }
 
+
+        public string VerificationNotes { get; set; } 
+
         [Required]
         TimeOnly OpeningTime { get; set; }
         [Required]
         TimeOnly ClosingTime { get; set; }
+
+
+
 
         [Required]
 

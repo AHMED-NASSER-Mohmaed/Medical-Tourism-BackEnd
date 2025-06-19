@@ -231,8 +231,7 @@ namespace Elagy.BL.Services
             if (!addUserTypeClaimResult.Succeeded)
             {
                 _logger.LogWarning($"Failed to add UserType claim '{serviceProvider.UserType}' to user {serviceProvider.Email}: {string.Join(", ", addUserTypeClaimResult.Errors.Select(e => e.Description))}. Registration will proceed without this claim.");
-                // Decide if this failure is critical enough to rollback. For UserType, usually not.
-                //not necessarally for roleback
+                 
             }
 
 
@@ -241,7 +240,9 @@ namespace Elagy.BL.Services
 
             // Create the associated ServiceAsset
             var serviceAsset = createAsset();
+
             _mapper.Map(model, serviceAsset); // Map common asset properties from DTO
+
             serviceAsset.Id = serviceProvider.Id; // Set AssetId to match ServiceProvider's Id (shared PK)
             serviceAsset.ServiceProvider = serviceProvider; // Link to the provider
             serviceAsset.AssetType = assetType;
@@ -253,7 +254,6 @@ namespace Elagy.BL.Services
 
             try
             {
-               
 
                 await _unitOfWork.ServiceAssets.AddAsync(serviceAsset);
                 await _unitOfWork.CompleteAsync(); // Save the asset and link

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Elagy.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250618223553_Initial")]
+    [Migration("20250619134101_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -211,7 +211,9 @@ namespace Elagy.DAL.Migrations
 
                     b.ToTable("AspNetUsers", (string)null);
 
-                    b.UseTptMappingStrategy();
+                    b.HasDiscriminator<int>("UserType");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -418,7 +420,7 @@ namespace Elagy.DAL.Migrations
                     b.Property<float>("Weight")
                         .HasColumnType("real");
 
-                    b.ToTable("Patients", (string)null);
+                    b.HasDiscriminator().HasValue(0);
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.ServiceProvider", b =>
@@ -435,7 +437,7 @@ namespace Elagy.DAL.Migrations
                         .HasMaxLength(1024)
                         .HasColumnType("nvarchar(1024)");
 
-                    b.ToTable("ServiceProviders", (string)null);
+                    b.HasDiscriminator().HasValue(1);
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.SuperAdmin", b =>
@@ -446,7 +448,7 @@ namespace Elagy.DAL.Migrations
                         .HasMaxLength(1024)
                         .HasColumnType("nvarchar(1024)");
 
-                    b.ToTable("SuperAdmins", (string)null);
+                    b.HasDiscriminator().HasValue(2);
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.Asset", b =>
@@ -533,33 +535,6 @@ namespace Elagy.DAL.Migrations
                     b.HasOne("Elagy.Core.Entities.Asset", null)
                         .WithOne()
                         .HasForeignKey("Elagy.Core.Entities.HotelAsset", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Elagy.Core.Entities.Patient", b =>
-                {
-                    b.HasOne("Elagy.Core.Entities.User", null)
-                        .WithOne()
-                        .HasForeignKey("Elagy.Core.Entities.Patient", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Elagy.Core.Entities.ServiceProvider", b =>
-                {
-                    b.HasOne("Elagy.Core.Entities.User", null)
-                        .WithOne()
-                        .HasForeignKey("Elagy.Core.Entities.ServiceProvider", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Elagy.Core.Entities.SuperAdmin", b =>
-                {
-                    b.HasOne("Elagy.Core.Entities.User", null)
-                        .WithOne()
-                        .HasForeignKey("Elagy.Core.Entities.SuperAdmin", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

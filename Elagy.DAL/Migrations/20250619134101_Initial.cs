@@ -43,6 +43,12 @@ namespace Elagy.DAL.Migrations
                     DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     UserType = table.Column<int>(type: "int", nullable: false),
+                    BloodGroup = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
+                    Height = table.Column<float>(type: "real", nullable: true),
+                    Weight = table.Column<float>(type: "real", nullable: true),
+                    NationalURL = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true),
+                    NationalFeildId = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
+                    Docs = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -170,63 +176,6 @@ namespace Elagy.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Patients",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    BloodGroup = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
-                    Height = table.Column<float>(type: "real", nullable: false),
-                    Weight = table.Column<float>(type: "real", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Patients", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Patients_AspNetUsers_Id",
-                        column: x => x.Id,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ServiceProviders",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    NationalURL = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false),
-                    NationalFeildId = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ServiceProviders", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ServiceProviders_AspNetUsers_Id",
-                        column: x => x.Id,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SuperAdmins",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Docs = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SuperAdmins", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_SuperAdmins_AspNetUsers_Id",
-                        column: x => x.Id,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Assets",
                 columns: table => new
                 {
@@ -251,9 +200,9 @@ namespace Elagy.DAL.Migrations
                 {
                     table.PrimaryKey("PK_Assets", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Assets_ServiceProviders_Id",
+                        name: "FK_Assets_AspNetUsers_Id",
                         column: x => x.Id,
-                        principalTable: "ServiceProviders",
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -387,19 +336,10 @@ namespace Elagy.DAL.Migrations
                 name: "HotelAssets");
 
             migrationBuilder.DropTable(
-                name: "Patients");
-
-            migrationBuilder.DropTable(
-                name: "SuperAdmins");
-
-            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "Assets");
-
-            migrationBuilder.DropTable(
-                name: "ServiceProviders");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
