@@ -100,11 +100,11 @@ public class DoctorService : IDoctorService
             UserType = Elagy.Core.Enums.UserType.Doctor,
             Status = Elagy.Core.Enums.UserStatus.Active,
             EmailConfirmed = true,
-            NationalId = createDto.NationalId,
-            PassportId = createDto.PassportId,
-            Nationality=createDto.Nationality,
-            ImageId=createDto.ImageId,
-            ImageURL=createDto.ImageURL,
+            //NationalId = createDto.NationalId,
+            //PassportId = createDto.PassportId,
+            //Nationality=createDto.Nationality,
+            //ImageId=createDto.ImageId,
+            //ImageURL=createDto.ImageURL,
             Gender=createDto.Gender,
             ZipCode=createDto.ZipCode,
             StreetNumber=createDto.StreetNumber,
@@ -178,8 +178,8 @@ public class DoctorService : IDoctorService
         doctor.FirstName = updateDto.FirstName;
         doctor.LastName = updateDto.LastName;
         doctor.Nationality = updateDto.Nationality;
-        doctor.NationalId = updateDto.NationalId;
-        doctor.PassportId = updateDto.PassportId;
+        //doctor.NationalId = updateDto.NationalId;
+        //doctor.PassportId = updateDto.PassportId;
         doctor.ImageURL = updateDto.ImageURL;
         doctor.Gender = updateDto.Gender;
         doctor.Status = updateDto.Status;

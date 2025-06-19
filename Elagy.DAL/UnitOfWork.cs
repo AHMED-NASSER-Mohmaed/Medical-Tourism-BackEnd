@@ -19,17 +19,16 @@ namespace Elagy.DAL
         public IGenericRepository<HospitalAsset> HospitalAssets { get; private set; }
         public IGenericRepository<CarRentalAsset> CarRentalAssets { get; private set; }
 
-<<<<<<< HEAD
+
         public ISpecialtyRepository Specialties { get; private set; }
 
         public IDoctorRepository Doctors { get; private set; }
 
         public IHospitalRepository Hospitals { get; private set; }
         public IHospitalSpecialtyRepository HospitalSpecialties { get; private set; }
-=======
-        // NEW: Repository for temporary ImageKit files
+
         public IGenericRepository<ImageKitTempFile> ImageKitTempFiles { get; private set; }
->>>>>>> main
+
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -42,17 +41,15 @@ namespace Elagy.DAL
             HotelAssets = new GenericRepository<HotelAsset>(_context); 
             HospitalAssets = new GenericRepository<HospitalAsset>(_context);
             CarRentalAssets = new GenericRepository<CarRentalAsset>(_context);
-<<<<<<< HEAD
-            //////////////////
+
             Specialties = new SpecialtyRepository(_context);
             Doctors = new DoctorRepository(_context);
             Hospitals = new HospitalRepository(_context);
             HospitalSpecialties = new HospitalSpecialtyRepository(_context);
 
-=======
 
              ImageKitTempFiles = new GenericRepository<ImageKitTempFile>(_context);
->>>>>>> main
+
         }
 
         public async Task<int> CompleteAsync()
