@@ -195,10 +195,6 @@ namespace Elagy.BL.Mapping
 
             CreateMap<CarRentalProviderProfileUpdateDto, CarRentalAsset>()
                 .IncludeBase<BaseServiceProviderProfileUpdateDto, ServiceAsset>();
-            ///////////////////////////
-            CreateMap<Specialty, SpecialtyDto>().ReverseMap(); // For CRUD and nested views
-            CreateMap<SpecialtyCreateDto, Specialty>();
-            CreateMap<SpecialtyUpdateDto, Specialty>();
             
 
         }
