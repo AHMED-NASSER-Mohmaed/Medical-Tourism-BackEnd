@@ -13,8 +13,11 @@ namespace Elagy.APIs.Controllers
     {
         private readonly IPatientService _patientService;
         private readonly IImageProfile _pofileImageService;
+ 
 
-        public PatientController(IPatientService patientService, IImageProfile pofileImageService,Logger<PatientController>_logger):base(pofileImageService,_logger)
+
+        public PatientController(IPatientService patientService, IImageProfile pofileImageService,ILogger<PatientController>logger)
+        :base(pofileImageService,logger)
         {
             _patientService = patientService;
             _pofileImageService = pofileImageService;

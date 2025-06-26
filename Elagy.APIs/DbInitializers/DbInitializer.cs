@@ -12,13 +12,7 @@ namespace Elagy.APIs.Initializers
 {
     public static class DbInitializer
     {
-        /// <summary>
-        /// Seeds application roles based on the RoleApps enum.
-        /// Ensures each role exists before attempting to create it.
-        /// </summary>
-        /// <param name="userManager">The UserManager instance.</param>
-        /// <param name="roleManager">The RoleManager instance.</param>
-        /// <param name="logger">The logger for logging messages.</param>
+ 
         public static async Task SeedRoles(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ILogger logger)
         {
             logger.LogInformation("Starting role seeding...");
@@ -44,14 +38,7 @@ namespace Elagy.APIs.Initializers
             }
             logger.LogInformation("Role seeding completed.");
         }
-
-        /// <summary>
-        /// Seeds static data such as Countries and Governorates.
-        /// Checks for existing data to prevent duplicate insertions.
-        /// Assumes Country and Governorate entities use database-generated IDs.
-        /// </summary>
-        /// <param name="context">The ApplicationDbContext instance.</param>
-        /// <param name="logger">The logger for logging messages.</param>
+ 
         public static async Task SeedStaticDataAsync(ApplicationDbContext context, ILogger logger)
         {
             logger.LogInformation("Starting static data seeding...");
@@ -113,14 +100,7 @@ namespace Elagy.APIs.Initializers
             logger.LogInformation("Static data seeding completed (if not already present).");
         }
 
-        /// <summary>
-        /// Seeds a SuperAdmin user if one does not already exist.
-        /// Assigns the SuperAdmin role.
-        /// IMPORTANT: The password should be read from secure configuration (e.g., User Secrets, Environment Variables), NOT hardcoded.
-        /// </summary>
-        /// <param name="userManager">The UserManager instance.</param>
-        /// <param name="roleManager">The RoleManager instance.</param>
-        /// <param name="logger">The logger for logging messages.</param>
+      
         public static async Task SeedSuperAdminAsync(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ILogger logger)
         {
             logger.LogInformation("Starting SuperAdmin seeding...");
