@@ -13,9 +13,7 @@ namespace Elagy.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<Doctor> builder)
         {
-            // Map Doctor to its own table, as per TPT inheritance strategy
-            builder.ToTable("Doctors");
-
+      
             // Explicitly state its base type for TPT
             // This means Doctor's primary key will also be a foreign key to the AspNetUsers table.
             builder.HasBaseType<User>();
@@ -26,17 +24,6 @@ namespace Elagy.DAL.Configurations
             builder.Property(d => d.Bio).IsRequired(false).HasMaxLength(1000);
             builder.Property(d => d.Qualification).IsRequired(false).HasMaxLength(100);
 
-            // Configure relationships:
-
-            // One Doctor works in one primary Specialty (even if they work in multiple hospitals for different specialties,
-            // this is for their main declared specialty).
-            //builder.HasOne(d => d.Specialty)
-            //       .WithMany(s => s.Doctors)
-            //       .HasForeignKey(d => d.SpecialtyId)
-            //       .IsRequired()
-            //       .OnDelete(DeleteBehavior.Restrict); // Restrict deletion of a Specialty if doctors are linked
-
-            // One Doctor works in a specific Hospital-Specialty combination.
             // This is the foreign key representing the doctor's "account" for that specific hospital and specialty.
             builder.HasOne(d => d.HospitalSpecialty)
                    .WithMany(hs => hs.Doctors)

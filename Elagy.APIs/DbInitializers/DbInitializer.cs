@@ -14,19 +14,15 @@ namespace Elagy.APIs.Initializers
         public static async Task SeedRoles(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ILogger logger)
         {
 
-            // Create roles if they don't exist
-            string[] roleNames = { "SuperAdmin", "Patient", "ServiceProvider","Doctor" };
-     
-
-
             foreach (string roleName in Enum.GetNames(typeof(RoleApps)))
-
+            {
                 if (!await roleManager.RoleExistsAsync(roleName))
                 {
                     await roleManager.CreateAsync(new IdentityRole(roleName));
                 }
             }
-        
+        }
+
 
         public static async Task SeedSuperAdminAsync(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ILogger logger)
         {

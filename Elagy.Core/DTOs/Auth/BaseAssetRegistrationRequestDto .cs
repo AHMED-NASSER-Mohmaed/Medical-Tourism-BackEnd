@@ -24,7 +24,6 @@ namespace Elagy.Core.DTOs.Auth
 
         public string[] Facilities { get; set; }
 
-
         public string VerificationNotes { get; set; } 
 
         [Required]
@@ -33,10 +32,7 @@ namespace Elagy.Core.DTOs.Auth
         TimeOnly ClosingTime { get; set; }
 
 
-
-
         [Required]
-
         public Language[] LanguagesSupported { get; set; }
 
         [Required]

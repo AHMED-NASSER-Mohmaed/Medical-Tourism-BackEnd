@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elagy.Core.DTOs.SpecialtyDTO
+namespace Elagy.Core.DTOs.Specialty
 {
     public class SpecialtyCreateDto
     {

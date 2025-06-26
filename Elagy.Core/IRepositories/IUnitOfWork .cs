@@ -24,7 +24,7 @@ namespace Elagy.Core.IRepositories
         ///////////////////////////
 
 
-
+        public IScheduleRepository Schedules { get; }
         Task<int> CompleteAsync();
     }
 }

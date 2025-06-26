@@ -1,7 +1,7 @@
 ﻿// Elagy.APIs/Controllers/SpecialtiesController.cs
 
 using Elagy.Core.DTOs;
-using Elagy.Core.DTOs.SpecialtyDTO;
+using Elagy.Core.DTOs.Specialty;
 using Elagy.Core.IServices.ISpecialtyService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,14 +19,9 @@ namespace Elagy.APIs.Controllers
             _specialtyService = specialtyService;
         }
 
-        // --- Admin Dashboard Endpoints ---
 
-        // GET: api/Specialties (Admin dashboard list)
-        // SuperAdmin: All global specialties. HospitalAdmin: Specialties linked to their hospital.
         [HttpGet]
         [Authorize(Roles = "SuperAdmin, HospitalAdmin")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)] // For HospitalAdmin if no specialties found
         public async Task<ActionResult<IEnumerable<SpecialtyDto>>> GetAllSpecialtiesForAdmin()
         {
             var userId = GetCurrentUserId();
@@ -50,11 +45,9 @@ namespace Elagy.APIs.Controllers
             return Ok(specialties);
         }
 
-        // NEW ENDPOINT: GET: api/Specialties/available-to-link (HospitalAdmin gets global list for dropdown)
         // This endpoint provides the list of global specialties that the current hospital admin CAN link to their hospital.
         [HttpGet("available-to-link")]
         [Authorize(Roles = "HospitalAdmin")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<SpecialtyDto>>> GetAvailableSpecialtiesToLink()
         {
             var hospitalId = GetCurrentUserId();
@@ -65,14 +58,8 @@ namespace Elagy.APIs.Controllers
         }
 
 
-        // GET: api/Specialties/{id} (Admin view single specialty details)
-        // Both SuperAdmin and HospitalAdmin can view global specialty details.
-        // For HospitalAdmin, an additional check ensures it's relevant to their hospital.
         [HttpGet("{id}")]
         [Authorize(Roles = "SuperAdmin, HospitalAdmin")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)] // If HospitalAdmin tries to view unassociated specialty
         public async Task<ActionResult<SpecialtyDto>> GetSpecialtyForAdmin(int id)
         {
             var specialty = await _specialtyService.GetSpecialtyByIdAsync(id);
@@ -93,12 +80,9 @@ namespace Elagy.APIs.Controllers
             return Ok(specialty);
         }
 
-        // POST: api/Specialties (SuperAdmin creates a global specialty)
+
         [HttpPost]
         [Authorize(Roles = "SuperAdmin")] // ONLY SuperAdmin can create global specialties
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)] // If specialty name already exists
         public async Task<ActionResult<SpecialtyDto>> CreateSpecialtyGlobal([FromBody] SpecialtyCreateDto createDto)
         {
             if (!ModelState.IsValid)

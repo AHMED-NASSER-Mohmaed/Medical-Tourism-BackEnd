@@ -1,5 +1,5 @@
-﻿using Elagy.Core.DTOs.DoctorDTO;
-using Elagy.Core.DTOs.SpecialtyDTO;
+﻿using Elagy.Core.DTOs.Doctor;
+using Elagy.Core.DTOs.Specialty;
 using System;
 using System.Collections.Generic;
 using System.Linq;

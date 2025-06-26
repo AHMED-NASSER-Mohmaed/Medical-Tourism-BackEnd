@@ -12,7 +12,7 @@ namespace Elagy.Core.IRepositories
         //Task<IQueryable<HospitalAsset>> GetFilteredHospitalsQueryAsync(HospitalFilterDto filter); // Return IQueryable for service to project
         //Task<HospitalAsset> GetHospitalWithSpecialtiesAsync(string hospitalId); // For HospitalWebsiteDto
         public Task<IEnumerable<HospitalSpecialty>> GetHospitalSpecialtiesInHospitalAsync(string hospitalId); // Get join entities for HospitalSpecialtyDto
-        public Task<HospitalAsset> GetHospitalIdAsync(int id);
+   
        public Task<IQueryable<HospitalAsset>> GetHospitalsBySpecialtyQueryAsync(int specialtyId); 
         //Task<IQueryable<HospitalAsset>> GetHospitalsBySpecialtyQueryAsync(int specialtyId); // Return IQueryable for service to project
     }

@@ -12,6 +12,7 @@ namespace Elagy.Core.Enums
         HospitalServiceProvider = 1,
         HotelServiceProvider = 2,
         CarRentalServiceProvider = 3,
-        SuperAdmin = 4
+        SuperAdmin = 4,
+        Doctor=5,
     }
 }

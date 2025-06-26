@@ -22,6 +22,7 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
     public DbSet<Doctor> Doctors { get; set; }
     public DbSet<Specialty> Specialties { get; set; }
     public DbSet<HospitalSpecialty> HospitalSpecialties { get; set; }
+    public DbSet<Schedule> Schedules { get; set; }
 
 
 
@@ -45,6 +46,8 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
         builder.ApplyConfiguration(new SpecialtyConfiguration());
         builder.ApplyConfiguration(new HospitalSpecialtyConfiguration());
         builder.ApplyConfiguration(new DoctorConfiguration());
+
+        builder.ApplyConfiguration(new ScheduleConfiguration());
 
         // builder.ApplyConfiguration(new ImageKitTempFileConfiguration()); // If you still have this entity
     }

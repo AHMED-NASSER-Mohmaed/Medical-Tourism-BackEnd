@@ -1,6 +1,6 @@
 ﻿using Elagy.Core.DTOs.Auth;
 using Elagy.Core.DTOs.Shared;
-using Elagy.Core.DTOs.SpecialtyDTO;
+using Elagy.Core.DTOs.Specialty;
 using Elagy.Core.DTOs.User;
 using System.Threading.Tasks;
 

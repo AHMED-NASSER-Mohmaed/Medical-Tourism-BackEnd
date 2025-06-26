@@ -29,7 +29,7 @@ namespace Elagy.DAL.Repositories
         }
 
 
-        public async   Task<IQueryable<HospitalAsset>> GetHospitalsBySpecialtyQueryAsync(int specialtyId)
+        public async Task<IQueryable<HospitalAsset>> GetHospitalsBySpecialtyQueryAsync(int specialtyId)
         {
             return _context.HospitalSpecialties // Starting from the join table
                 .Where(hs => hs.SpecialtyId == specialtyId)

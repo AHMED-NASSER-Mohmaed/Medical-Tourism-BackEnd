@@ -26,6 +26,8 @@ namespace Elagy.DAL
 
         public IHospitalRepository Hospitals { get; private set; }
         public IHospitalSpecialtyRepository HospitalSpecialties { get; private set; }
+        public IScheduleRepository Schedules { get; private set; }
+
 
 
 
@@ -45,6 +47,7 @@ namespace Elagy.DAL
             Specialties = new SpecialtyRepository(_context);
             Doctors = new DoctorRepository(_context);
             Hospitals = new HospitalRepository(_context);
+            Schedules=new ScheduleRepository(_context);
 
         }
 

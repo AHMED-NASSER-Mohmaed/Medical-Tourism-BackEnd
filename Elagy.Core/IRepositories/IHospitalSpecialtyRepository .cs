@@ -9,6 +9,7 @@ namespace Elagy.Core.IRepositories
 {
     public interface IHospitalSpecialtyRepository : IGenericRepository<HospitalSpecialty>
     {
-
+        Task<HospitalSpecialty> GetByIdAsync(int id);
+        Task<IEnumerable<HospitalSpecialty>> GetActiveHospitalSpecialtiesByHospitalIdAsync(string hospitalId);
     }
 }

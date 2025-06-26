@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Elagy.Core.DTOs.SpecialtyDTO;
+using Elagy.Core.DTOs.Specialty;
 using Elagy.Core.Entities;
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices.ISpecialtyService;
@@ -51,7 +51,7 @@ namespace Elagy.BL.Services
 
         public async Task<bool> DeleteSpecialtyAsync(int id)
         {
-            var specialty = await _unitOfWork.Specialties.GetSpecialtyByIdWithHospitalsAsync(id);
+            var specialty = await _unitOfWork.Specialties.GetSpecialtyIdAsync(id);
             if (specialty == null)
             {
                 _logger.LogWarning($"Specialty with ID {id} not found for global deletion.");
@@ -65,7 +65,7 @@ namespace Elagy.BL.Services
                 throw new InvalidOperationException("Cannot delete specialty globally as it is currently associated with one or more hospitals. Remove all hospital associations first.");
             }
 
-            _unitOfWork.Specialties.Remove(specialty);
+            _unitOfWork.Specialties.AddAsync(specialty);
             await _unitOfWork.CompleteAsync();
             _logger.LogInformation($"Global Specialty ID {id} deleted successfully by SuperAdmin.");
             return true;
@@ -78,12 +78,8 @@ namespace Elagy.BL.Services
             List < SpecialtyDto> spdTOS = new List<SpecialtyDto>();
             foreach (var specialty in specialties)
             {
-                SpecialtyDto specialtyDto = new SpecialtyDto()
-                {
-                    Description = specialty.Description,
-                    Name = specialty.Name,
-                };
-                spdTOS.Add(specialtyDto);
+             var stdo= _mapper.Map<SpecialtyDto>(specialty);
+                spdTOS.Add(stdo);
               
             }
             return spdTOS;
@@ -102,8 +98,7 @@ namespace Elagy.BL.Services
 
             // 3. Filter out already linked specialties
             var availableSpecialties = allGlobalSpecialties
-                                        .Where(s => !linkedSpecialtyIds.Contains(s.Id))
-                                        .ToList();
+                                        .Where(s => !linkedSpecialtyIds.Contains(s.Id));
 
             List<SpecialtyDto> spdTOS = new List<SpecialtyDto>();
             foreach (var specialty in availableSpecialties)
@@ -138,13 +133,13 @@ namespace Elagy.BL.Services
 
         public async Task<SpecialtyDto> GetSpecialtyByIdAsync(int id)
         {
-            var specialty = await _unitOfWork.Specialties.GetSpecialtyByIdWithHospitalsAsync(id);
+            var specialty = await _unitOfWork.Specialties.GetSpecialtyIdAsync(id);
             return _mapper.Map<SpecialtyDto>(specialty);
         }
 
         public async Task<bool> IsSpecialtyAssociatedWithHospitalAsync(int specialtyId, string hospitalId)
         {
-            return await _unitOfWork.HospitalSpecialties.AsQueryable() // <--- Use the HospitalSpecialties repo
+            return await _unitOfWork.HospitalSpecialties.AsQueryable() 
                              .AnyAsync(hs => hs.SpecialtyId == specialtyId && hs.HospitalAssetId == hospitalId);
         }
 
@@ -207,7 +202,7 @@ namespace Elagy.BL.Services
                 throw new InvalidOperationException("Cannot remove specialty from your hospital as doctors are still assigned to this specialty within your hospital. Please reassign or remove doctors first.");
             }
 
-            _unitOfWork.HospitalSpecialties.Remove(hospitalSpecialtyLink); // <--- Use the HospitalSpecialties repo
+            _unitOfWork.HospitalSpecialties.Remove(hospitalSpecialtyLink); 
             await _unitOfWork.CompleteAsync();
             _logger.LogInformation($"Specialty ID {specialtyId} successfully removed from Hospital ID: {hospitalId} by Hospital Admin.");
             return true;
@@ -215,7 +210,7 @@ namespace Elagy.BL.Services
 
         public async Task<bool> UpdateSpecialtyAsync(SpecialtyUpdateDto updateDto)
         {
-            var specialty = await _unitOfWork.Specialties.GetSpecialtyByIdWithHospitalsAsync(updateDto.Id);
+            var specialty = await _unitOfWork.Specialties.GetSpecialtyIdAsync(updateDto.Id);
             if (specialty == null)
             {
                 _logger.LogWarning($"Specialty with ID {updateDto.Id} not found for update.");
