@@ -246,7 +246,6 @@ namespace Elagy.BL.Services
             serviceAsset.Id = serviceProvider.Id; // Set AssetId to match ServiceProvider's Id (shared PK)
             serviceAsset.ServiceProvider = serviceProvider; // Link to the provider
             serviceAsset.AssetType = assetType;
-            serviceAsset.AcquisitionDate = DateTime.UtcNow; // Set creation date
             serviceAsset.CredentialDocURL= Result.UploadResults[1].Url;
             serviceAsset.CredentialDocId= Result.UploadResults[1].Id;
 

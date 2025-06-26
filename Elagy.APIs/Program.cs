@@ -42,7 +42,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     options.Password.RequireLowercase = false;       // For simplicity in dev, consider true for production
 
     // Lockout settings
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromDays(1);
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.AllowedForNewUsers = true;
 })
@@ -193,26 +193,40 @@ builder.Services.AddRateLimiter(rateLimiterOptions =>
 
 var app = builder.Build();
 
-// --- Data Seeding at Startup ---
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
+        // Resolve required services from the created scope
+        var appContext = services.GetRequiredService<ApplicationDbContext>();
         var userManager = services.GetRequiredService<UserManager<User>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var logger = services.GetRequiredService<ILogger<Program>>(); // Logger for Program.cs scope
 
+        logger.LogInformation("Starting database seeding process...");
+
+        // Ensure database is created/migrated. This is a common practice before seeding.
+        // If you handle migrations separately (e.g., via CLI or deployment scripts),
+        // you might remove this line.
+        await appContext.Database.MigrateAsync();
+        logger.LogInformation("Database migrations applied.");
+
+        // Execute seeding methods in a logical order
         await DbInitializer.SeedRoles(userManager, roleManager, logger);
         await DbInitializer.SeedSuperAdminAsync(userManager, roleManager, logger);
+        await DbInitializer.SeedStaticDataAsync(appContext, logger);
+
+        logger.LogInformation("Database seeding completed successfully.");
     }
     catch (Exception ex)
     {
+        // Catch any exceptions during seeding and log them
         var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "An error occurred while seeding the database.");
     }
 }
-// --- End Data Seeding ---
 
 
 

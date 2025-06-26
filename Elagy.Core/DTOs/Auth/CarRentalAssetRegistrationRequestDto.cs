@@ -7,8 +7,8 @@ namespace Elagy.Core.DTOs.Auth
     public class CarRentalAssetRegistrationRequestDto : BaseAssetRegistrationRequestDto
     {
 
-        [Required(ErrorMessage = "Please provide the operational areas for the car rental service.")]
-        public Governorate[] OperationalAreas { get; set; } // Geographic areas where car rental operates
+        //[Required(ErrorMessage = "Please provide the operational areas for the car rental service.")]
+        //public Governorate[] OperationalAreas { get; set; } // Geographic areas where car rental operates
 
 
         public FuelType[] FuelTypes { get; set; }

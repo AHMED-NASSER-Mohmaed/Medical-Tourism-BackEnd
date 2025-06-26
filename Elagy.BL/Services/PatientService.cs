@@ -16,7 +16,7 @@ using IEmailService = Elagy.Core.Helpers.IEmailService;
 
 namespace Elagy.BL.Services
 {
-    public class PatientService : IPatientService
+    public class PatientService  
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;

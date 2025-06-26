@@ -26,47 +26,16 @@ namespace Elagy.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUsers",
+                name: "Countries",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    ImageId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    ImageURL = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true),
-                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Governorate = table.Column<int>(type: "int", nullable: false),
-                    Country = table.Column<int>(type: "int", nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    UserType = table.Column<int>(type: "int", nullable: false),
-                    BloodGroup = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
-                    Height = table.Column<float>(type: "real", nullable: true),
-                    Weight = table.Column<float>(type: "real", nullable: true),
-                    NationalURL = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true),
-                    NationalFeildId = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
-                    Docs = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true),
-                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                    table.PrimaryKey("PK_Countries", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -88,6 +57,76 @@ namespace Elagy.DAL.Migrations
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Governaties",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CountryId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Governaties", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Governaties_Countries_CountryId",
+                        column: x => x.CountryId,
+                        principalTable: "Countries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUsers",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    ImageId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    ImageURL = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true),
+                    Gender = table.Column<int>(type: "int", nullable: false),
+                    Address = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    GovernorateId = table.Column<int>(type: "int", nullable: true),
+                    Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    UserType = table.Column<int>(type: "int", nullable: false),
+                    BloodGroup = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
+                    Height = table.Column<float>(type: "real", nullable: true),
+                    Weight = table.Column<float>(type: "real", nullable: true),
+                    AcquisitionDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    NationalURL = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true),
+                    NationalFeildId = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
+                    Docs = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true),
+                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUsers_Governaties_GovernorateId",
+                        column: x => x.GovernorateId,
+                        principalTable: "Governaties",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -185,7 +224,6 @@ namespace Elagy.DAL.Migrations
                     CredentialDocURL = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true),
                     CredentialDocId = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
-                    AcquisitionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     VerificationNotes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     Latitude = table.Column<float>(type: "real", nullable: false),
                     Longitude = table.Column<float>(type: "real", nullable: false),
@@ -212,7 +250,6 @@ namespace Elagy.DAL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
-                    OperationalAreas = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FuelTypes = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Models = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Transmission = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
@@ -301,11 +338,21 @@ namespace Elagy.DAL.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_GovernorateId",
+                table: "AspNetUsers",
+                column: "GovernorateId");
+
+            migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Governaties_CountryId",
+                table: "Governaties",
+                column: "CountryId");
         }
 
         /// <inheritdoc />
@@ -343,6 +390,12 @@ namespace Elagy.DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Governaties");
+
+            migrationBuilder.DropTable(
+                name: "Countries");
         }
     }
 }

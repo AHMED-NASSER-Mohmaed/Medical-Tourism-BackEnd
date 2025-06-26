@@ -19,6 +19,10 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
     public DbSet<Patient> Patients { get; set; }
     public DbSet<ServiceProvider> ServiceProviders { get; set; }
     public DbSet<SuperAdmin> SuperAdmins { get; set; }
+    public DbSet<Country> Countries { get; set; }
+    public DbSet<Governorate> Governaties { get; set; }
+
+
 
     // public DbSet<ImageKitTempFile> ImageKitTempFiles { get; set; } // If you still have this entity
 
@@ -39,4 +43,10 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
 
         // builder.ApplyConfiguration(new ImageKitTempFileConfiguration()); // If you still have this entity
     }
+
+
+
+
+
+
 }

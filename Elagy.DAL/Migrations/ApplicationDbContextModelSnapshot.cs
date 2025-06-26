@@ -27,9 +27,6 @@ namespace Elagy.DAL.Migrations
                         .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<DateTime>("AcquisitionDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("AssetType")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -91,6 +88,45 @@ namespace Elagy.DAL.Migrations
                     b.UseTptMappingStrategy();
                 });
 
+            modelBuilder.Entity("Elagy.Core.Entities.Country", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Countries");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.Governorate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CountryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CountryId");
+
+                    b.ToTable("Governaties");
+                });
+
             modelBuilder.Entity("Elagy.Core.Entities.User", b =>
                 {
                     b.Property<string>("Id")
@@ -105,16 +141,12 @@ namespace Elagy.DAL.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("City")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Country")
-                        .HasColumnType("int");
 
                     b.Property<DateTime?>("DateOfBirth")
                         .IsRequired()
@@ -132,11 +164,10 @@ namespace Elagy.DAL.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Gender")
+                        .HasColumnType("int");
 
-                    b.Property<int>("Governorate")
+                    b.Property<int?>("GovernorateId")
                         .HasColumnType("int");
 
                     b.Property<string>("ImageId")
@@ -197,6 +228,8 @@ namespace Elagy.DAL.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GovernorateId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -358,10 +391,6 @@ namespace Elagy.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("OperationalAreas")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("RentalPolicies")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -411,10 +440,10 @@ namespace Elagy.DAL.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<float>("Height")
+                    b.Property<float?>("Height")
                         .HasColumnType("real");
 
-                    b.Property<float>("Weight")
+                    b.Property<float?>("Weight")
                         .HasColumnType("real");
 
                     b.HasDiscriminator().HasValue(0);
@@ -423,6 +452,9 @@ namespace Elagy.DAL.Migrations
             modelBuilder.Entity("Elagy.Core.Entities.ServiceProvider", b =>
                 {
                     b.HasBaseType("Elagy.Core.Entities.User");
+
+                    b.Property<DateTime>("AcquisitionDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("NationalFeildId")
                         .IsRequired()
@@ -456,6 +488,27 @@ namespace Elagy.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("ServiceProvider");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.Governorate", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.Country", "Country")
+                        .WithMany("Governorates")
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Country");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.User", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.Governorate", "Governorate")
+                        .WithMany()
+                        .HasForeignKey("GovernorateId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Governorate");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -534,6 +587,11 @@ namespace Elagy.DAL.Migrations
                         .HasForeignKey("Elagy.Core.Entities.HotelAsset", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.Country", b =>
+                {
+                    b.Navigation("Governorates");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.ServiceProvider", b =>

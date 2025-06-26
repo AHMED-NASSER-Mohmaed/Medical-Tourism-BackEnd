@@ -287,7 +287,7 @@ namespace Elagy.BL.Services
         {
             var query = _unitOfWork.ServiceProviders.AsQueryable().OfType<ServiceProvider>();
 
-            
+             
             query = query.Include(sp => sp.ServiceAsset);
 
         

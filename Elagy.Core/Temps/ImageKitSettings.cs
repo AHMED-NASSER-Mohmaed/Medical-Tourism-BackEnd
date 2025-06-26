@@ -13,6 +13,6 @@
         public string UploadApiUrl { get; set; } = default!; // e.g., "https://upload.imagekit.io/api/v1/files/upload"
 
         // Although not used in your current snippet, if you have a Manage API URL, it's good to keep it:
-         public string ManageApiUrl { get; set; } = default!;
+        public string ManageApiUrl { get; set; } = default!;
     }
 }

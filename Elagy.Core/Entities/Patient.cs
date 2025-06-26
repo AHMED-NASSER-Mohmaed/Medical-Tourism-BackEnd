@@ -2,8 +2,8 @@
 {
     public class Patient : User
     {
-        public string BloodGroup { get; set; }
-        public float Height { get; set; }
-        public float Weight { get; set; }
+        public string? BloodGroup { get; set; }
+        public float? Height { get; set; }
+        public float? Weight { get; set; }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Elagy.Core.DTOs.Files;
 using Elagy.Core.Helpers;
-using Elagy.Core.IServices;
 using Elagy.Core.Temps;
+using Elagy.Core.IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
