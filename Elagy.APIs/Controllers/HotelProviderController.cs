@@ -9,11 +9,12 @@ namespace Elagy.APIs.Controllers
     [Route("api/[controller]")]
     // Protect this controller, allowing only ServiceProviders that are Hotel type
     [Authorize(Roles = "HotelServiceProvider")] // Assuming a generic ServiceProvider role for all providers
-    public class HotelProviderController : BaseApiController
+    public class HotelProviderController : ProfileImageBaseController
     {
         private readonly IHotelProviderService _hotelProviderService;
 
-        public HotelProviderController(IHotelProviderService hotelProviderService)
+        public HotelProviderController(IHotelProviderService hotelProviderService,IImageProfile _imageProfile,ILogger<HotelProviderController>logger)
+        :base(_imageProfile, logger) 
         {
             _hotelProviderService = hotelProviderService;
         }

@@ -1,47 +1,39 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;  
+using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
-using Elagy.Core.IServices;  
-using Elagy.Core.DTOs.Files; 
-using Microsoft.Extensions.Logging;  
-using Microsoft.AspNetCore.Authorization;  
+using Elagy.Core.IServices;
+using Elagy.Core.DTOs.Files;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using Elagy.Core.Enums;  
+using Elagy.Core.Enums;
 
 namespace Elagy.APIs.Controllers
 {
-
+    [ApiController]
     [Route("profile/[controller]")]
-    public abstract class ProfileImageBaseController : BaseApiController  
+    public abstract class ProfileImageBaseController : BaseApiController
     {
         protected readonly IImageProfile _profileImageService;
         protected readonly ILogger<ProfileImageBaseController> _logger;
 
-        
         public ProfileImageBaseController(
             IImageProfile profileImageService,
             ILogger<ProfileImageBaseController> logger)
         {
             _profileImageService = profileImageService;
-            _logger = logger;  
+            _logger = logger;
         }
 
-        
-        [HttpPut("{userId}/profile-image")]
-        [RequestSizeLimit(20 * 1024 * 1024)]
+ 
+ 
+        [HttpPut("profile/profile-image")]
+        [RequestSizeLimit(5 * 1024 * 1024)]
+        [Consumes("multipart/form-data")]
         public async Task<ActionResult<FileUploadResponseDto>> UpdateUserProfileImage(
-            string userId,
-            [FromForm] IFormFile imageFile)
+        IFormFile imageFile)
         {
-             string currentUserId = GetCurrentUserId();
-            if (currentUserId == null) return Unauthorized();
-
-            
-            if (!User.IsInRole(RoleApps.SuperAdmin.ToString()) && currentUserId != userId) 
-            {
-                _logger.LogWarning($"Unauthorized attempt to update profile image for user '{userId}' by user '{currentUserId}'.");
-                return Forbid();
-            }
+            string userId = GetCurrentUserId();
 
             if (imageFile == null || imageFile.Length == 0)
             {
@@ -85,23 +77,11 @@ namespace Elagy.APIs.Controllers
             }
         }
 
-        
-        [HttpDelete("{userId}/profile-image")]
-        public async Task<ActionResult<FileDeletionResponseDto>> DeleteUserProfileImage(string userId)
+  
+        [HttpDelete("profile/profile-image")]
+        public async Task<ActionResult<FileDeletionResponseDto>> DeleteUserProfileImage()
         {
-            string currentUserId = GetCurrentUserId();
-            if (currentUserId == null) return Unauthorized();
-
-             if (!User.IsInRole(RoleApps.SuperAdmin.ToString()) && currentUserId != userId)
-            {
-                _logger.LogWarning($"Unauthorized attempt to delete profile image for user '{userId}' by user '{currentUserId}'.");
-                return Forbid();
-            }
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return BadRequest(new FileDeletionResponseDto { Success = false, Message = "User ID cannot be empty." });
-            }
+            string userId = GetCurrentUserId();
 
             try
             {

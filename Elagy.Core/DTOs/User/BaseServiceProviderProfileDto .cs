@@ -6,6 +6,7 @@ namespace Elagy.Core.DTOs.User
     public abstract class BaseServiceProviderProfileDto : BaseProfileDto
     {
         public string NationalDocsURL { get; set; }
+        public DateTime AcquisitionDate { get; set; }
 
 
         // Common ServiceAsset properties flattened directly into this DTO
@@ -16,7 +17,6 @@ namespace Elagy.Core.DTOs.User
 
 
         public string AssetEmail { get; set; }
-        public DateTime AcquisitionDate { get; set; }
 
         //public VerificationStatus VerificationStatus { get; set; } // Asset's verification status
         public string VerificationNotes { get; set; }

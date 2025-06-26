@@ -1,6 +1,7 @@
-﻿using Elagy.Core.Enums;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using System;
+using Elagy.Core.Entities;
+using Elagy.Core.Enums;
 
 namespace Elagy.Core.Entities
 {
@@ -14,14 +15,18 @@ namespace Elagy.Core.Entities
          
         public string ImageId { get; set; }
         public string ImageURL { get; set; }
-        public string Gender { get; set; }
+
+
+        public Gender Gender { get; set; }
 
         #region
-        public string Address { get; set; } // Full address as a single string
-        public string City { get; set; } // City name, not a complex object
-        public Governorate Governorate { get; set; }
-        public Country Country { get; set; } // Country name, not a complex object
+        public string? Address { get; set; } // Full address as a single string
+        public string? City { get; set; } // City name, not a complex object
+        public int? GovernorateId { get; set; } //governate forgin key
+        public Governorate? Governorate { get; set; } // navigation properity
+
         #endregion
+
 
 
         public string Phone { get; set; }

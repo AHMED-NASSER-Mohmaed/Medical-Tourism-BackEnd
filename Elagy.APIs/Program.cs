@@ -12,9 +12,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration; // Add for configuration access
 using Microsoft.Extensions.DependencyInjection; // Add for service collection access
 using Microsoft.Extensions.Logging; // Add for logging in seed
+using Microsoft.OpenApi.Models;
 using System;
+using System.Reflection;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,7 +25,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
+
+    c.MapType<IFormFile>(() => new OpenApiSchema
+    {
+        Type = "string",
+        Format = "binary"
+    });
+});
 
 // Configure DbContext with SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -42,7 +54,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     options.Password.RequireLowercase = false;       // For simplicity in dev, consider true for production
 
     // Lockout settings
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromDays(1);
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.AllowedForNewUsers = true;
 })
@@ -61,6 +73,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Register your application services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IImageProfile, ImageProfile>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IHotelProviderService, HotelProviderService>();
 builder.Services.AddScoped<IHospitalProviderService, HospitalProviderService>();
@@ -193,26 +206,49 @@ builder.Services.AddRateLimiter(rateLimiterOptions =>
 
 var app = builder.Build();
 
-// --- Data Seeding at Startup ---
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
+        // Resolve required services from the created scope
+        var appContext = services.GetRequiredService<ApplicationDbContext>();
         var userManager = services.GetRequiredService<UserManager<User>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var logger = services.GetRequiredService<ILogger<Program>>(); // Logger for Program.cs scope
 
+        logger.LogInformation("Starting database seeding process...");
+
+        // Ensure database is created/migrated. This is a common practice before seeding.
+        // If you handle migrations separately (e.g., via CLI or deployment scripts),
+        // you might remove this line.
+        await appContext.Database.MigrateAsync();
+        logger.LogInformation("Database migrations applied.");
+
+        // Execute seeding methods in a logical order
         await DbInitializer.SeedRoles(userManager, roleManager, logger);
         await DbInitializer.SeedSuperAdminAsync(userManager, roleManager, logger);
+        await DbInitializer.SeedStaticDataAsync(appContext, logger);
+
+        logger.LogInformation("Database seeding completed successfully.");
     }
     catch (Exception ex)
     {
+        // Catch any exceptions during seeding and log them
         var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "An error occurred while seeding the database.");
     }
 }
-// --- End Data Seeding ---
+
+
+
+
+
+
+ 
+ 
+
 
 
 

@@ -106,8 +106,7 @@ namespace Elagy.BL.Services
             hospitalAsset.Id = serviceProvider.Id; // Set AssetId to match ServiceProvider's Id
             hospitalAsset.ServiceProvider = serviceProvider; // Link to the provider
             hospitalAsset.AssetType = AssetType.Hospital;
-            hospitalAsset.AcquisitionDate = DateTime.UtcNow; // Set creation date
-
+ 
             try
             {
                 await _unitOfWork.HospitalAssets.AddAsync(hospitalAsset);

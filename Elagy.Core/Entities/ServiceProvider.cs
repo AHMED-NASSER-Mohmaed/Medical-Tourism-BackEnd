@@ -2,6 +2,9 @@
 {
     public class ServiceProvider : User
     {
+
+        public DateTime AcquisitionDate { get; set; } = DateTime.Now; // Date of asset acquisition/establishment
+
         public string NationalURL { get; set; } 
         public string NationalFeildId { get; set; } 
         // Navigation property for the one-to-one relationship with ServiceAsset

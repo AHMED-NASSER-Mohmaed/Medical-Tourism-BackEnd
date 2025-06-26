@@ -25,7 +25,6 @@ namespace Elagy.DAL.Configurations
             builder.Property(a => a.CredentialDocURL).HasMaxLength(1024).IsRequired(false);
             builder.Property(a => a.CredentialDocId).HasMaxLength(250).IsRequired(false);
             builder.Property(a => a.Email).HasMaxLength(250).IsRequired(false);
-            builder.Property(a => a.AcquisitionDate).IsRequired();
             builder.Property(a => a.VerificationNotes).HasMaxLength(500).IsRequired(false);
 
             // Location Properties

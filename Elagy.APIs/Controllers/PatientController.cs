@@ -9,12 +9,15 @@ namespace Elagy.APIs.Controllers
 {
     [Route("api/[controller]")]
     [Authorize(Roles = "Patient")] // Only allow users with the "Patient" role
-    public class PatientController : BaseApiController
+    public class PatientController : ProfileImageBaseController
     {
         private readonly IPatientService _patientService;
         private readonly IImageProfile _pofileImageService;
+ 
 
-        public PatientController(IPatientService patientService, IImageProfile pofileImageService   )
+
+        public PatientController(IPatientService patientService, IImageProfile pofileImageService,ILogger<PatientController>logger)
+        :base(pofileImageService,logger)
         {
             _patientService = patientService;
             _pofileImageService = pofileImageService;

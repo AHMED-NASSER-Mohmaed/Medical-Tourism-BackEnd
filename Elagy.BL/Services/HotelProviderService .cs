@@ -107,8 +107,7 @@ namespace Elagy.BL.Services
             hotelAsset.Id = serviceProvider.Id; // Set AssetId to match ServiceProvider's Id
             hotelAsset.ServiceProvider = serviceProvider; // Link to the provider
             hotelAsset.AssetType = AssetType.Hotel;
-            hotelAsset.AcquisitionDate = DateTime.UtcNow; // Set creation date
-
+ 
             try
             {
                 await _unitOfWork.HotelAssets.AddAsync(hotelAsset);

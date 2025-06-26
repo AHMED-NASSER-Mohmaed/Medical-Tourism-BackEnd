@@ -26,10 +26,10 @@ namespace Elagy.Core.DTOs.Auth
         public string LastName { get; set; } = default!;
 
         [Required]
-        public string PhoneNumber { get; set; }
+        public string Phone { get; set; }
 
         [Required]
-        public string Gender { get; set; }
+        public Gender Gender { get; set; }
 
 
         #region
@@ -37,12 +37,12 @@ namespace Elagy.Core.DTOs.Auth
         public string Address { get; set; } // Full address as a single string
 
         [Required]
-        public string City { get; set; } // City name, not a complex object
+        public string City { get; set; } 
 
         [Required]
-        public Governorate Governorate { get; set; }
+        public int GovernorateId { get; set; }
         [Required]
-        public Country Country { get; set; } // Country name, not a complex object
+        public int CountryId { get; set; } 
         #endregion
 
 

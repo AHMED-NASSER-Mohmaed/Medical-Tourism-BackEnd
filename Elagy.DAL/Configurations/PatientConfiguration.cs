@@ -10,10 +10,10 @@ namespace Elagy.DAL.Configurations
         {
  
  
-            // Property configurations for Patient specific properties
+             
             builder.Property(p => p.BloodGroup).HasMaxLength(10).IsRequired(false);
-            builder.Property(p => p.Height).HasColumnType("real").IsRequired();
-            builder.Property(p => p.Weight).HasColumnType("real").IsRequired();
+            builder.Property(p => p.Height).HasColumnType("real").IsRequired(false);
+            builder.Property(p => p.Weight).HasColumnType("real").IsRequired(false);
         }
     }
 }

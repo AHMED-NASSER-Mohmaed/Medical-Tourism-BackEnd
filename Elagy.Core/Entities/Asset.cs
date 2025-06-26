@@ -12,7 +12,6 @@ namespace Elagy.Core.Entities
         public string CredentialDocURL { get; set; } // Credential paper documentation for the asset
         public string CredentialDocId { get; set; } // Credential paper documentation for the asset
         public string Email { get; set; } // Asset-specific email (e.g., hotel reception email)
-        public DateTime AcquisitionDate { get; set; } = DateTime.Now; // Date of asset acquisition/establishment
         public string VerificationNotes { get; set; } // Notes regarding verification status
 
         #region //related to location

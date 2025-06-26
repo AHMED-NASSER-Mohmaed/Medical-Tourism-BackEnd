@@ -25,6 +25,9 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
     public DbSet<Schedule> Schedules { get; set; }
 
 
+    public DbSet<Country> Countries { get; set; }
+    public DbSet<Governorate> Governaties { get; set; }
+
 
 
     // public DbSet<ImageKitTempFile> ImageKitTempFiles { get; set; } // If you still have this entity
@@ -51,4 +54,10 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
 
         // builder.ApplyConfiguration(new ImageKitTempFileConfiguration()); // If you still have this entity
     }
+
+
+
+
+
+
 }

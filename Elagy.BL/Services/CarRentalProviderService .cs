@@ -107,8 +107,7 @@ namespace Elagy.BL.Services
             carRentalAsset.Id = serviceProvider.Id; // Set AssetId to match ServiceProvider's Id
             carRentalAsset.ServiceProvider = serviceProvider; // Link to the provider
             carRentalAsset.AssetType = AssetType.CarRental;
-            carRentalAsset.AcquisitionDate = DateTime.UtcNow; // Set creation date
-
+ 
             try
             {
                 await _unitOfWork.CarRentalAssets.AddAsync(carRentalAsset);

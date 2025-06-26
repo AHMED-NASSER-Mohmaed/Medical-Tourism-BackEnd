@@ -16,7 +16,7 @@ namespace Elagy.DAL.Configurations
 
             builder.HasBaseType<Asset>(); // Correct: explicitly states its base type for TPT
 
-            // Property configurations for CarRentalAsset specific properties
+            /*// Property configurations for CarRentalAsset specific properties
             builder.Property(cra => cra.OperationalAreas)
                 .HasConversion(
                     v => JsonConvert.SerializeObject(v.Select(e => e.ToString()).ToArray()),
@@ -24,7 +24,7 @@ namespace Elagy.DAL.Configurations
                     new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<Governorate[]>(
                         (c1, c2) => c1.SequenceEqual(c2),
                         c => c.Aggregate(0, (a, val) => HashCode.Combine(a, (val != null ? val.GetHashCode() : 0))),
-                        c => c.ToArray()));
+                        c => c.ToArray()));*/
 
             builder.Property(cra => cra.FuelTypes)
                 .HasConversion(
