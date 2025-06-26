@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration; // Add for configuration access
 using Microsoft.Extensions.DependencyInjection; // Add for service collection access
 using Microsoft.Extensions.Logging; // Add for logging in seed
 using System;
+using System.Reflection;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 
@@ -61,6 +62,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Register your application services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IImageProfile, ImageProfile>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IHotelProviderService, HotelProviderService>();
 builder.Services.AddScoped<IHospitalProviderService, HospitalProviderService>();
