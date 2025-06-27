@@ -11,6 +11,7 @@ namespace Elagy.Core.DTOs.Specialty
     public class SpecialtyLinkToHospitalDto
     {
         [Required(ErrorMessage = "Specialty ID to link is required.")]
+        public int Id { get; set; }
         public int SpecialtyId { get; set; }
         public string HospitalId { get; set; }
         public Status Status { get; set; }

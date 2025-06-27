@@ -32,7 +32,8 @@ namespace Elagy.Core.DTOs.Doctor
 
         public DateTime? DateOfBirth { get; set; }
 
-
+        public string? Address { get; set; } // Full address as a single string
+        public string? City { get; set; }
 
         [Required(ErrorMessage = "Medical License Number is required.")]
         [StringLength(50)]

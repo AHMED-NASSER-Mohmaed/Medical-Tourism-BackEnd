@@ -102,7 +102,7 @@ namespace Elagy.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Countries");
+                    b.ToTable("Countries", (string)null);
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.Governorate", b =>
@@ -124,7 +124,7 @@ namespace Elagy.DAL.Migrations
 
                     b.HasIndex("CountryId");
 
-                    b.ToTable("Governaties");
+                    b.ToTable("Governaties", (string)null);
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.User", b =>

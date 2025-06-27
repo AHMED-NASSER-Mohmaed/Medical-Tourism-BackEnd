@@ -1,186 +1,327 @@
 ﻿// Elagy.APIs/Controllers/DoctorsController.cs
-
-
 using Elagy.Core.DTOs.Doctor;
-using Elagy.Core.DTOs.Specialty;
-using Elagy.Core.IServices;
+using Elagy.Core.DTOs.Pagination;
+using Elagy.Core.Enums; // For Status enum
+using Elagy.Core.IServices; // For IDoctorService
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http; // For StatusCodes
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Elagy.APIs.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
-    [Authorize(Roles = "HospitalAdmin")] // Only hospital admins can manage doctors
-    public class DoctorsController : ProfileImageBaseController
+    [Route("api/[controller]")] // Base route: /api/Doctors
+    public class DoctorsController : BaseApiController // Inherits from your BaseApiController
     {
         private readonly IDoctorService _doctorService;
-        public DoctorsController(IDoctorService doctorService,
-             IImageProfile profileImageService,
-            ILogger<DoctorsController> logger) : base(profileImageService, logger) 
+        private readonly ILogger<DoctorsController> _logger;
+
+        public DoctorsController(IDoctorService doctorService, ILogger<DoctorsController> logger)
+        {
+            _doctorService = doctorService;
+            _logger = logger;
+        }
+
+        // --- PUBLIC/WEBSITE ENDPOINTS ---
+
+        [HttpGet("hospital-specialty/{hospitalSpecialtyId}")]
+        [AllowAnonymous] // Publicly accessible for website visitors
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResponseDto<DoctorProfileDto>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetDoctorsByHospitalSpecialty(
+            int hospitalSpecialtyId,
+            [FromQuery] int PageNumber = 1,
+            [FromQuery] int PageSize = 10,
+            [FromQuery] string? SearchTerm = null)
+        {
+            if (hospitalSpecialtyId <= 0 || PageNumber < 1 || PageSize < 1)
             {
-                _doctorService = doctorService;
+                return BadRequest("Invalid pagination parameters or HospitalSpecialtyId.");
             }
-
-            // GET: api/Doctors (Admin dashboard list of doctors)
-            [HttpGet]
-            [ProducesResponseType(StatusCodes.Status200OK)]
-            public async Task<ActionResult<IEnumerable<DoctorTableDto>>> GetAllDoctorsForAdmin()
+            try
             {
-                var hospitalId = GetCurrentUserId(); // Get the authenticated admin's HospitalAsset.Id
-                if (hospitalId == null) return Unauthorized("Hospital ID could not be determined from token.");
-
-                // Pass hospitalId to service for scoping
-                var doctors = await _doctorService.GetAllDoctorsForAdminDashboardAsync(hospitalId);
-                return Ok(doctors);
+                var paginationParams = new PaginationParameters { PageNumber = PageNumber, PageSize = PageSize, SearchTerm = SearchTerm };
+                var result = await _doctorService.GetAllDoctorsPerHospitalSpecialty(hospitalSpecialtyId, paginationParams);
+                return Ok(result);
             }
-
-            // GET: api/Doctors/{id} (Admin view single doctor details modal)
-            [HttpGet("{id}")]
-            [ProducesResponseType(StatusCodes.Status200OK)]
-            [ProducesResponseType(StatusCodes.Status404NotFound)]
-            [ProducesResponseType(StatusCodes.Status403Forbidden)] // Add Forbidden for resource mismatch
-            public async Task<ActionResult<DoctorTableDto>> GetDoctorForAdmin(string id)
+            catch (Exception ex)
             {
-                var hospitalId = GetCurrentUserId(); // Get the authenticated admin's HospitalAsset.Id
-                if (hospitalId == null) return Unauthorized("Hospital ID could not be determined from token.");
-
-                // Pass hospitalId to service for scoping
-                var doctor = await _doctorService.GetDoctorByIdForAdminAsync(id, hospitalId);
-                if (doctor == null)
-                {
-                    return NotFound("Doctor not found or you do not have permission to view this doctor.");
-                }
-                return Ok(doctor);
+                _logger.LogError(ex, $"Error getting doctors for hospital specialty ID: {hospitalSpecialtyId}.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving doctors for the specialty.");
             }
+        }
 
-            // POST: api/Doctors (Admin create doctor)
-            [HttpPost]
-            [ProducesResponseType(StatusCodes.Status201Created)]
-            [ProducesResponseType(StatusCodes.Status400BadRequest)]
-            [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-            public async Task<ActionResult<DoctorTableDto>> CreateDoctor([FromBody] DoctorCreateDto createDto) // Changed return type to DoctorDto
+        // --- HOSPITAL ADMIN DASHBOARD ENDPOINTS ---
+
+        [HttpGet("my-hospital")]
+        [Authorize(Roles = "HospitalAdmin")] // Only Hospital Admins can view doctors for their hospital
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResponseDto<DoctorProfileDto>))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)] // If GetCurrentUserId fails
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetMyHospitalDoctors(
+            [FromQuery] int PageNumber = 1,
+            [FromQuery] int PageSize = 10,
+            [FromQuery] string? SearchTerm = null,
+            [FromQuery] Status? UserStatus = null)
+        {
+            var hospitalId = GetCurrentUserId(); // Get hospital ID from the authenticated user's token
+            if (hospitalId == null) return Unauthorized("Hospital ID could not be determined from your token.");
+
+            if (PageNumber < 1 || PageSize < 1) return BadRequest("PageNumber and PageSize must be greater than 0.");
+
+            try
             {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var hospitalId = GetCurrentUserId(); // Get the authenticated admin's HospitalAsset.Id
-                if (hospitalId == null) return Unauthorized("Hospital ID could not be determined from token.");
-
-                try
-                {
-                    // Pass hospitalId to service for scoping
-                    var doctorDto = await _doctorService.CreateDoctorAsync(createDto, hospitalId);
-                    // Return DoctorDto here, which includes the generated Id
-                    return CreatedAtAction(nameof(GetDoctorForAdmin), new { id = doctorDto.Id }, doctorDto);
-                }
-                catch (ArgumentException ex) // For invalid HospitalSpecialtyId or duplicate email
-                {
-                    return BadRequest(ex.Message);
-                }
-                catch (ApplicationException ex) // For Identity errors
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-                }
+                var paginationParams = new PaginationParameters { PageNumber = PageNumber, PageSize = PageSize, SearchTerm = SearchTerm, UserStatus = UserStatus };
+                var result = await _doctorService.GetAllDoctorsForAdminDashboardAsync(hospitalId, paginationParams);
+                return Ok(result);
             }
-            // This handles updating doctor details and REASSIGNING them to a different specialty.
-            [HttpPut("{id}")]
-            [ProducesResponseType(StatusCodes.Status204NoContent)]
-            [ProducesResponseType(StatusCodes.Status400BadRequest)]
-            [ProducesResponseType(StatusCodes.Status404NotFound)]
-            [ProducesResponseType(StatusCodes.Status403Forbidden)] // Add Forbidden for resource mismatch
-            [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-            public async Task<IActionResult> UpdateDoctor(string id, [FromBody] DoctorUpdateDto updateDto)
+            catch (Exception ex)
             {
-                if (id != updateDto.Id)
-                {
-                    return BadRequest("ID mismatch.");
-                }
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var hospitalId = GetCurrentUserId(); // Get the authenticated admin's HospitalAsset.Id
-                if (hospitalId == null) return Unauthorized("Hospital ID could not be determined from token.");
-
-                try
-                {
-                    // Pass hospitalId to service for scoping
-                    var updated = await _doctorService.UpdateDoctorAsync(updateDto, hospitalId);
-                    if (!updated)
-                    {
-                        // Service returns false if doctor not found. If service throws Unauthorized, it's a Forbid.
-                        return NotFound("Doctor not found.");
-                    }
-                    return NoContent();
-                }
-                catch (ArgumentException ex) // For invalid HospitalSpecialtyId or other validation issues
-                {
-                    return BadRequest(ex.Message);
-                }
-                catch (UnauthorizedAccessException) // From service if doctor does not belong to this hospital
-                {
-                    return Forbid("You do not have permission to update this doctor."); // 403 Forbidden
-                }
-                catch (ApplicationException ex) // For Identity update errors
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-                }
+                _logger.LogError(ex, $"Error getting doctors for hospital admin dashboard for Hospital ID: {hospitalId}.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving doctors for your hospital.");
             }
+        }
 
-            // DELETE: api/Doctors/{id} (Admin delete doctor)
-            [HttpDelete("{id}")]
-            [ProducesResponseType(StatusCodes.Status204NoContent)]
-            [ProducesResponseType(StatusCodes.Status404NotFound)]
-            [ProducesResponseType(StatusCodes.Status403Forbidden)] // Added for clarity
-            [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-            public async Task<IActionResult> DeleteDoctor(string id)
+        // POST: api/Doctors
+        [HttpPost]
+        [Authorize(Roles = "HospitalAdmin")] // Only Hospital Admins can add doctors
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(DoctorProfileDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)] // If GetCurrentUserId fails
+        [ProducesResponseType(StatusCodes.Status409Conflict)] // For email already exists/other business conflicts
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CreateDoctor([FromBody] DoctorCreateDto createDto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var hospitalId = GetCurrentUserId(); // Get hospital ID from the authenticated user's token
+            if (hospitalId == null) return Unauthorized("Hospital ID could not be determined from your token.");
+
+            try
             {
-                var hospitalId = GetCurrentUserId(); // Get the authenticated admin's HospitalAsset.Id
-                if (hospitalId == null) return Unauthorized("Hospital ID could not be determined from token.");
-
-                try
-                {
-                    // Calls DoctorService.DeleteDoctorAsync(id, hospitalId)
-                    var deleted = await _doctorService.DeleteDoctorAsync(id, hospitalId);
-                    if (!deleted)
-                    {
-                        return NotFound("Doctor not found."); // If service threw Unauthorized, it would be caught below
-                    }
-                    return NoContent(); // Success, 204 No Content
-                }
-                catch (UnauthorizedAccessException) // Catches the exception from the service if not permitted
-                {
-                    return Forbid("You do not have permission to delete this doctor."); // 403 Forbidden
-                }
-                catch (ApplicationException ex) // Catches Identity-related errors
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-                }
+                var result = await _doctorService.CreateDoctorAsync(createDto, hospitalId);
+                // CreatedAtAction requires a route name and route values to build the URL for the created resource.
+                // Assuming a GET endpoint for a single doctor like GetDoctorById exists at "api/Doctors/{doctorId}".
+                return CreatedAtAction(nameof(GetDoctorById), new { doctorId = result.Id }, result);
             }
-
-
-
-            // GET: api/Doctors/hospital-specialties/{hospitalId}
-            // This endpoint helps admins get the list of HospitalSpecialties for a dropdown when adding/updating doctors
-            [HttpGet("hospital-specialties")] // No {hospitalId} in route, get from token
-            [ProducesResponseType(StatusCodes.Status200OK)]
-            [ProducesResponseType(StatusCodes.Status404NotFound)] // If hospitalId is invalid/not found
-            public async Task<ActionResult<IEnumerable<HospitalSpecialtyDto>>> GetHospitalSpecialtiesForDoctorAssignment()
+            catch (ArgumentException ex) // For invalid HospitalSpecialtyId, GovernorateId, CountryId etc.
             {
-                var hospitalId = GetCurrentUserId(); // Get the authenticated admin's HospitalAsset.Id
-                if (hospitalId == null) return Unauthorized("Hospital ID could not be determined from token.");
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex) // For email already exists, inactive specialty, Identity creation failures etc.
+            {
+                return Conflict(ex.Message); // 409 Conflict for resource conflicts or business rule violations
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating doctor account.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while creating the doctor account.");
+            }
+        }
 
-                var hospitalSpecialties = await _doctorService.GetAvailableHospitalSpecialtiesForAssignmentAsync(hospitalId);
-                if (hospitalSpecialties == null || !hospitalSpecialties.Any())
+        // GET: api/Doctors/{doctorId}
+
+        [HttpGet("{doctorId}")]
+        [Authorize(Roles = "HospitalAdmin")] // Assuming HospitalAdmin can view individual doctors
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DoctorProfileDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)] // For invalid doctorId format
+        [ProducesResponseType(StatusCodes.Status404NotFound)] // If doctor not found
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetDoctorById(string doctorId)
+        {
+            if (string.IsNullOrWhiteSpace(doctorId)) return BadRequest("Doctor ID cannot be empty.");
+            try
+            {
+                var result = await _doctorService.GetDoctorByIdAsync(doctorId);
+                if (result == null) return NotFound("Doctor not found.");
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting doctor by ID: {doctorId}.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the doctor.");
+            }
+        }
+
+        // PUT: api/Doctors/{doctorId}
+        /// <summary>
+        /// Updates an existing doctor's profile and/or assigned hospital specialty.
+        /// Ensures the doctor is affiliated with the current authenticated hospital.
+        /// </summary>
+        /// <param name="doctorId">The ID of the doctor to update (from route).</param>
+        /// <param name="updateDto">Doctor update data.</param>
+        /// <returns>The updated DoctorProfileDto.</returns>
+        [HttpPut("{doctorId}")]
+        [Authorize(Roles = "HospitalAdmin")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DoctorProfileDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)] // For validation errors
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)] // If GetCurrentUserId fails
+        [ProducesResponseType(StatusCodes.Status403Forbidden)] // If doctor not affiliated with hospital
+        [ProducesResponseType(StatusCodes.Status404NotFound)] // If doctor not found
+        [ProducesResponseType(StatusCodes.Status409Conflict)] // For email conflict / business rule violation
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateDoctor(string doctorId, [FromBody] DoctorUpdateDto updateDto)
+        {
+            // Validate route ID matches DTO ID (if DTO had ID) or simply ensures route ID is valid
+            if (string.IsNullOrWhiteSpace(doctorId)) return BadRequest("Doctor ID cannot be empty.");
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var hospitalId = GetCurrentUserId(); // Get hospital ID from the authenticated user's token
+            if (hospitalId == null) return Unauthorized("Hospital ID could not be determined from your token.");
+
+            try
+            {
+                // Call service method with doctorId from route, DTO from body, and hospitalId from token
+                var result = await _doctorService.UpdateDoctorAsync(doctorId, updateDto, hospitalId);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex) // Doctor not found
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentException ex) // Invalid HospitalSpecialtyId, GovernorateId, CountryId etc.
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex) // Doctor not affiliated with hospital
+            {
+                return Forbid(ex.Message); // 403 Forbidden
+            }
+            catch (InvalidOperationException ex) // For email conflict, inactive specialty, Identity update failures etc.
+            {
+                return Conflict(ex.Message); // 409 Conflict
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating doctor with ID: {doctorId}.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while updating the doctor.");
+            }
+        }
+
+        // DELETE: api/Doctors/{doctorId}
+        [HttpDelete("{doctorId}")]
+        [Authorize(Roles = "HospitalAdmin")] // Assuming HospitalAdmin can soft delete doctors
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DoctorProfileDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)] // For invalid doctorId
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)] // If GetCurrentUserId fails
+        [ProducesResponseType(StatusCodes.Status403Forbidden)] // If doctor not affiliated with hospital
+        [ProducesResponseType(StatusCodes.Status404NotFound)] // If doctor not found
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteDoctor(string doctorId)
+        {
+            if (string.IsNullOrWhiteSpace(doctorId)) return BadRequest("Doctor ID cannot be empty.");
+
+            var hospitalId = GetCurrentUserId(); // Get hospital ID from the authenticated user's token
+            if (hospitalId == null) return Unauthorized("Hospital ID could not be determined from your token.");
+
+            try
+            {
+                
+                var result = await _doctorService.DeleteDoctorAsync(doctorId, hospitalId);
+                return Ok(result); 
+            }
+            catch (KeyNotFoundException ex) 
+            {
+                return NotFound(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message); // 403 Forbidden
+            }
+            catch (InvalidOperationException ex) // Identity deactivation failure
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message); // Or 409 Conflict if specific reason
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting doctor with ID: {doctorId}.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while deleting the doctor.");
+            }
+        }
+
+
+        [HttpPut("{doctorId}/activate")]
+        [Authorize(Roles = "HospitalAdmin")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DoctorProfileDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)] // If doctor not affiliated
+        [ProducesResponseType(StatusCodes.Status404NotFound)] // If doctor not found
+        [ProducesResponseType(StatusCodes.Status409Conflict)] // If already active or other business conflicts
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> ActivateDoctor(string doctorId)
+        {
+            if (string.IsNullOrWhiteSpace(doctorId)) return BadRequest("Doctor ID cannot be empty.");
+
+            var hospitalId = GetCurrentUserId(); // Get hospital ID from token
+            if (hospitalId == null) return Unauthorized("Hospital ID could not be determined from your token.");
+
+            try
+            {
+                // 1. Get the current doctor's full profile. This is crucial
+                // because DoctorUpdateDto has [Required] fields that must be sent,
+                // even if only Status is changing.
+                var currentDoctorProfile = await _doctorService.GetDoctorByIdAsync(doctorId);
+                if (currentDoctorProfile == null) return NotFound("Doctor not found.");
+
+                // 2. Validate doctor's affiliation *before* attempting update.
+                if (currentDoctorProfile.HospitalId != hospitalId)
                 {
-                    return NotFound("No specialties are assigned to your hospital."); // More specific error
+                    return Forbid("You do not have permission to activate this doctor as they are not affiliated with your hospital.");
                 }
-                return Ok(hospitalSpecialties);
+
+                // 3. Create a DoctorUpdateDto based on current data,
+    
+                var updateDto = new DoctorUpdateDto
+                {
+                   
+                    FirstName = currentDoctorProfile.FirstName,
+                    LastName = currentDoctorProfile.LastName,
+                    Email = currentDoctorProfile.Email, 
+                    PhoneNumber = currentDoctorProfile.Phone,
+                    Gender = currentDoctorProfile.Gender,
+                    Address = currentDoctorProfile.Address,
+                    City = currentDoctorProfile.City,
+                    GovernorateId = currentDoctorProfile.Governorate?.Id ?? 0, 
+                    CountryId = currentDoctorProfile.Country?.Id ?? 0,
+                    DateOfBirth = currentDoctorProfile.DateOfBirth,
+                    MedicalLicenseNumber = currentDoctorProfile.MedicalLicenseNumber,
+                    YearsOfExperience = currentDoctorProfile.YearsOfExperience,
+                    Bio = currentDoctorProfile.Bio,
+                    Qualification = currentDoctorProfile.Qualification,
+                    HospitalSpecialtyId = currentDoctorProfile.SpecialtyId,
+                    Status = Status.Active // Set the desired status
+                };
+
+                // 4. Call the main UpdateDoctorAsync service method
+                var result = await _doctorService.UpdateDoctorAsync(doctorId, updateDto, hospitalId);
+
+                return Ok(result); // Return the updated DoctorProfileDto
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (InvalidOperationException ex) // For business rule violations (e.g., already active)
+            {
+                return Conflict(ex.Message); // 409 Conflict
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error activating doctor {doctorId}.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while activating the doctor.");
             }
         }
     }
+}

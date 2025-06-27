@@ -1,4 +1,5 @@
 ﻿using Elagy.Core.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,8 @@ namespace Elagy.Core.IRepositories
 {
     public interface IHospitalSpecialtyRepository : IGenericRepository<HospitalSpecialty>
     {
-        Task<HospitalSpecialty> GetByIdAsync(int id);
-        Task<IEnumerable<HospitalSpecialty>> GetActiveHospitalSpecialtiesByHospitalIdAsync(string hospitalId);
+        Task<HospitalSpecialty?> GetByIdWithDetailsAsync(int hospitalspecialtyid);
+        Task<HospitalSpecialty?> GetByHospitalAndSpecialtyIdAsync(string hospitalId, int specialtyId);
+
     }
 }

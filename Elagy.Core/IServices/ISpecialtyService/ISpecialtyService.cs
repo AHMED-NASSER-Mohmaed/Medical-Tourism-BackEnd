@@ -13,14 +13,14 @@ namespace Elagy.Core.IServices.ISpecialtyService
     {
 
 
-        # region Supper Admin Dashboard CRUD
-        Task<PagedResponseDto<SpecialtyResponseDto>> GetAllSpecialties();
+        #region Supper Admin Dashboard CRUD
+        Task<PagedResponseDto<SpecialtyResponseDto>> GetAllSpecialties(PaginationParameters paginationParameters);
         Task<SpecialtyResponseDto> CreateSpecialty(SpecialtyCreateDto createDto);
         Task<SpecialtyResponseDto> DeleteSpecialtyAsync(int id);
-        Task<SpecialtyResponseDto> UpdateSpecialty(SpecialtyUpdateDto updateDto);
+        Task<SpecialtyResponseDto> UpdateSpecialty(int specialtyId,SpecialtyUpdateDto updateDto);
         #endregion
 
-
+        Task<SpecialtyResponseDto?> GetSpecialtyIdAsync(int id);
         Task<SpecialtyLinkToHospitalDto?> LinkSpecialtyToHospital(int specialtyId, string hospitalId);
 
         //<summary>

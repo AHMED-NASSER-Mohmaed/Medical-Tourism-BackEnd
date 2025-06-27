@@ -9,12 +9,11 @@ namespace Elagy.Core.IRepositories
 {
     public interface IDoctorRepository : IGenericRepository<Doctor>
     {
-        Task<IEnumerable<Doctor>> GetDoctorsByHospitalSpecialtyAsync(int hospitalSpecialtyId); // For DoctorTableDto
-        public Task<Doctor> GetDoctorIdAsync(int id);
-
-        Task<Doctor> GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync(string doctorId);
-
-        // For Admin Dashboard: Get all doctors with their full navigation for the table view
-        Task<IEnumerable<Doctor>> GetAllDoctorsWithHospitalSpecialtyAndSpecialtyAsync(); 
+        //for hospital admin
+        Task<IEnumerable<Doctor>> GetDoctorsByHospitalIdAsync(string hospitalId, bool isActive = true);
+        // for website show 
+        Task<IEnumerable<Doctor>> GetDoctorsByHospitalSpecialtyIdAsync(int hospitalSpecialtyId, bool isActive = true);
+        //show doctor details
+        Task<Doctor?> GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync(string doctorId); 
     }
 }

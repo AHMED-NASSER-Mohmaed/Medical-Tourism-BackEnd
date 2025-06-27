@@ -1,4 +1,5 @@
 ﻿using Elagy.Core.Entities;
+using Elagy.Core.Enums;
 using Elagy.Core.IRepositories;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -13,38 +14,46 @@ namespace Elagy.DAL.Repositories
     {
         public DoctorRepository(ApplicationDbContext context) : base(context) { }
 
-        public async Task<IEnumerable<Doctor>> GetAllDoctorsWithHospitalSpecialtyAndSpecialtyAsync()
+
+         private IQueryable<Doctor> GetDoctorsWithAllDetails()
         {
-            return await _dbSet.Include(d => d.HospitalSpecialty)
-                               .ThenInclude(hs => hs.Specialty)
-                              .Include(d => d.HospitalSpecialty)
-                               .ThenInclude(hs => hs.HospitalAsset)
-                              .ToListAsync();
+            return _dbSet
+                .Include(d => d.Governorate)
+                    .ThenInclude(g => g.Country) 
+                .Include(d => d.HospitalSpecialty)
+                    .ThenInclude(hs => hs.HospitalAsset)
+                .Include(d => d.HospitalSpecialty)
+                    .ThenInclude(hs => hs.Specialty);
+        }
+     
+        public async Task<IEnumerable<Doctor>> GetDoctorsByHospitalIdAsync(string hospitalId, bool isActive = true)
+        {
+            var query = GetDoctorsWithAllDetails()
+                .Where(d => d.HospitalSpecialty.HospitalAssetId == hospitalId);
+
+            if (isActive)
+            {
+                query = query.Where(d => d.Status == Status.Active);
+            }
+            return await query.ToListAsync();
         }
 
-        public async Task<Doctor> GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync(string doctorId)
+        public async Task<IEnumerable<Doctor>> GetDoctorsByHospitalSpecialtyIdAsync(int hospitalSpecialtyId, bool isActive = true)
         {
-            return await _dbSet.Where(d => d.Id == doctorId)
-                             .Include(d => d.HospitalSpecialty)
-                                .ThenInclude(hs => hs.Specialty) // For Doctor's specific Specialty name
-                             .Include(d => d.HospitalSpecialty)
-                                .ThenInclude(hs => hs.HospitalAsset) // For Hospital details (e.g., name for display)
-                             .FirstOrDefaultAsync();
+            var query = GetDoctorsWithAllDetails()
+                .Where(d => d.HospitalSpecialtyId == hospitalSpecialtyId);
+
+            if (isActive)
+            {
+                query = query.Where(d => d.Status == Status.Active);
+            }
+            return await query.ToListAsync();
         }
 
-        public async Task<Doctor> GetDoctorIdAsync(int id)
+        public async Task<Doctor?> GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync(string doctorId)
         {
-            return await _dbSet.FindAsync(id);
-        }
-
-        public async Task<IEnumerable<Doctor>> GetDoctorsByHospitalSpecialtyAsync(int hospitalSpecialtyId)
-        {
-            return await _dbSet.Where(d => d.HospitalSpecialtyId == hospitalSpecialtyId)
-                                  .Include(d => d.HospitalSpecialty) // Must include to access nested Specialty/HospitalAsset
-                                     .ThenInclude(hs => hs.Specialty)
-                                  .Include(d => d.HospitalSpecialty)
-                                     .ThenInclude(hs => hs.HospitalAsset)
-                                  .ToListAsync();
+            return await GetDoctorsWithAllDetails()
+                .FirstOrDefaultAsync(d => d.Id == doctorId);
         }
     }
 }

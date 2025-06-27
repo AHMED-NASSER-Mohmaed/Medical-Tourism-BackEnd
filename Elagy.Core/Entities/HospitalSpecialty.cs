@@ -1,5 +1,4 @@
-﻿using Elagy.Core.Enums;
-using Microsoft.EntityFrameworkCore;
+﻿
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
@@ -18,10 +17,7 @@ namespace Elagy.Core.Entities
 
         public int SpecialtyId { get; set; } // Foreign Key to Specialty
         public Specialty Specialty { get; set; }
-
-        public bool  IsActive { get; set; }
-
-        // Navigation property for Doctors working in this specific Hospital-Specialty combination
+      
         public ICollection<Doctor> Doctors { get; set; }
         public ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
     }

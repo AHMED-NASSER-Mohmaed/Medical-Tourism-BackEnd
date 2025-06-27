@@ -10,8 +10,10 @@ namespace Elagy.Core.IRepositories
     public interface ISpecialtyRepository : IGenericRepository<Specialty>
     {
     
-        public Task<Specialty> GetSpecialtyIdAsync(int id);
-        Task<bool> ExistsByNameAsync(string name); // <--- It is declared HERE
-        void SoftDelete(Specialty entity);
+       Task<Specialty> GetSpecialtyIdAsync(int id);
+        Task<IEnumerable<Specialty>> GetSpecialtiesByHospitalIdAsync(string hospitalId, bool isActive = true);
+        Task<IEnumerable<Specialty>> GetAllSpecialtiesAsync(bool isActive = true);
+        Task<IEnumerable<Specialty>> GetUnlinkedSpecialtiesForHospitalAsync(string hospitalId);
+
     }
 }

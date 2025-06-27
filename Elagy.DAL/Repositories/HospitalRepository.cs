@@ -20,10 +20,10 @@ namespace Elagy.DAL.Repositories
 
         public async Task<IEnumerable<HospitalSpecialty>> GetHospitalSpecialtiesInHospitalAsync(string hospitalId)
         {
-            return await _context.HospitalSpecialties // Start from the join table directly
+            return await _context.HospitalSpecialties 
                 .Where(hs => hs.HospitalAssetId == hospitalId)
-                .Include(hs => hs.Specialty) // Include Specialty details
-                .Include(hs => hs.HospitalAsset) // Include HospitalAsset details (for nested DTO)
+                .Include(hs => hs.Specialty) 
+                .Include(hs => hs.HospitalAsset) 
                 .ToListAsync();
 
         }
@@ -31,10 +31,10 @@ namespace Elagy.DAL.Repositories
 
         public async Task<IQueryable<HospitalAsset>> GetHospitalsBySpecialtyQueryAsync(int specialtyId)
         {
-            return _context.HospitalSpecialties // Starting from the join table
+            return _context.HospitalSpecialties 
                 .Where(hs => hs.SpecialtyId == specialtyId)
-                .Select(hs => hs.HospitalAsset) // Select the HospitalAsset entity
-                .Distinct(); // Ensure unique hospitals
+                .Select(hs => hs.HospitalAsset)
+                .Distinct(); 
         }
     }
     }

@@ -31,7 +31,6 @@ namespace Elagy.Core.DTOs.Auth
         [Required]
         public Gender Gender { get; set; }
 
-
         #region
         [Required]
         public string Address { get; set; } // Full address as a single string
@@ -44,7 +43,6 @@ namespace Elagy.Core.DTOs.Auth
         [Required]
         public int CountryId { get; set; } 
         #endregion
-
 
         [Required]
         public DateTime DateOfBirth { get; set; }

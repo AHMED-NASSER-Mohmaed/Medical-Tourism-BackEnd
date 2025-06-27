@@ -1,293 +1,394 @@
-﻿using AutoMapper;
+﻿
+using AutoMapper;
 using Elagy.Core.DTOs.Doctor;
-using Elagy.Core.DTOs.Specialty;
-using Elagy.Core.Entities;
-using Elagy.Core.IRepositories;
+using Elagy.Core.DTOs.Pagination;
+using Elagy.Core.Entities; 
+using Elagy.Core.Enums; 
+using Elagy.Core.IRepositories; 
 using Elagy.Core.IServices;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore; 
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
 
-public class DoctorService : IDoctorService
+namespace Elagy.BL.Services
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
-    private readonly UserManager<User> _userManager;
-    private readonly ILogger<DoctorService> _logger;
-
-    public DoctorService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<User> userManager, ILogger<DoctorService> logger)
+    public class DoctorService : IDoctorService
     {
-        _unitOfWork = unitOfWork;
-        _mapper = mapper;
-        _userManager = userManager;
-        _logger = logger;
-    }
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+        private readonly ILogger<DoctorService> _logger;
+        private readonly UserManager<User> _userManager;
 
-    // Admin Dashboard - Get all doctors for the table view
-    public async Task<IEnumerable<DoctorTableDto>> GetAllDoctorsForAdminDashboardAsync(string hospitalId)
-    {
-        var doctors = await _unitOfWork.Doctors.GetAllDoctorsWithHospitalSpecialtyAndSpecialtyAsync(); // Gets all doctors with nav props
-                                                                                                       // Filter by hospitalId in memory if the initial fetch is too broad, or add .Where() to repo method for efficiency
-        var scopedDoctors = doctors.Where(d => d.HospitalSpecialty?.HospitalAssetId == hospitalId).ToList();
-
-        List<DoctorTableDto> DOCDTOS = new List<DoctorTableDto>();
-        foreach (var doctor in scopedDoctors)
+        public DoctorService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<DoctorService> logger, UserManager<User> userManager)
         {
-            DoctorTableDto DoctorDTO = new DoctorTableDto()
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _logger = logger;
+            _userManager = userManager;
+        }
+
+        /// Retrieves a paginated list of doctors for the Hospital Admin Dashboard,
+        /// filtered by the hospital ID and optional search/status parameters.
+        public async Task<DoctorProfileDto?> GetDoctorByIdAsync(string doctorId)
+        {
+            try
             {
-                Id = doctor.Id,
-                Name=doctor.FirstName+""+doctor.LastName,
-                Email=doctor.Email,
-                Specialist=doctor.HospitalSpecialty.Specialty.Name,
-            };
-            DOCDTOS.Add(DoctorDTO);
-
-        }
-        return DOCDTOS;
-    }
-
-    // Admin Dashboard - Get single doctor for "View Details" modal
-    public async Task<DoctorTableDto> GetDoctorByIdForAdminAsync(string id, string hospitalId)
-    {
-        var doctor = await _unitOfWork.Doctors.GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync(id);
-
-        // SCOPING LOGIC: Ensure the doctor belongs to this hospital
-        if (doctor == null || doctor.HospitalSpecialty?.HospitalAssetId != hospitalId)
-        {
-            _logger.LogWarning($"Doctor ID {id} not found or does not belong to hospital ID {hospitalId}.");
-            return null;
-        }
-        DoctorTableDto DoctorDTO = new DoctorTableDto()
-        {
-            Id = doctor.Id,
-            Name = doctor.FirstName + "" + doctor.LastName,
-            Email = doctor.Email,
-            Specialist = doctor.HospitalSpecialty.Specialty.Name,
-        };
-        return DoctorDTO;
-    }
-
-    // Admin Dashboard - Create a new Doctor
-    public async Task<DoctorTableDto> CreateDoctorAsync(DoctorCreateDto createDto, string hospitalId)
-    {
-        var hospitalSpecialty = await _unitOfWork.Hospitals.AsQueryable()
-                                     .SelectMany(h => h.HospitalSpecialties)
-                                     .Where(hs => hs.Id == createDto.HospitalSpecialtyId && hs.HospitalAssetId == hospitalId) // SCOPING VALIDATION
-                                     .Include(hs => hs.Specialty) // Required for mapping DoctorDto later
-                                     .Include(hs => hs.HospitalAsset) // Required for mapping DoctorDto later
-                                     .FirstOrDefaultAsync();
-
-        if (hospitalSpecialty == null)
-        {
-            _logger.LogWarning($"Attempted to create doctor with invalid or unauthorized HospitalSpecialtyId: {createDto.HospitalSpecialtyId} for hospital {hospitalId}");
-            throw new ArgumentException($"The selected specialty/clinic (ID: {createDto.HospitalSpecialtyId}) is not valid or does not belong to your hospital.");
-        }
-
-        // 2. Check if email is already registered
-        var userExists = await _userManager.FindByEmailAsync(createDto.Email);
-        if (userExists != null)
-        {
-            _logger.LogWarning($"Attempted to create doctor with existing email: {createDto.Email}");
-            throw new ArgumentException("Email address is already registered.");
-        }
-
-        Doctor doctor = new Doctor()
-        {
-            FirstName = createDto.FirstName,
-            LastName = createDto.LastName,
-            Email = createDto.Email,
-            UserType = Elagy.Core.Enums.UserType.Doctor,
-            Status = Elagy.Core.Enums.Status.Active,
-            EmailConfirmed = true,
-            //NationalId = createDto.NationalId,
-            //PassportId = createDto.PassportId,
-            //Nationality=createDto.Nationality,
-            //ImageId=createDto.ImageId,
-            //ImageURL=createDto.ImageURL,
-            Gender=createDto.Gender,
-            //ZipCode=createDto.ZipCode,
-            //StreetNumber=createDto.StreetNumber,
-            Governorate=createDto.Governorate,
-            DateOfBirth=createDto.DateOfBirth,
-            YearsOfExperience=createDto.YearsOfExperience,
-            Bio=createDto.Bio,
-            Qualification=createDto.Qualification,
-            MedicalLicenseNumber=createDto.MedicalLicenseNumber,
-            HospitalSpecialtyId=createDto.HospitalSpecialtyId
-
-
-
-        };
-
-   
-        // 5. Create the User via UserManager
-        var result = await _userManager.CreateAsync(doctor, createDto.Password);
-
-        if (!result.Succeeded)
-        {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            _logger.LogError($"Doctor creation failed for {createDto.Email}: {errors}");
-            throw new ApplicationException($"Failed to create doctor: {errors}");
-        }
-
-        // 6. Assign role
-        await _userManager.AddToRoleAsync(doctor, "Doctor");
-
-        _logger.LogInformation($"Doctor '{doctor.Email}' created successfully by admin for hospital ID: {hospitalId}. User ID: {doctor.Id}");
-
-        // Manually set the navigation property for the DTO mapping if needed immediately, as Identity doesn't fill this
-        doctor.HospitalSpecialty = hospitalSpecialty;
-
-        return _mapper.Map<DoctorTableDto>(doctor);
-    }
-
-    // Admin Dashboard - Update existing Doctor
-    public async Task<bool> UpdateDoctorAsync(DoctorUpdateDto updateDto, string hospitalId)
-    {
-
-        var doctor = await _unitOfWork.Doctors.GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync(updateDto.Id);
-        if (doctor == null)
-        {
-            _logger.LogWarning($"Doctor with ID {updateDto.Id} not found for update.");
-            return false;
-        }
-
-        // SCOPING LOGIC: Check if the doctor belongs to this hospital
-        if (doctor.HospitalSpecialty?.HospitalAssetId != hospitalId)
-        {
-            _logger.LogWarning($"Hospital Admin {hospitalId} attempted to update doctor {updateDto.Id} which does not belong to their hospital.");
-            throw new UnauthorizedAccessException("You do not have permission to update this doctor."); // Controller will catch this
-        }
-
-        // Validate HospitalSpecialtyId (the new one) exists AND belongs to the current hospital
-        var newHospitalSpecialty = await _unitOfWork.Hospitals.AsQueryable()
-                                        .SelectMany(h => h.HospitalSpecialties)
-                                        .Where(hs => hs.Id == updateDto.HospitalSpecialtyId && hs.HospitalAssetId == hospitalId) // SCOPING VALIDATION
-                                        .FirstOrDefaultAsync();
-
-        if (newHospitalSpecialty == null)
-        {
-            _logger.LogWarning($"Attempted to update doctor {updateDto.Id} with invalid or unauthorized HospitalSpecialtyId: {updateDto.HospitalSpecialtyId} for hospital {hospitalId}");
-            throw new ArgumentException($"The selected new specialty/clinic (ID: {updateDto.HospitalSpecialtyId}) is not valid or does not belong to your hospital.");
-        }
-
-        // Update IdentityUser properties
-        doctor.Email = updateDto.Email;
-        doctor.PhoneNumber = updateDto.PhoneNumber;
-        doctor.FirstName = updateDto.FirstName;
-        doctor.LastName = updateDto.LastName;
-        //doctor.Nationality = updateDto.Nationality;
-        //doctor.NationalId = updateDto.NationalId;
-        //doctor.PassportId = updateDto.PassportId;
-        doctor.ImageURL = updateDto.ImageURL;
-        doctor.Gender = updateDto.Gender;
-        doctor.Status = updateDto.Status;
-        //doctor.ZipCode = updateDto.ZipCode;
-        //doctor.StreetNumber = updateDto.StreetNumber;
-        //doctor.Governorate = updateDto.Governorate;
-        doctor.DateOfBirth = updateDto.DateOfBirth;
-
-        var userResult = await _userManager.UpdateAsync(doctor);
-        if (!userResult.Succeeded)
-        {
-            var errors = string.Join(", ", userResult.Errors.Select(e => e.Description));
-            _logger.LogError($"Failed to update doctor user details for {updateDto.Id}: {errors}");
-            throw new ApplicationException($"Failed to update doctor user details: {errors}");
-        }
-
-        // Update Doctor-specific properties, including the reassignment
-        doctor.MedicalLicenseNumber = updateDto.MedicalLicenseNumber;
-        doctor.YearsOfExperience = updateDto.YearsOfExperience;
-        doctor.Bio = updateDto.Bio;
-        doctor.Qualification = updateDto.Qualification;
-        doctor.HospitalSpecialtyId = updateDto.HospitalSpecialtyId; // This is the REASSIGNMENT
-
-        _unitOfWork.Doctors.Update(doctor); // Mark for update if not handled by UserManager update or if you add new properties outside Identity
-        await _unitOfWork.CompleteAsync(); // Save specific doctor property changes
-        _logger.LogInformation($"Doctor ID {updateDto.Id} profile updated successfully by hospital admin {hospitalId}.");
-        return true;
-    }
-
-    // Admin Dashboard - Delete Doctor
-    public async Task<bool> DeleteDoctorAsync(string id, string hospitalId) // Corrected parameter order
-    {
-        var doctor = await _unitOfWork.Doctors.GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync(id);
-        if (doctor == null)
-        {
-            _logger.LogWarning($"Doctor with ID {id} not found for deletion.");
-            return false; // Doctor not found at all
-        }
-
-        // --- SCOPING LOGIC ---
-        // Critical step: Verify that the doctor to be deleted belongs to the current admin's hospital.
-        if (doctor.HospitalSpecialty?.HospitalAssetId != hospitalId)
-        {
-            _logger.LogWarning($"Hospital Admin {hospitalId} attempted to delete doctor {id} which does not belong to their hospital.");
-            // Throwing UnauthorizedAccessException is good practice for permission denial at the service layer.
-            throw new UnauthorizedAccessException("You do not have permission to delete this doctor.");
-        }
-
-        // --- EXECUTE HARD DELETE ---
-        // _userManager.DeleteAsync() performs a hard delete of the User record (and Doctor record if TPT cascade delete is configured).
-        var result = await _userManager.DeleteAsync(doctor);
-        if (!result.Succeeded)
-        {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            _logger.LogError($"Failed to delete doctor {id}: {errors}");
-            // Throw ApplicationException for Identity-related errors during deletion
-            throw new ApplicationException($"Failed to delete doctor: {errors}");
-        }
-        _logger.LogInformation($"Doctor ID {id} deleted successfully by hospital admin {hospitalId}.");
-        return true; // Deletion successful
-    }
-
-    // Admin Helper: Get available HospitalSpecialties for assignment dropdown
-    public async Task<IEnumerable<HospitalSpecialtyDto>> GetAvailableHospitalSpecialtiesForAssignmentAsync(string hospitalId)
-    {
-        var hospitalSpecialties = await _unitOfWork.Hospitals.GetHospitalSpecialtiesInHospitalAsync(hospitalId);
-        var hospitalSpecialtyDtos = new List<HospitalSpecialtyDto>();
-
-        foreach (var hsEntity in hospitalSpecialties)
-        {
-            var hsDto = new HospitalSpecialtyDto
-            {
-                Id = hsEntity.Id,
-                HospitalAssetId = hsEntity.HospitalAssetId,
-                SpecialtyId = hsEntity.SpecialtyId
-            };
-
-            // Explicitly map nested Specialty
-            if (hsEntity.Specialty != null)
-            {
-                hsDto.Specialty = new SpecialtyResponseDto
+ 
+                var doctor = await _unitOfWork.Doctors.GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync(doctorId);
+                if (doctor == null)
                 {
-                    Id = hsEntity.Specialty.Id,
-                    Name = hsEntity.Specialty.Name,
-                    Description = hsEntity.Specialty.Description
-                };
-            }
-
-            // Explicitly map nested HospitalAsset (requires casting because HospitalAsset is derived from ServiceAsset)
-            if (hsEntity.HospitalAsset != null)
-            {
-                var hospitalAsset = hsEntity.HospitalAsset as HospitalAsset; // Cast to HospitalAsset to access its specific properties
-                if (hospitalAsset != null)
-                {
-                    hsDto.HospitalAsset = new HospitalMinDto
-                    {
-                        Id = hospitalAsset.Id,
-                        //Name = hospitalAsset.AssetName, // AssetName from ServiceAsset base
-                     
-                    };
+                    _logger.LogInformation($"Doctor with ID {doctorId} not found in repository.");
+                    return null; // Return null if the doctor is not found
                 }
+                return _mapper.Map<DoctorProfileDto>(doctor);
             }
-            hospitalSpecialtyDtos.Add(hsDto);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving doctor by ID {doctorId}.");
+                throw; 
+            }
+        }
+        public async Task<PagedResponseDto<DoctorProfileDto>> GetAllDoctorsForAdminDashboardAsync(string hospitalId, PaginationParameters paginationParameters)
+        {
+            try
+            {
+                // 1. Get all doctors affiliated with the specific hospital.
+                var doctors = await _unitOfWork.Doctors.GetDoctorsByHospitalIdAsync(hospitalId, isActive: true);
+
+                // 2. Apply search term filter in service (on the in-memory or already-queried set).
+
+                var query = doctors.AsQueryable();
+                if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
+                {
+                    string term = paginationParameters.SearchTerm.Trim().ToLower();
+                    query = query.Where(d =>
+                        d.FirstName.ToLower().Contains(term) ||
+                        d.LastName.ToLower().Contains(term) ||
+                        d.Email.ToLower().Contains(term) 
+                       
+                    );
+                }
+
+                // 3. Apply UserStatus filter (Active, Deactivated, PendingApproval)
+   
+                if (paginationParameters.UserStatus.HasValue)
+                {
+                    query = query.Where(d => d.Status == paginationParameters.UserStatus.Value);
+                }
+
+                // 4. Get total count AFTER applying all filters.
+                // .Count() here operates on the IQueryable in memory (if 'doctors' was already ToListAsync)
+                // or against the database if 'doctors' was kept as an IQueryable from the repo.
+                var totalCount = query.Count();
+
+                // 5. Apply pagination (Skip and Take) for the current page.
+                var pagedDoctors = query
+                    .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+                    .Take(paginationParameters.PageSize)
+                    .ToList();
+
+                // 6. Map the filtered and paginated Doctor entities to DoctorProfileDto.
+                var doctorDtos = _mapper.Map<IEnumerable<DoctorProfileDto>>(pagedDoctors);
+
+                // 7. Construct and return the PagedResponseDto.
+                return new PagedResponseDto<DoctorProfileDto>(doctorDtos, totalCount, paginationParameters.PageNumber, paginationParameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting doctors for admin dashboard for Hospital ID: {hospitalId}.");
+                // Return an empty paginated response on error, to avoid breaking the caller.
+                return new PagedResponseDto<DoctorProfileDto>(Enumerable.Empty<DoctorProfileDto>(), 0, paginationParameters.PageNumber, paginationParameters.PageSize);
+            }
         }
 
-        return hospitalSpecialtyDtos;
+        /// Creates a new doctor account, assigning them to a specific hospital specialty.
+      
+        public async Task<DoctorProfileDto> CreateDoctorAsync(DoctorCreateDto createDto, string hospitalId)
+        {
+            try
+            {
+                // 1. Validate HospitalSpecialtyId and its affiliation with the hospitalId
+                // GetByIdWithDetailsAsync is assumed to load related Specialty and HospitalAsset for validation.
+                var hospitalSpecialty = await _unitOfWork.HospitalSpecialties.GetByIdWithDetailsAsync(createDto.HospitalSpecialtyId);
+                if (hospitalSpecialty == null)
+                {
+                    _logger.LogWarning($"Doctor creation failed: HospitalSpecialty with ID {createDto.HospitalSpecialtyId} not found.");
+                    throw new ArgumentException($"Hospital Specialty with ID {createDto.HospitalSpecialtyId} does not exist.");
+                }
+                // Ensure the selected HospitalSpecialty truly belongs to the hospital of the current admin.
+                if (hospitalSpecialty.HospitalAssetId != hospitalId)
+                {
+                    _logger.LogWarning($"Doctor creation failed: HospitalSpecialty {createDto.HospitalSpecialtyId} does not belong to Hospital {hospitalId}.");
+                    throw new InvalidOperationException($"Hospital Specialty with ID {createDto.HospitalSpecialtyId} does not belong to your hospital.");
+                }
+                // Check if the global Specialty itself is active. A doctor shouldn't be assigned to an inactive global specialty.
+                if (!hospitalSpecialty.Specialty.IsActive)
+                {
+                    _logger.LogWarning($"Doctor creation failed: Associated global specialty '{hospitalSpecialty.Specialty.Name}' is inactive.");
+                    throw new InvalidOperationException($"Cannot create doctor for an inactive global specialty.");
+                }
+               
+                // 2. Validate Governorate and Country IDs for the doctor's address.
+                // Assuming _unitOfWork.Governorates.GetByIdAsync exists.
+                //var governorate = await _unitOfWork.Governorates.GetByIdAsync(createDto.GovernorateId);
+                //if (governorate == null)
+                //{
+                //    _logger.LogWarning($"Doctor creation failed: Governorate with ID {createDto.GovernorateId} not found.");
+                //    throw new ArgumentException($"Governorate with ID {createDto.GovernorateId} does not exist.");
+                //}
+                //// Assuming Governorate entity has a CountryId property to validate consistency.
+                //if (governorate.CountryId != createDto.CountryId)
+                //{
+                //    _logger.LogWarning($"Doctor creation failed: Country ID {createDto.CountryId} does not match Governorate {createDto.GovernorateId}.");
+                //    throw new ArgumentException($"Country with ID {createDto.CountryId} does not match the selected Governorate.");
+                //}
+
+                // 3. Check if the provided email is already in use by another Identity user.
+                if (await _userManager.FindByEmailAsync(createDto.Email) != null)
+                {
+                    _logger.LogWarning($"Doctor creation failed: Email '{createDto.Email}' is already registered.");
+                    throw new InvalidOperationException($"Email '{createDto.Email}' is already registered.");
+                }
+
+                // 4. Map DTO to Doctor entity (which inherits from IdentityUser).
+
+                var doctor = _mapper.Map<Doctor>(createDto);
+                doctor.PhoneNumber = createDto.Phone; // Explicitly map Phone from DTO to Identity's PhoneNumber property.
+
+                // 5. Create the user with IdentityUserManager.
+                var result = await _userManager.CreateAsync(doctor, createDto.Password);
+                if (!result.Succeeded)
+                {
+                    _logger.LogError($"Failed to create Identity user for doctor: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                    throw new InvalidOperationException($"Failed to create doctor account: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                }
+
+                // 6. Assign the "Doctor" role to the newly created user.
+                await _userManager.AddToRoleAsync(doctor, "Doctor"); // Assumes "Doctor" role exists in your Identity system.
+
+                // 7. Complete Unit of Work.
+                await _unitOfWork.CompleteAsync();
+
+                _logger.LogInformation($"Doctor '{doctor.FirstName} {doctor.LastName}' (ID: {doctor.Id}) created successfully for Hospital {hospitalId}.");
+
+                // 8. Re-fetch the newly created doctor with all details for the comprehensive DoctorProfileDto.
+
+                var createdDoctorWithDetails = await _unitOfWork.Doctors.GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync(doctor.Id);
+                if (createdDoctorWithDetails == null)
+                {
+                    _logger.LogError($"Created doctor {doctor.Id} not found immediately after creation for detail fetch.");
+                    throw new Exception("Created doctor not found after successful creation."); // This is an unexpected internal error.
+                }
+
+                return _mapper.Map<DoctorProfileDto>(createdDoctorWithDetails);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error creating doctor for Hospital {hospitalId}.");
+                throw; // Re-throw the exception to the controller for appropriate HTTP response handling.
+            }
+        }
+
+
+        /// Updates an existing doctor's profile and/or assigned hospital specialty.
+        /// Ensures the doctor belongs to the specified hospital and performs comprehensive validation.
+        public async Task<DoctorProfileDto> UpdateDoctorAsync(string doctorId, DoctorUpdateDto updateDto, string hospitalId)
+        {
+            try
+            {
+                // 1. Retrieve the doctor by ID with all necessary details.
+                // Using GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync ensures all related data is loaded for validation and mapping.
+                var doctor = await _unitOfWork.Doctors.GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync(doctorId);
+                if (doctor == null)
+                {
+                    _logger.LogWarning($"Doctor with ID {doctorId} not found for update.");
+                    throw new KeyNotFoundException($"Doctor with ID {doctorId} not found.");
+                }
+
+                // 2. Validate doctor's affiliation to the requesting hospital admin.
+                // Ensures that the admin can only update doctors belonging to their hospital.
+                if (doctor.HospitalSpecialty?.HospitalAssetId != hospitalId)
+                {
+                    _logger.LogWarning($"Hospital Admin {hospitalId} attempted to update doctor {doctorId} not affiliated with their hospital.");
+                    throw new UnauthorizedAccessException($"Doctor with ID {doctorId} is not affiliated with your hospital.");
+                }
+
+                // 3. Validate and update HospitalSpecialtyId if it's being changed.
+                if (doctor.HospitalSpecialtyId != updateDto.HospitalSpecialtyId)
+                {
+                    var newHospitalSpecialty = await _unitOfWork.HospitalSpecialties.GetByIdWithDetailsAsync(updateDto.HospitalSpecialtyId);
+                    if (newHospitalSpecialty == null)
+                    {
+                        throw new ArgumentException($"New Hospital Specialty with ID {updateDto.HospitalSpecialtyId} does not exist.");
+                    }
+                    // Ensure the new HospitalSpecialty also belongs to the same hospital as the admin.
+                    if (newHospitalSpecialty.HospitalAssetId != hospitalId)
+                    {
+                        throw new InvalidOperationException($"New Hospital Specialty with ID {updateDto.HospitalSpecialtyId} does not belong to your hospital.");
+                    }
+                    // Ensure the global Specialty itself is active. Doctors should only be assigned to active specialties.
+                    if (!newHospitalSpecialty.Specialty.IsActive)
+                    {
+                        throw new InvalidOperationException($"Cannot assign doctor to an inactive global specialty.");
+                    }
+                    doctor.HospitalSpecialtyId = updateDto.HospitalSpecialtyId; // Update FK on the doctor entity.
+                }
+                // wait for the governerate repo
+                // 4. Validate Governorate and Country IDs if they're being changed.
+                // Assuming _unitOfWork.Governorates.GetByIdAsync exists.
+                // Validate if the new GovernorateId and CountryId are valid and consistent.
+                //if (doctor.GovernorateId != updateDto.GovernorateId || doctor.Governorate.CountryId != updateDto.CountryId)
+                //{
+                //    //var governorate = await _unitOfWork.Governorates.GetByIdAsync(updateDto.GovernorateId);
+                //    if (governorate == null) throw new ArgumentException($"Governorate with ID {updateDto.GovernorateId} does not exist.");
+                //    // Ensure the selected CountryId is consistent with the Governorate's CountryId.
+                //    if (governorate.CountryId != updateDto.CountryId) throw new ArgumentException($"Country with ID {updateDto.CountryId} does not match the selected Governorate.");
+                //}
+                // Update GovernorateId and CountryId on the doctor entity.
+                doctor.GovernorateId = updateDto.GovernorateId;
+                doctor.Governorate.CountryId = updateDto.CountryId; // Update CountryId directly on the doctor entity (User base).
+
+                // 5. Update user-level properties managed by Identity (Email, PhoneNumber, Status)
+                if (!string.Equals(doctor.Email, updateDto.Email, StringComparison.OrdinalIgnoreCase))
+                {
+                    var existingUserWithNewEmail = await _userManager.FindByEmailAsync(updateDto.Email);
+                    if (existingUserWithNewEmail != null && existingUserWithNewEmail.Id != doctor.Id)
+                    {
+                        throw new InvalidOperationException($"Email '{updateDto.Email}' is already registered to another user.");
+                    }
+                    // Directly updating Email and UserName (UserName often mirrors Email in Identity).
+                    // This is acceptable for admin-initiated updates, but for user-initiated, ChangeEmailAsync with token is more secure.
+                    doctor.Email = updateDto.Email;
+                    doctor.UserName = updateDto.Email; // Keep UserName consistent with Email.
+                }
+                doctor.PhoneNumber = updateDto.PhoneNumber; // Update phone number.
+                doctor.Status = updateDto.Status; // Update doctor's overall status (e.g., Active, Deactivated).
+
+                // Update the Identity user's profile and save changes.
+                var userUpdateResult = await _userManager.UpdateAsync(doctor);
+                if (!userUpdateResult.Succeeded)
+                {
+                    _logger.LogError($"Failed to update Identity user for doctor {doctorId}: {string.Join(", ", userUpdateResult.Errors.Select(e => e.Description))}");
+                    throw new InvalidOperationException($"Failed to update doctor account: {string.Join(", ", userUpdateResult.Errors.Select(e => e.Description))}");
+                }
+
+                // 6. Map remaining DTO properties to the entity for doctor-specific fields.
+                // This maps FirstName, LastName, Gender, Address, City, DateOfBirth, MedicalLicenseNumber, YearsOfExperience, Bio, Qualification.
+                _mapper.Map(updateDto, doctor);
+
+                // 7. Commit all pending changes to the database.
+                _unitOfWork.Doctors.Update(doctor); 
+                await _unitOfWork.CompleteAsync(); 
+
+                // 8. Re-fetch the updated doctor with all details to return a complete DoctorProfileDto.
+                // This ensures all navigation properties are correctly populated for the DTO response.
+                var updatedDoctorWithDetails = await _unitOfWork.Doctors.GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync(doctorId);
+                if (updatedDoctorWithDetails == null) throw new Exception("Updated doctor not found after save and detail fetch."); 
+
+                _logger.LogInformation($"Doctor '{updatedDoctorWithDetails.FirstName} {updatedDoctorWithDetails.LastName}' (ID: {updatedDoctorWithDetails.Id}) updated successfully for Hospital {hospitalId}.");
+                return _mapper.Map<DoctorProfileDto>(updatedDoctorWithDetails);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating doctor with ID: {doctorId} for Hospital {hospitalId}.");
+                throw; // Re-throw to controller.
+            }
+        }
+
+        /// <summary>
+        /// Soft deletes a doctor account (sets Status to Deactivated).
+        /// Ensures the doctor belongs to the specified hospital.
+        /// </summary>
+        public async Task<DoctorProfileDto> DeleteDoctorAsync(string doctorId, string hospitalId)
+        {
+            try
+            {
+                // 1. Retrieve the doctor by ID with details.
+                var doctor = await _unitOfWork.Doctors.GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync(doctorId);
+                if (doctor == null)
+                {
+                    _logger.LogWarning($"Doctor with ID {doctorId} not found for deletion.");
+                    throw new KeyNotFoundException($"Doctor with ID {doctorId} not found.");
+                }
+
+                // 2. Validate doctor's affiliation to the requesting hospital admin.
+                // Ensures that the admin can only delete doctors belonging to their hospital.
+                if (doctor.HospitalSpecialty?.HospitalAssetId != hospitalId)
+                {
+                    _logger.LogWarning($"Hospital Admin {hospitalId} attempted to delete doctor {doctorId} not affiliated with their hospital.");
+                    throw new UnauthorizedAccessException($"Doctor with ID {doctorId} is not affiliated with your hospital.");
+                }
+
+                // 3. Soft delete: Set doctor's status to Deactivated.
+                if (doctor.Status == Status.Deactivated)
+                {
+                    _logger.LogInformation($"Doctor {doctorId} is already deactivated. No action needed.");
+                    return _mapper.Map<DoctorProfileDto>(doctor); // Return existing (deactivated) DTO.
+                }
+
+                doctor.Status = Status.Deactivated;
+                // Update the Identity user's status and save changes via UserManager.
+                var userUpdateResult = await _userManager.UpdateAsync(doctor);
+                if (!userUpdateResult.Succeeded)
+                {
+                    _logger.LogError($"Failed to deactivate Identity user for doctor {doctorId}: {string.Join(", ", userUpdateResult.Errors.Select(e => e.Description))}");
+                    throw new InvalidOperationException($"Failed to deactivate doctor account: {string.Join(", ", userUpdateResult.Errors.Select(e => e.Description))}");
+                }
+
+                // No separate _unitOfWork.Doctors.Update(doctor) is strictly needed here if UserManager.UpdateAsync
+                // already tracks and saves the entity, but including it for clarity if other UoW changes are pending.
+                await _unitOfWork.CompleteAsync(); // Commit all pending changes.
+
+                _logger.LogInformation($"Doctor '{doctor.FirstName} {doctor.LastName}' (ID: {doctor.Id}) soft-deleted successfully for Hospital {hospitalId}.");
+                return _mapper.Map<DoctorProfileDto>(doctor); // Return the updated (deactivated) doctor profile.
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting doctor with ID: {doctorId} for Hospital {hospitalId}.");
+                throw; // Re-throw to controller.
+            }
+        }
+
+
+
+        public async Task<PagedResponseDto<DoctorProfileDto>> GetAllDoctorsPerHospitalSpecialty(int hospitalSpecialtyId, PaginationParameters paginationParameters)
+        {
+            try
+            {
+                // 1. Get doctors for the specific HospitalSpecialty.
+
+                var doctors = await _unitOfWork.Doctors.GetDoctorsByHospitalSpecialtyIdAsync(hospitalSpecialtyId, isActive: true);
+
+                // 2. Apply search term filter in service (if needed for website search on displayed doctor fields)
+                var query = doctors.AsQueryable();
+                if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
+                {
+                    string term = paginationParameters.SearchTerm.Trim().ToLower();
+                    query = query.Where(d =>
+                        d.FirstName.ToLower().Contains(term) ||
+                        d.LastName.ToLower().Contains(term) 
+                    );
+                }
+
+                // 3. Get total count AFTER applying filters
+                var totalCount = query.Count();
+
+                // 4. Apply pagination
+                var pagedDoctors = query
+                    .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+                    .Take(paginationParameters.PageSize)
+                    .ToList();
+
+                // 5. Map to DTOs
+                var doctorDtos = _mapper.Map<IEnumerable<DoctorProfileDto>>(pagedDoctors);
+
+                return new PagedResponseDto<DoctorProfileDto>(doctorDtos, totalCount, paginationParameters.PageNumber, paginationParameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting doctors for Hospital Specialty ID: {hospitalSpecialtyId}.");
+                return new PagedResponseDto<DoctorProfileDto>(Enumerable.Empty<DoctorProfileDto>(), 0, paginationParameters.PageNumber, paginationParameters.PageSize);
+            }
+        }
     }
 }
-
-   
-

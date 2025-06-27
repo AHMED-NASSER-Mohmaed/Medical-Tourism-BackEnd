@@ -38,15 +38,15 @@ namespace Elagy.BL.Services
             if (doctor == null)
                 throw new ArgumentException($"Doctor with ID '{createDto.DoctorId}' not found.");
 
-            var hospitalSpecialty = await _unitOfWork.HospitalSpecialties.GetByIdAsync(createDto.HospitalSpecialtyId);
-            if (hospitalSpecialty == null)
-                throw new ArgumentException($"Hospital Specialty with ID '{createDto.HospitalSpecialtyId}' not found.");
+            //var hospitalSpecialty = await _unitOfWork.HospitalSpecialties.GetByIdAsync(createDto.HospitalSpecialtyId);
+            //if (hospitalSpecialty == null)
+            //    throw new ArgumentException($"Hospital Specialty with ID '{createDto.HospitalSpecialtyId}' not found.");
 
-            if (doctor.HospitalSpecialtyId != createDto.HospitalSpecialtyId)
-                throw new ArgumentException($"Doctor '{doctor.FirstName} {doctor.LastName}' is not primarily assigned to specialty '{hospitalSpecialty.Specialty?.Name}' at '{hospitalSpecialty.HospitalAsset?.Name}'.");
+            //if (doctor.HospitalSpecialtyId != createDto.HospitalSpecialtyId)
+            //    throw new ArgumentException($"Doctor '{doctor.FirstName} {doctor.LastName}' is not primarily assigned to specialty '{hospitalSpecialty.Specialty?.Name}' at '{hospitalSpecialty.HospitalAsset?.Name}'.");
 
-            if (hospitalSpecialty.HospitalAssetId != hospitalAdminId)
-                throw new UnauthorizedAccessException("You do not have permission to assign schedules for this hospital specialty.");
+            //if (hospitalSpecialty.HospitalAssetId != hospitalAdminId)
+            //    throw new UnauthorizedAccessException("You do not have permission to assign schedules for this hospital specialty.");
 
             if (createDto.StartTime >= createDto.EndTime)
                 throw new ArgumentException("Schedule start time must be before end time.");
@@ -109,7 +109,7 @@ namespace Elagy.BL.Services
 
             if (updateDto.HospitalSpecialtyId.HasValue && updateDto.HospitalSpecialtyId.Value != schedule.HospitalSpecialtyId)
             {
-                updatedHospitalSpecialty = await _unitOfWork.HospitalSpecialties.GetByIdAsync(updateDto.HospitalSpecialtyId.Value);
+                //updatedHospitalSpecialty = await _unitOfWork.HospitalSpecialties.GetByIdAsync(updateDto.HospitalSpecialtyId.Value);
                 if (updatedHospitalSpecialty == null) throw new ArgumentException($"Hospital Specialty with ID '{updateDto.HospitalSpecialtyId.Value}' not found.");
                 hospitalSpecialtyChanged = true;
             }

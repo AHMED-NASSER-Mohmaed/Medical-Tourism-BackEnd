@@ -18,22 +18,21 @@ namespace Elagy.DAL.Repositories
 
         public ApplicationDbContext Context { get; }
 
-        public async Task<IEnumerable<HospitalSpecialty>> GetActiveHospitalSpecialtiesByHospitalIdAsync(string hospitalId)
+        public async Task<HospitalSpecialty?> GetByHospitalAndSpecialtyIdAsync(string hospitalId, int specialtyId)
         {
-            return await _context.HospitalSpecialties
-               .Where(hs => hs.HospitalAssetId == hospitalId)
-               .Include(hs => hs.Specialty)
-               .Include(hs => hs.HospitalAsset)
-               .ToListAsync();
+            return await _dbSet
+                 .FirstOrDefaultAsync(hs => hs.HospitalAssetId == hospitalId && hs.SpecialtyId == specialtyId);
         }
 
-        public async Task<HospitalSpecialty> GetByIdAsync(int id)
+        public async Task<HospitalSpecialty?> GetByIdWithDetailsAsync(int hospitalspecialtyid)
         {
-            return await _context.HospitalSpecialties
-                  .Include(hs => hs.Specialty)
-                  .Include(hs => hs.HospitalAsset)
-                  .FirstOrDefaultAsync(hs => hs.Id == id);
-
+            return await _dbSet // _dbSet is from GenericRepository<HospitalSpecialty, int>
+               .Where(hs => hs.Id == hospitalspecialtyid)
+               .Include(hs => hs.Specialty) // Include the Specialty navigation property
+               .Include(hs => hs.HospitalAsset) // Include the HospitalAsset navigation property
+               .FirstOrDefaultAsync();
         }
+
+
     }
 }

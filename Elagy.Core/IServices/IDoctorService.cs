@@ -13,26 +13,22 @@ namespace Elagy.Core.IServices
     {
         // Admin Dashboard CRUD
 
-        Task<PagedResponseDto<DoctorProfileDto>> GetAllDoctorsForAdminDashboardAsync(string hospitalId); // For table display
+        // MODIFIED: Added PaginationParameters
+        Task<PagedResponseDto<DoctorProfileDto>> GetAllDoctorsForAdminDashboardAsync(string hospitalId, PaginationParameters paginationParameters);
 
-        //for external web site 
-        //dispaly doctors by clinic and hospital for patient 
-        Task<PagedResponseDto<DoctorProfileDto>> GetAllDoctorsPerHospitalSpecility(string hospitalspecialityyId);  
+        // MODIFIED: Added PaginationParameters, renamed parameter for clarity
+        Task<PagedResponseDto<DoctorProfileDto>> GetAllDoctorsPerHospitalSpecialty(int hospitalSpecialtyId, PaginationParameters paginationParameters);
 
+        // hospital id is token from [jwt token]
+        Task<DoctorProfileDto> CreateDoctorAsync(DoctorCreateDto createDto, string hospitalId);
 
+        // MODIFIED: Added doctorId as a separate parameter, hospitalId from token
+        Task<DoctorProfileDto> UpdateDoctorAsync(string doctorId, DoctorUpdateDto updateDto, string hospitalId);
 
-        //hopital id is token from [jwt token] 
-        Task<DoctorProfileDto> CreateDoctorAsync(DoctorCreateDto createDto,string hospitalId);
-        
-        //hopital id is token from [jwt token] 
-        Task<DoctorProfileDto> UpdateDoctorAsync(DoctorUpdateDto updateDto, string hospitalId);
-
-        //hopital id is token from [jwt token]
-        // doctor id from params
-        Task<DoctorProfileDto> DeleteDoctorAsync(string id , string hospitalId);
+        // hospital id is token from [jwt token], doctor id from params
+        Task<DoctorProfileDto> DeleteDoctorAsync(string doctorId, string hospitalId);
+        Task<DoctorProfileDto?> GetDoctorByIdAsync(string doctorId);
 
 
-        // Website View (when clicking on a specialty within a hospital)
-        //Task<IEnumerable<DoctorWebsiteDto>> GetDoctorsForWebsiteByHospitalSpecialtyAsync(string hospitalId, int specialtyId);
     }
 }
