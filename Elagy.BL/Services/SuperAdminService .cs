@@ -73,12 +73,12 @@ namespace Elagy.BL.Services
             {
                 return new AuthResultDto { Success = false, Errors = new[] { "User not found." } };
             }
-            if (user.Status == UserStatus.Active)
+            if (user.Status == Status.Active)
             {
                 return new AuthResultDto { Success = true, Message = "User is already active." };
             }
 
-            user.Status = UserStatus.Active;
+            user.Status = Status.Active;
             var result = await _userManager.UpdateAsync(user);
 
             if (result.Succeeded)
@@ -97,12 +97,12 @@ namespace Elagy.BL.Services
             {
                 return new AuthResultDto { Success = false, Errors = new[] { "User not found." } };
             }
-            if (user.Status == UserStatus.Deactivated)
+            if (user.Status == Status.Deactivated)
             {
                 return new AuthResultDto { Success = true, Message = "User is already deactivated." };
             }
 
-            user.Status = UserStatus.Deactivated;
+            user.Status = Status.Deactivated;
             var result = await _userManager.UpdateAsync(user);
 
             if (result.Succeeded)
@@ -121,12 +121,12 @@ namespace Elagy.BL.Services
             {
                 return new AuthResultDto { Success = false, Errors = new[] { "Service Provider not found." } };
             }
-            if (provider.Status == UserStatus.Active)
+            if (provider.Status == Status.Active)
             {
                 return new AuthResultDto { Success = true, Message = "Service Provider is already approved and active." };
             }
 
-            provider.Status = UserStatus.Active;
+            provider.Status = Status.Active;
             var userUpdateResult = await _userManager.UpdateAsync(provider);
 
             if (!userUpdateResult.Succeeded)
@@ -161,7 +161,7 @@ namespace Elagy.BL.Services
             }
 
             // Deactivate user account
-            provider.Status = UserStatus.Deactivated;
+            provider.Status = Status.Deactivated;
             var userUpdateResult = await _userManager.UpdateAsync(provider);
 
             if (!userUpdateResult.Succeeded)
@@ -190,7 +190,7 @@ namespace Elagy.BL.Services
 
         // --- Filtering/Listing for Dashboard ---
 
-        private IQueryable<User> ApplyUserFilters(IQueryable<User> query, string? searchQuery, UserStatus? status)
+        private IQueryable<User> ApplyUserFilters(IQueryable<User> query, string? searchQuery, Status? status)
         {
             // --- 1. Apply UserStatus Filter (Independent) ---
             // This filter is applied regardless of whether a search query is present.
@@ -221,7 +221,7 @@ namespace Elagy.BL.Services
             return query;
         }
 
-        private IQueryable<ServiceProvider> ApplyServiceProviderFilters(IQueryable<ServiceProvider> query, string? searchQuery, UserStatus? userStatus)
+        private IQueryable<ServiceProvider> ApplyServiceProviderFilters(IQueryable<ServiceProvider> query, string? searchQuery, Status? userStatus)
         {
             // Ensure ServiceAsset is included for filtering on its properties, and for later mapping
             query = query.Include(sp => sp.ServiceAsset);

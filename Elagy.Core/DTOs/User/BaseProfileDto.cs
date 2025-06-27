@@ -34,7 +34,7 @@ namespace Elagy.Core.DTOs.User
 
         //for test 
         public bool EmailConfirmed { get; set; } // From IdentityUser
-        public UserStatus Status { get; set; }
+        public Status Status { get; set; }
         public UserType UserType { get; set; } // Discriminator to know the actual type
 
     }

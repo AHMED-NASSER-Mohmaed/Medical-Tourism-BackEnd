@@ -10,8 +10,7 @@ namespace Elagy.Core.DTOs.Doctor
 {
     public class DoctorCreateDto:BaseRegistrationRequestDto // For the Add Doctor modal form
     {
-        public DateTime? DateOfBirth { get; set; }
-        [Required(ErrorMessage = "Medical License Number is required.")]
+        
         [StringLength(50)]
         public string MedicalLicenseNumber { get; set; }
         [Range(0, 70, ErrorMessage = "Years of experience must be between 0 and 70.")]

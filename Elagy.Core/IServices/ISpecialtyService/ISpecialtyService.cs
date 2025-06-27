@@ -1,4 +1,6 @@
-﻿using Elagy.Core.DTOs.Specialty;
+﻿using Elagy.Core.DTOs.Pagination;
+using Elagy.Core.DTOs.Specialty;
+using Elagy.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,26 +11,26 @@ namespace Elagy.Core.IServices.ISpecialtyService
 {
     public interface ISpecialtyService
     {
-        //Task<IEnumerable<SpecialtyDto>> GetAllSpecialtiesAsync(); // Get ALL global specialties
-        //Task<SpecialtyDto> GetSpecialtyByIdAsync(int id); // Get a global specialty by ID
-        //Task<SpecialtyDto> CreateSpecialtyAsync(SpecialtyCreateDto createDto); // Create a global specialty
-        //Task<bool> UpdateSpecialtyAsync(SpecialtyUpdateDto updateDto); // Update a global specialty
-        //Task<bool> DeleteSpecialtyAsync(int id); // Delete a global specialty
-        // Admin Dashboard CRUD
-        Task<IEnumerable<SpecialtyDto>> GetAllSpecialtiesAsync();
-        Task<SpecialtyDto> GetSpecialtyByIdAsync(int id);
-        Task<SpecialtyDto> CreateSpecialtyAsync(SpecialtyCreateDto createDto);
-        Task<bool> UpdateSpecialtyAsync(SpecialtyUpdateDto updateDto);
-        Task<bool> DeleteSpecialtyAsync(int id);
 
-        Task<IEnumerable<SpecialtyDto>> GetSpecialtiesForHospitalAdminDashboardAsync(string hospitalId);
-        Task<IEnumerable<SpecialtyDto>> GetAvailableGlobalSpecialtiesToLinkAsync(string hospitalId);
-        Task<bool> LinkSpecialtyToHospitalAsync(SpecialtyLinkToHospitalDto linkDto, string hospitalId); // Hospital Admin links an existing specialty
-        Task<bool> RemoveSpecialtyFromHospitalAsync(int specialtyId, string hospitalId); // Hospital Admin removes specialty from hospital's offerings
-        Task<bool> IsSpecialtyAssociatedWithHospitalAsync(int specialtyId, string hospitalId); // Helper to check association
-        
 
-        // Website View (e.g., patient viewing all specialties on the website)
-        //Task<IEnumerable<SpecialtyWebsiteDto>> GetAllWebsiteSpecialtiesAsync();
+        # region Supper Admin Dashboard CRUD
+        Task<PagedResponseDto<SpecialtyResponseDto>> GetAllSpecialties();
+        Task<SpecialtyResponseDto> CreateSpecialty(SpecialtyCreateDto createDto);
+        Task<SpecialtyResponseDto> DeleteSpecialtyAsync(int id);
+        Task<SpecialtyResponseDto> UpdateSpecialty(SpecialtyUpdateDto updateDto);
+        #endregion
+
+
+        Task<SpecialtyLinkToHospitalDto?> LinkSpecialtyToHospital(int specialtyId, string hospitalId);
+
+        //<summary>
+        //for supper admin dashboard and external site 
+        //<summary>
+        Task<PagedResponseDto<SpecialtyResponseDto>> GetAllSpecialtiesForHospital(string hospitalId);
+        Task<SpecialtyLinkToHospitalDto> CahngeSTSpecialtiesForHospitalAdminDashboard(string hospitalId,Status St);
+
+        // do not return description
+        Task<IEnumerable<SpecialtyResponseDto>> GetAvailableGlobalSpecialtiesToLinkAsync(string hospitalId);
+
     }
 }

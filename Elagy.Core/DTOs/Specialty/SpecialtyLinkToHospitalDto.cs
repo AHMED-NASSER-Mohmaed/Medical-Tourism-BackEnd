@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Elagy.Core.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -11,5 +12,10 @@ namespace Elagy.Core.DTOs.Specialty
     {
         [Required(ErrorMessage = "Specialty ID to link is required.")]
         public int SpecialtyId { get; set; }
+        public string HospitalId { get; set; }
+        public Status Status { get; set; }
+        public string SpecialtyName { get; set; }
+        public string? SpecialtyDesc { get; set; }
+
     }
 }

@@ -26,7 +26,7 @@ namespace Elagy.BL.Services
             _logger = logger;
         }
 
-        public async Task<SpecialtyDto> CreateSpecialtyAsync(SpecialtyCreateDto createDto)
+        public async Task<SpecialtyResponseDto> CreateSpecialtyAsync(SpecialtyCreateDto createDto)
         {
             if (await _unitOfWork.Specialties.ExistsByNameAsync(createDto.Name))
             {
@@ -46,7 +46,7 @@ namespace Elagy.BL.Services
                 Name = sp.Name,
                 Description = sp.Description,
             };
-            return _mapper.Map<SpecialtyDto>(spdto);
+            return _mapper.Map<SpecialtyResponseDto>(spdto);
         }
 
         public async Task<bool> DeleteSpecialtyAsync(int id)
@@ -72,20 +72,20 @@ namespace Elagy.BL.Services
         }
 
 
-        public async Task<IEnumerable<SpecialtyDto>> GetAllSpecialtiesAsync()
+        public async Task<IEnumerable<SpecialtyResponseDto>> GetAllSpecialtiesAsync()
         {
             var specialties = await _unitOfWork.Specialties.GetAllAsync();
-            List < SpecialtyDto> spdTOS = new List<SpecialtyDto>();
+            List < SpecialtyResponseDto> spdTOS = new List<SpecialtyResponseDto>();
             foreach (var specialty in specialties)
             {
-             var stdo= _mapper.Map<SpecialtyDto>(specialty);
+             var stdo= _mapper.Map<SpecialtyResponseDto>(specialty);
                 spdTOS.Add(stdo);
               
             }
             return spdTOS;
         }
 
-        public async Task<IEnumerable<SpecialtyDto>> GetAvailableGlobalSpecialtiesToLinkAsync(string hospitalId)
+        public async Task<IEnumerable<SpecialtyResponseDto>> GetAvailableGlobalSpecialtiesToLinkAsync(string hospitalId)
         {
             var allGlobalSpecialties = await _unitOfWork.Specialties.GetAllAsync();
 
@@ -100,10 +100,10 @@ namespace Elagy.BL.Services
             var availableSpecialties = allGlobalSpecialties
                                         .Where(s => !linkedSpecialtyIds.Contains(s.Id));
 
-            List<SpecialtyDto> spdTOS = new List<SpecialtyDto>();
+            List<SpecialtyResponseDto> spdTOS = new List<SpecialtyResponseDto>();
             foreach (var specialty in availableSpecialties)
             {
-                SpecialtyDto specialtyDto = new SpecialtyDto()
+                SpecialtyResponseDto specialtyDto = new SpecialtyResponseDto()
                 {
                     Description = specialty.Description,
                     Name = specialty.Name,
@@ -114,15 +114,15 @@ namespace Elagy.BL.Services
             return spdTOS;
         }
 
-        public async Task<IEnumerable<SpecialtyDto>> GetSpecialtiesForHospitalAdminDashboardAsync(string hospitalId)
+        public async Task<IEnumerable<SpecialtyResponseDto>> GetSpecialtiesForHospitalAdminDashboardAsync(string hospitalId)
         {
             var hospitalSpecialties = await _unitOfWork.Hospitals.GetHospitalSpecialtiesInHospitalAsync(hospitalId);
             if (hospitalSpecialties == null || !hospitalSpecialties.Any())
             {
                 _logger.LogInformation($"No specialties found for hospital admin dashboard with hospital ID: {hospitalId}");
-                return new List<SpecialtyDto>();
+                return new List<SpecialtyResponseDto>();
             }
-            var specialtyDtos = hospitalSpecialties.Select(hs => new SpecialtyDto
+            var specialtyDtos = hospitalSpecialties.Select(hs => new SpecialtyResponseDto
             {
                 Name = hs.Specialty.Name,
                 Description = hs.Specialty.Description
@@ -131,10 +131,10 @@ namespace Elagy.BL.Services
             return specialtyDtos;
         }
 
-        public async Task<SpecialtyDto> GetSpecialtyByIdAsync(int id)
+        public async Task<SpecialtyResponseDto> GetSpecialtyByIdAsync(int id)
         {
             var specialty = await _unitOfWork.Specialties.GetSpecialtyIdAsync(id);
-            return _mapper.Map<SpecialtyDto>(specialty);
+            return _mapper.Map<SpecialtyResponseDto>(specialty);
         }
 
         public async Task<bool> IsSpecialtyAssociatedWithHospitalAsync(int specialtyId, string hospitalId)

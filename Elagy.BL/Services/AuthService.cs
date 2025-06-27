@@ -73,7 +73,7 @@ namespace Elagy.BL.Services
             var user = createUser(); // Create specific user type (Patient, ServiceProvider, SuperAdmin) -- builder
             _mapper.Map(model, user); // Map common properties
             user.UserType = userType;
-            user.Status = UserStatus.EmailUnconfirmed; // Initial status
+            user.Status = Status.EmailUnconfirmed; // Initial status
 
             var result = await _userManager.CreateAsync(user, model.Password);
 
@@ -187,7 +187,7 @@ namespace Elagy.BL.Services
             serviceProvider.NationalURL = Result.UploadResults[0].Url;
             serviceProvider.UserType = UserType.ServiceProvider;
             serviceProvider.NationalFeildId = Result.UploadResults[0].Id;
-            serviceProvider.Status = UserStatus.EmailUnconfirmed;
+            serviceProvider.Status = Status.EmailUnconfirmed;
 
 
  
@@ -353,11 +353,11 @@ namespace Elagy.BL.Services
             }
 
             // Check account status 
-            if (user.Status == UserStatus.Deactivated)
+            if (user.Status == Status.Deactivated)
             {
                 return new AuthResultDto { Success = false, Errors = new[] { "Your account has been deactivated. Please contact support." } };
             }
-            if (user.UserType == UserType.ServiceProvider && user.Status == UserStatus.Pending)
+            if (user.UserType == UserType.ServiceProvider && user.Status == Status.Pending)
             {
                 return new AuthResultDto { Success = false, Errors = new[] { "Your Service Provider account is pending approval from an administrator." } };
             }
@@ -399,11 +399,11 @@ namespace Elagy.BL.Services
                 //|| user.UserType == UserType.SuperAdmin
                 if (user.UserType == UserType.Patient)
                 {
-                    user.Status = UserStatus.Active; // Patients/SuperAdmins become active immediately
+                    user.Status = Status.Active; // Patients/SuperAdmins become active immediately
                 }
                 else if (user.UserType == UserType.ServiceProvider)
                 {
-                    user.Status = UserStatus.Pending; // Service Providers go to Pending for admin approval
+                    user.Status = Status.Pending; // Service Providers go to Pending for admin approval
                 }
                 await _userManager.UpdateAsync(user);
 
@@ -457,9 +457,9 @@ namespace Elagy.BL.Services
             if (result.Succeeded)
             {
                 // Optionally, update user status here if needed, similar to initial confirmation
-                if (user.Status == UserStatus.EmailUnconfirmed || user.Status == UserStatus.Pending) // Allow confirmation from these states
+                if (user.Status == Status.EmailUnconfirmed || user.Status == Status.Pending) // Allow confirmation from these states
                 {
-                    user.Status = UserStatus.Active; // Or whatever status means confirmed in your app
+                    user.Status = Status.Active; // Or whatever status means confirmed in your app
                     await _userManager.UpdateAsync(user);
                     _logger.LogInformation($"[{currentUtcTimeConf:yyyy-MM-dd HH:mm:ss.fff UTC} CONF] User status updated to '{user.Status}' for '{user.Email}'.");
                 }
@@ -575,7 +575,7 @@ namespace Elagy.BL.Services
         }
 
         // --- Admin User Status Management (Common for all users) ---
-        public async Task<bool> UpdateUserStatusAsync(string userId, UserStatus newStatus)
+        public async Task<bool> UpdateUserStatusAsync(string userId, Status newStatus)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)

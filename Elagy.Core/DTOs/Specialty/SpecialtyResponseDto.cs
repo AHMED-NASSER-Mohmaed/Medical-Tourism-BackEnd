@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Elagy.Core.DTOs.Specialty
 {
-    public class SpecialtyDto
+    public class SpecialtyResponseDto
     {
         public int Id { get; set; }
         public string Name { get; set; }

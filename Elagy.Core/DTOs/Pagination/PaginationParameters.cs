@@ -15,8 +15,10 @@ namespace Elagy.Core.DTOs.Pagination
             set => _pageSize = (value > MaxPageSize) ? MaxPageSize : value;
         }
 
-        public UserStatus? UserStatus { get; set; } 
+        public Status? UserStatus { get; set; } 
         public string? SearchTerm { get; set; }  
+
+        // order acs , desc
 
     }
 }

@@ -98,7 +98,7 @@ public class DoctorService : IDoctorService
             LastName = createDto.LastName,
             Email = createDto.Email,
             UserType = Elagy.Core.Enums.UserType.Doctor,
-            Status = Elagy.Core.Enums.UserStatus.Active,
+            Status = Elagy.Core.Enums.Status.Active,
             EmailConfirmed = true,
             //NationalId = createDto.NationalId,
             //PassportId = createDto.PassportId,
@@ -260,7 +260,7 @@ public class DoctorService : IDoctorService
             // Explicitly map nested Specialty
             if (hsEntity.Specialty != null)
             {
-                hsDto.Specialty = new SpecialtyDto
+                hsDto.Specialty = new SpecialtyResponseDto
                 {
                     Id = hsEntity.Specialty.Id,
                     Name = hsEntity.Specialty.Name,

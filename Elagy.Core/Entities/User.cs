@@ -33,7 +33,7 @@ namespace Elagy.Core.Entities
         public DateTime? DateOfBirth { get; set; }  
 
 
-        public UserStatus Status { get; set; }
+        public Status Status { get; set; }
         public UserType UserType { get; set; } // Discriminator for TPH
     }
 }

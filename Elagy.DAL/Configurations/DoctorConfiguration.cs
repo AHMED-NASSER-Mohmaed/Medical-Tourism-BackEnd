@@ -19,7 +19,8 @@ namespace Elagy.DAL.Configurations
             builder.HasBaseType<User>();
 
             // Configure specific properties for Doctor
-            builder.Property(d => d.MedicalLicenseNumber).IsRequired().HasMaxLength(50);
+            builder.Property(d => d.MedicalLicenseNumberURL).IsRequired().HasMaxLength(500);
+            builder.Property(d => d.MedicalLicenseNumberId).IsRequired().HasMaxLength(500);
             builder.Property(d => d.YearsOfExperience).IsRequired();
             builder.Property(d => d.Bio).IsRequired(false).HasMaxLength(1000);
             builder.Property(d => d.Qualification).IsRequired(false).HasMaxLength(100);

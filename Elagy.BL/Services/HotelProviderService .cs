@@ -92,7 +92,7 @@ namespace Elagy.BL.Services
 
             var serviceProvider = _mapper.Map<ServiceProvider>(model);
             serviceProvider.UserType = UserType.ServiceProvider;
-            serviceProvider.Status = UserStatus.Active; // Admin adds directly to active
+            serviceProvider.Status = Status.Active; // Admin adds directly to active
             serviceProvider.EmailConfirmed = true; // Admin adds directly to confirmed
 
             var result = await _userManager.CreateAsync(serviceProvider, model.Password);

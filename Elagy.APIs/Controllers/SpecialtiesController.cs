@@ -22,12 +22,12 @@ namespace Elagy.APIs.Controllers
 
         [HttpGet]
         [Authorize(Roles = "SuperAdmin, HospitalAdmin")]
-        public async Task<ActionResult<IEnumerable<SpecialtyDto>>> GetAllSpecialtiesForAdmin()
+        public async Task<ActionResult<IEnumerable<SpecialtyResponseDto>>> GetAllSpecialtiesForAdmin()
         {
             var userId = GetCurrentUserId();
             var isSuperAdmin = User.IsInRole("SuperAdmin");
 
-            IEnumerable<SpecialtyDto> specialties;
+            IEnumerable<SpecialtyResponseDto> specialties;
 
             if (isSuperAdmin)
             {
@@ -48,7 +48,7 @@ namespace Elagy.APIs.Controllers
         // This endpoint provides the list of global specialties that the current hospital admin CAN link to their hospital.
         [HttpGet("available-to-link")]
         [Authorize(Roles = "HospitalAdmin")]
-        public async Task<ActionResult<IEnumerable<SpecialtyDto>>> GetAvailableSpecialtiesToLink()
+        public async Task<ActionResult<IEnumerable<SpecialtyResponseDto>>> GetAvailableSpecialtiesToLink()
         {
             var hospitalId = GetCurrentUserId();
             if (hospitalId == null) return Unauthorized("Hospital ID could not be determined from token.");
@@ -60,7 +60,7 @@ namespace Elagy.APIs.Controllers
 
         [HttpGet("{id}")]
         [Authorize(Roles = "SuperAdmin, HospitalAdmin")]
-        public async Task<ActionResult<SpecialtyDto>> GetSpecialtyForAdmin(int id)
+        public async Task<ActionResult<SpecialtyResponseDto>> GetSpecialtyForAdmin(int id)
         {
             var specialty = await _specialtyService.GetSpecialtyByIdAsync(id);
             if (specialty == null)
@@ -83,7 +83,7 @@ namespace Elagy.APIs.Controllers
 
         [HttpPost]
         [Authorize(Roles = "SuperAdmin")] // ONLY SuperAdmin can create global specialties
-        public async Task<ActionResult<SpecialtyDto>> CreateSpecialtyGlobal([FromBody] SpecialtyCreateDto createDto)
+        public async Task<ActionResult<SpecialtyResponseDto>> CreateSpecialtyGlobal([FromBody] SpecialtyCreateDto createDto)
         {
             if (!ModelState.IsValid)
             {

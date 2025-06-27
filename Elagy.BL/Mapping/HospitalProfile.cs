@@ -15,11 +15,11 @@ namespace Elagy.BL.Mapping
         public HospitalProfile()
         {
          
-            CreateMap<Specialty, SpecialtyDto>().ReverseMap(); // For CRUD and nested views
+            CreateMap<Specialty, SpecialtyResponseDto>().ReverseMap(); // For CRUD and nested views
             CreateMap<SpecialtyCreateDto, Specialty>();
             CreateMap<SpecialtyUpdateDto, Specialty>();
             //------------------------Doctor--------------------
-            CreateMap<Doctor, DoctorDto>()
+            CreateMap<Doctor, DoctorProfileDto>()
                .IncludeBase<User, Elagy.Core.DTOs.User.BaseProfileDto>() // Doctor is a User, maps base User properties to BaseProfileDto structure
                                                                          // Map properties specific to Doctor entity that are directly on DoctorDto
                .ForMember(dest => dest.MedicalLicenseNumber, opt => opt.MapFrom(src => src.MedicalLicenseNumber))
@@ -49,7 +49,7 @@ namespace Elagy.BL.Mapping
                .ForMember(dest => dest.HospitalSpecialtyId, opt => opt.MapFrom(src => src.HospitalSpecialtyId)) // Direct FK map
                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email)) // Set UserName from Email
                .ForMember(dest => dest.UserType, opt => opt.MapFrom(src => UserType.Doctor)) // Set specific UserType
-               .ForMember(dest => dest.Status, opt => opt.MapFrom(src => UserStatus.Active)) // Default status on creation
+               .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Status.Active)) // Default status on creation
                .ForMember(dest => dest.EmailConfirmed, opt => opt.MapFrom(src => true)) // Confirmed by admin
                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore()); // Password set by UserManager
 
@@ -86,7 +86,7 @@ namespace Elagy.BL.Mapping
                 .ForMember(dest => dest.HospitalAsset, opt => opt.MapFrom(src => src.HospitalAsset)); // Map nested HospitalAsset
 
             // Helper DTOs for nested mappings (if they don't have their own profiles)
-            CreateMap<Specialty, SpecialtyDto>();
+            CreateMap<Specialty, SpecialtyResponseDto>();
             CreateMap<HospitalAsset, HospitalMinDto>(); // HospitalMinDto likely needs AssetName
             CreateMap<Asset, HospitalMinDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))

@@ -1,10 +1,10 @@
 ﻿namespace Elagy.Core.Enums
 {
-    public enum UserStatus
+    public enum Status
     {
-        Pending = 0,         // For Service Providers awaiting SuperAdmin approval (after email confirmation)
+        Deactivated = 0,     // Account deactivated by admin
         Active = 1,          // For Patients and Service Providers (after approval)
-        Deactivated = 2,     // Account deactivated by admin
+        Pending = 2,         // For Service Providers awaiting SuperAdmin approval (after email confirmation)
         EmailUnconfirmed = 3 // Initial state after registration, before email confirmation
     }
 }

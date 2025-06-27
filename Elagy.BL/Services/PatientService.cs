@@ -73,7 +73,7 @@ namespace Elagy.BL.Services
 
             var patient = _mapper.Map<Patient>(model);
             patient.UserType = UserType.Patient;
-            patient.Status = UserStatus.EmailUnconfirmed; // Still requires email confirmation
+            patient.Status = Status.EmailUnconfirmed; // Still requires email confirmation
             patient.EmailConfirmed = false; // Explicitly set to false
 
             var result = await _userManager.CreateAsync(patient, model.Password);

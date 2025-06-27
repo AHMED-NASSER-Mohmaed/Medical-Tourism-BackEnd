@@ -150,7 +150,7 @@ namespace Elagy.APIs.Controllers
         [HttpGet("patients")]
         public async Task<ActionResult< PagedResponseDto<PatientDto>>> GetPatients(
             [FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10,
-            [FromQuery] string SearchTerm = null, [FromQuery] UserStatus? UserStatus = null)
+            [FromQuery] string SearchTerm = null, [FromQuery] Status? UserStatus = null)
         {
             var Filter = new PaginationParameters();
             Filter.PageNumber = PageNumber ;
@@ -165,7 +165,7 @@ namespace Elagy.APIs.Controllers
         [HttpGet("hotel-providers")]
         public async Task<ActionResult<IEnumerable<HotelProviderProfileDto>>> GetHotelProviders(
             [FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10,
-            [FromQuery] string SearchTerm = null, [FromQuery] UserStatus? UserStatus = null)
+            [FromQuery] string SearchTerm = null, [FromQuery] Status? UserStatus = null)
         {
             var Filter = new PaginationParameters();
             Filter.PageNumber = PageNumber;
@@ -181,7 +181,7 @@ namespace Elagy.APIs.Controllers
         [HttpGet("hospital-providers")]
         public async Task<ActionResult<IEnumerable<HotelProviderProfileDto>>> GetHospitalProviders(
         [FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10,
-        [FromQuery] string SearchTerm = null, [FromQuery] UserStatus? UserStatus = null)
+        [FromQuery] string SearchTerm = null, [FromQuery] Status? UserStatus = null)
         {
             var Filter = new PaginationParameters();
             Filter.PageNumber = PageNumber;
@@ -197,7 +197,7 @@ namespace Elagy.APIs.Controllers
         [HttpGet("CarRental-providers")]
         public async Task<ActionResult<IEnumerable<HotelProviderProfileDto>>> GetCarRentalProviders(
         [FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10,
-        [FromQuery] string SearchTerm = null, [FromQuery] UserStatus? UserStatus = null)
+        [FromQuery] string SearchTerm = null, [FromQuery] Status? UserStatus = null)
         {
             var Filter = new PaginationParameters();
             Filter.PageNumber = PageNumber;

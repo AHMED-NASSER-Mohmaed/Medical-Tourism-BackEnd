@@ -14,6 +14,6 @@ namespace Elagy.Core.DTOs.Specialty
         public HospitalMinDto HospitalAsset { get; set; } // Nested DTO for hospital info
 
         public int SpecialtyId { get; set; } // The ID of the specialty
-        public SpecialtyDto Specialty { get; set; } // Nested DTO for specialty info
+        public SpecialtyResponseDto Specialty { get; set; } // Nested DTO for specialty info
     }
 }

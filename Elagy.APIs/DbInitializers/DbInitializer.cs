@@ -127,7 +127,7 @@ namespace Elagy.APIs.Initializers
                     PhoneNumberConfirmed = true,
                     DateOfBirth= DateTime.UtcNow,
                     Phone="01018208958",
-                    Status = UserStatus.Active,  // Set to active for seed
+                    Status = Status.Active,  // Set to active for seed
                     UserType = UserType.SuperAdmin,
                     Docs = "Initial Company Credentials", // Specific property for SuperAdmin
                     Address = "Default Admin Address" // <--- ADDED THIS LINE TO FIX THE ERROR

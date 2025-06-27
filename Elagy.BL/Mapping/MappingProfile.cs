@@ -85,7 +85,7 @@ namespace Elagy.BL.Mapping
                 .ForMember(dest => dest.LockoutEnabled, opt => opt.MapFrom(src => true)) // Enable lockout by default
                 .ForMember(dest => dest.AccessFailedCount, opt => opt.MapFrom(src => 0))
                 .ForMember(dest => dest.PhoneNumberConfirmed, opt => opt.MapFrom(src => false)) // Initial state
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => UserStatus.EmailUnconfirmed))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Status.EmailUnconfirmed))
                 .IncludeAllDerived();
 
 
