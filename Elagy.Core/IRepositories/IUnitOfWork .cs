@@ -1,4 +1,5 @@
 ﻿using Elagy.Core.Entities;
+using Elagy.Core.IServices;
 using System.Threading.Tasks;
 
 namespace Elagy.Core.IRepositories
@@ -14,6 +15,13 @@ namespace Elagy.Core.IRepositories
         IGenericRepository<HotelAsset> HotelAssets { get; }
         IGenericRepository<HospitalAsset> HospitalAssets { get; }
         IGenericRepository<CarRentalAsset> CarRentalAssets { get; }
+
+
+        public IGenericRepository<Country> Countries { get;  }
+        
+        public IGenericRepository<Governorate> Governates { get; }
+        
+        
 
 
 

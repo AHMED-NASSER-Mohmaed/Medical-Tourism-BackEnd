@@ -1,11 +1,11 @@
 ﻿using Elagy.Core.Entities;
 using Elagy.Core.Enums;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore; // Added for FirstOrDefaultAsync, Any
+using Microsoft.EntityFrameworkCore; 
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq; // Added for .Select() and .Any()
+using System.Linq; 
 using System.Threading.Tasks;
 
 namespace Elagy.APIs.Initializers
@@ -39,65 +39,73 @@ namespace Elagy.APIs.Initializers
             logger.LogInformation("Role seeding completed.");
         }
  
-        public static async Task SeedStaticDataAsync(ApplicationDbContext context, ILogger logger)
+      public static async Task SeedStaticDataAsync(ApplicationDbContext context, ILogger logger)
         {
             logger.LogInformation("Starting static data seeding...");
 
+            // List of Arab countries and their governorates (major administrative divisions)
+            var arabCountries = new Dictionary<string, List<string>>
+            {
+                { "Egypt", new List<string> { "Cairo", "Alexandria", "Aswan", "Asyut", "Beheira", "Beni Suef", "Dakahlia", "Damietta", "Faiyum", "Gharbia", "Giza", "Ismailia", "Kafr El Sheikh", "Luxor", "Matruh", "Minya", "Monufia", "New Valley", "North Sinai", "Port Said", "Qalyubia", "Qena", "Red Sea", "Sharqia", "Sohag", "South Sinai", "Suez" } },
+                { "Saudi Arabia", new List<string> { "Riyadh", "Makkah", "Madinah", "Eastern Province", "Qassim", "Asir", "Tabuk", "Hail", "Northern Borders", "Jazan", "Najran", "Al Bahah", "Al Jawf" } },
+                { "United Arab Emirates", new List<string> { "Abu Dhabi", "Dubai", "Sharjah", "Ajman", "Umm Al Quwain", "Ras Al Khaimah", "Fujairah" } },
+                { "Jordan", new List<string> { "Amman", "Irbid", "Zarqa", "Balqa", "Madaba", "Mafraq", "Jerash", "Ajloun", "Karak", "Tafilah", "Ma'an", "Aqaba" } },
+                { "Lebanon", new List<string> { "Beirut", "Mount Lebanon", "North", "South", "Beqaa", "Nabatieh", "Akkar", "Baalbek-Hermel" } },
+                { "Syria", new List<string> { "Damascus", "Aleppo", "Homs", "Hama", "Latakia", "Tartus", "Idlib", "Al-Hasakah", "Deir ez-Zor", "Raqqa", "Daraa", "As-Suwayda", "Quneitra", "Rif Dimashq" } },
+                { "Iraq", new List<string> { "Baghdad", "Basra", "Nineveh", "Erbil", "Sulaymaniyah", "Diyala", "Anbar", "Kirkuk", "Babil", "Najaf", "Dhi Qar", "Wasit", "Maysan", "Muthanna", "Qadisiyyah", "Karbala", "Saladin", "Dohuk" } },
+                { "Kuwait", new List<string> { "Al Asimah", "Hawalli", "Farwaniya", "Ahmadi", "Jahra", "Mubarak Al-Kabeer" } },
+                { "Qatar", new List<string> { "Doha", "Al Rayyan", "Al Wakrah", "Umm Salal", "Al Khor", "Al Shamal", "Al Daayen", "Al Shahaniya" } },
+                { "Bahrain", new List<string> { "Capital", "Muharraq", "Northern", "Southern" } },
+                { "Oman", new List<string> { "Muscat", "Dhofar", "Musandam", "Al Batinah North", "Al Batinah South", "Al Dakhiliyah", "Al Wusta", "Al Sharqiyah North", "Al Sharqiyah South", "Al Dhahirah", "Al Buraymi" } },
+                { "Palestine", new List<string> { "West Bank", "Gaza Strip", "Jerusalem", "Hebron", "Nablus", "Ramallah", "Bethlehem", "Jenin", "Tulkarm", "Qalqilya", "Salfit", "Tubas", "Jericho", "Rafah", "Khan Yunis", "Deir al-Balah", "North Gaza" } },
+                { "Sudan", new List<string> { "Khartoum", "Gezira", "Red Sea", "River Nile", "Northern", "Kassala", "Blue Nile", "White Nile", "North Kordofan", "South Kordofan", "West Kordofan", "North Darfur", "South Darfur", "East Darfur", "West Darfur", "Central Darfur", "Sennar" } },
+                { "Libya", new List<string> { "Tripoli", "Benghazi", "Misrata", "Zawiya", "Sabha", "Sirte", "Derna", "Al Bayda", "Al Marj", "Ghat", "Nalut", "Jufra", "Murzuq", "Wadi al Shatii", "Wadi al Hayaa", "Al Kufrah" } },
+                { "Algeria", new List<string> { "Algiers", "Oran", "Constantine", "Annaba", "Blida", "Batna", "Setif", "Sidi Bel Abbes", "Tlemcen", "Bejaia", "Tizi Ouzou", "Mostaganem", "Skikda", "Biskra", "Tiaret", "Bechar", "Chlef", "Djelfa", "El Oued", "Bouira", "M'sila", "Mascara", "Ouargla", "Relizane", "Tamanrasset", "Tebessa", "Ain Defla", "Ain Temouchent", "Adrar", "Laghouat", "Guelma", "Saida", "Tipaza", "Mila", "Naama", "Khenchela", "Souk Ahras", "Tindouf", "El Bayadh", "Illizi", "Bordj Bou Arreridj", "Boumerdes", "El Tarf", "Tissemsilt", "El M'Ghair", "El Menia", "Ouled Djellal", "Bordj Baji Mokhtar", "Beni Abbes", "Timimoun", "Touggourt", "Djanet", "In Salah", "In Guezzam" } },
+                { "Morocco", new List<string> { "Casablanca-Settat", "Rabat-Salé-Kénitra", "Fès-Meknès", "Marrakesh-Safi", "Tanger-Tetouan-Al Hoceima", "Souss-Massa", "Beni Mellal-Khénifra", "Oriental", "Drâa-Tafilalet", "Guelmim-Oued Noun", "Laâyoune-Sakia El Hamra", "Dakhla-Oued Ed-Dahab" } },
+                { "Tunisia", new List<string> { "Tunis", "Ariana", "Ben Arous", "Manouba", "Nabeul", "Zaghouan", "Bizerte", "Beja", "Jendouba", "Kef", "Siliana", "Sousse", "Monastir", "Mahdia", "Sfax", "Kairouan", "Kasserine", "Sidi Bouzid", "Gabes", "Medenine", "Tataouine", "Gafsa", "Tozeur", "Kebili" } },
+                { "Mauritania", new List<string> { "Adrar", "Assaba", "Brakna", "Dakhlet Nouadhibou", "Gorgol", "Guidimaka", "Hodh Ech Chargui", "Hodh El Gharbi", "Inchiri", "Nouakchott-Nord", "Nouakchott-Ouest", "Nouakchott-Sud", "Tagant", "Tiris Zemmour", "Trarza" } },
+                { "Comoros", new List<string> { "Grande Comore", "Anjouan", "Mohéli" } },
+                { "Djibouti", new List<string> { "Djibouti", "Ali Sabieh", "Arta", "Dikhil", "Obock", "Tadjourah" } },
+                { "Somalia", new List<string> { "Banadir", "Bari", "Bay", "Galguduud", "Gedo", "Hiiraan", "Lower Juba", "Middle Juba", "Mudug", "Nugal", "Sanaag", "Shabeellaha Dhexe", "Shabeellaha Hoose", "Sool", "Togdheer", "Woqooyi Galbeed", "Awdal" } },
+                { "Yemen", new List<string> { "Aden", "Abyan", "Al Bayda", "Al Hudaydah", "Al Jawf", "Al Mahrah", "Al Mahwit", "Amran", "Dhamar", "Hadhramaut", "Hajjah", "Ibb", "Lahij", "Ma'rib", "Raymah", "Saada", "Sanaa", "Shabwah", "Socotra", "Taiz" } }
+            };
+
             // Seed Countries
-            if (!await context.Countries.AnyAsync()) // Use AnyAsync for async check
+            foreach (var country in arabCountries.Keys)
             {
-                logger.LogInformation("No countries found. Seeding initial countries.");
-                var egypt = new Country { Name = "Egypt" };
-                var saudi = new Country { Name = "Saudi Arabia" };
-
-                context.Countries.AddRange(egypt, saudi);
-                await context.SaveChangesAsync(); // Save changes to populate IDs for newly added countries
-
-                logger.LogInformation("Initial countries seeded successfully.");
+                if (!await context.Countries.AnyAsync(c => c.Name == country))
+                {
+                    context.Countries.Add(new Country { Name = country });
+                }
             }
-            else
-            {
-                logger.LogInformation("Countries already exist, skipping country seeding.");
-            }
+            await context.SaveChangesAsync();
 
-            // Fetch existing countries to ensure correct foreign key relationships for governorates
-            // Fetching by name is safer than relying on hardcoded IDs after initial save
-            var existingEgypt = await context.Countries.FirstOrDefaultAsync(c => c.Name == "Egypt");
-            var existingSaudi = await context.Countries.FirstOrDefaultAsync(c => c.Name == "Saudi Arabia");
-
-            if (existingEgypt == null || existingSaudi == null)
-            {
-                logger.LogError("Required countries (Egypt, Saudi Arabia) not found after seeding/check. Cannot seed governorates.");
-                return; // Exit if base data isn't available
-            }
+            // Fetch all countries from DB for ID mapping
+            var dbCountries = await context.Countries.ToListAsync();
+            var countryNameToId = dbCountries.ToDictionary(c => c.Name, c => c.Id);
 
             // Seed Governorates
-            if (!await context.Governaties.AnyAsync()) // Use AnyAsync for async check
+            foreach (var kvp in arabCountries)
             {
-                logger.LogInformation("No governorates found. Seeding initial governorates.");
-
-                var governorates = new List<Governorate>
+                var countryName = kvp.Key;
+                var governorates = kvp.Value;
+                if (!countryNameToId.TryGetValue(countryName, out int countryId))
                 {
-                    new Governorate { Name = "Cairo", CountryId = existingEgypt.Id },
-                    new Governorate { Name = "Alexandria", CountryId = existingEgypt.Id },
-                    new Governorate { Name = "Aswan", CountryId = existingEgypt.Id },
-                    new Governorate { Name = "Asyut", CountryId = existingEgypt.Id },
-                    new Governorate { Name = "Beheira", CountryId = existingEgypt.Id },
-                    new Governorate { Name = "BeniSuef", CountryId = existingEgypt.Id },
-                    new Governorate { Name = "Dakahlia", CountryId = existingEgypt.Id },
-                    new Governorate { Name = "Riyadh", CountryId = existingSaudi.Id }
-                };
+                    logger.LogError($"Country '{countryName}' not found in DB after seeding.");
+                    continue;
+                }
 
-                context.Governaties.AddRange(governorates);
-                await context.SaveChangesAsync();
-                logger.LogInformation("Initial governorates seeded successfully.");
+                foreach (var gov in governorates)
+                {
+                    if (!await context.Governaties.AnyAsync(g => g.Name == gov && g.CountryId == countryId))
+                    {
+                        context.Governaties.Add(new Governorate { Name = gov, CountryId = countryId });
+                    }
+                }
             }
-            else
-            {
-                logger.LogInformation("Governorates already exist, skipping governorate seeding.");
-            }
+            await context.SaveChangesAsync();
 
-            logger.LogInformation("Static data seeding completed (if not already present).");
+            logger.LogInformation("Static data seeding for all Arab countries and their governorates completed.");
         }
 
       

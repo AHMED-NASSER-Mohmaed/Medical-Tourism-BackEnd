@@ -60,10 +60,57 @@ namespace Elagy.DAL.Repositories
             _dbSet.Update(entity);
         }
 
-        // Implementation for the AsQueryable() method from the interface
+
+        // Helper method to apply include expressions to an IQueryable
+        // This is internal to the repository and uses EF Core's Include
+        private IQueryable<T> ApplyIncludes(IQueryable<T> query, params Expression<Func<T, object>>[] includeProperties)
+        {
+            foreach (var includeProperty in includeProperties)
+            {
+                query = query.Include(includeProperty);
+            }
+            return query;
+        }
+
+
+        public virtual async Task<T> GetByIdAsync(int id, params Expression<Func<T, object>>[] includeProperties)
+        {
+            IQueryable<T> query = _dbSet;
+
+            query = ApplyIncludes(query, includeProperties); // Apply the includes
+
+            return await query.FirstOrDefaultAsync(e => EF.Property<int>(e, "Id") == id);
+
+        }
+
+        public virtual async Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includeProperties)
+        {
+            IQueryable<T> query = _dbSet;
+
+            query = ApplyIncludes(query, includeProperties); // Apply the includes
+
+            return await query.ToListAsync();
+        }
+
+        public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includeProperties)
+        {
+            if (predicate == null)
+                throw new ArgumentNullException(nameof(predicate));
+
+            IQueryable<T> query = _dbSet;
+
+            query = ApplyIncludes(query, includeProperties);
+
+            return await query.Where(predicate).ToListAsync();
+        }
+ 
+
+        //later i will remove it 
         public IQueryable<T> AsQueryable()
         {
             return _dbSet.AsQueryable();
         }
+
+         
     }
 }

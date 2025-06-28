@@ -71,7 +71,7 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(o =>
 // Configure Dependency Injection for Services and Unit of Work
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// Register your application services
+// Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IImageProfile, ImageProfile>();
 builder.Services.AddScoped<IPatientService, PatientService>();
@@ -79,6 +79,8 @@ builder.Services.AddScoped<IHotelProviderService, HotelProviderService>();
 builder.Services.AddScoped<IHospitalProviderService, HospitalProviderService>();
 builder.Services.AddScoped<ICarRentalProviderService, CarRentalProviderService>();
 builder.Services.AddScoped<ISuperAdminService, SuperAdminService>();
+builder.Services.AddScoped<ICountryService, CountryService>();
+
 
 // Register Helper Services
 builder.Services.AddTransient<IEmailService, EmailService>(); // Transient because SmtpClient can have issues with Scoped/Singleton
