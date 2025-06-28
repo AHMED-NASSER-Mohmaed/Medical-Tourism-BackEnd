@@ -28,8 +28,9 @@ namespace Elagy.DAL
         public IHospitalSpecialtyRepository HospitalSpecialties { get; private set; }
         public IScheduleRepository Schedules { get; private set; }
 
+        public IGenericRepository<Country> Countries { get; private set; }
 
-
+        public IGenericRepository<Governorate> Governorates { get; private set; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -48,6 +49,10 @@ namespace Elagy.DAL
             Doctors = new DoctorRepository(_context);
             Hospitals = new HospitalRepository(_context);
             Schedules=new ScheduleRepository(_context);
+            /////////////////
+            Governorates = new GenericRepository<Governorate>(_context);
+            Countries = new GenericRepository<Country>(_context);
+
 
         }
 

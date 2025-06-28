@@ -93,16 +93,17 @@ namespace Elagy.BL.Mapping
                  .ForMember(dest => dest.Schedules, opt => opt.Ignore()); // Navigation property ignored
 
 
-            // Doctor Entity to DoctorProfileDto
             CreateMap<Doctor, DoctorProfileDto>()
-                .ForMember(dest => dest.SpecialtyId, opt => opt.MapFrom(src => src.HospitalSpecialty.SpecialtyId))
-                .ForMember(dest => dest.SpecialtyName, opt => opt.MapFrom(src => src.HospitalSpecialty.Specialty.Name))
-                .ForMember(dest => dest.HospitalId, opt => opt.MapFrom(src => src.HospitalSpecialty.HospitalAssetId))
-                .ForMember(dest => dest.HospitalName, opt => opt.MapFrom(src => src.HospitalSpecialty.HospitalAsset.Name))
-                .ForMember(dest => dest.Governorate, opt => opt.MapFrom(src => src.Governorate)) // Direct mapping of Governorate object
-                .ForMember(dest => dest.Country, opt => opt.MapFrom(src => src.Governorate.Country)) // Direct mapping of Country object
-                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email ?? src.UserName)); // Email from IdentityUser
-
+                  .ForMember(dest => dest.SpecialtyId, opt => opt.MapFrom(src => src.HospitalSpecialty.SpecialtyId))
+                  .ForMember(dest => dest.SpecialtyName, opt => opt.MapFrom(src => src.HospitalSpecialty.Specialty.Name))
+                  .ForMember(dest => dest.HospitalId, opt => opt.MapFrom(src => src.HospitalSpecialty.HospitalAssetId))
+                  .ForMember(dest => dest.HospitalName, opt => opt.MapFrom(src => src.HospitalSpecialty.HospitalAsset.Name))
+                  // MODIFIED MAPPINGS: Map primitive properties from Governorate and Country
+                  .ForMember(dest => dest.GovernorateId, opt => opt.MapFrom(src => src.Governorate.Id))
+                  .ForMember(dest => dest.GovernorateName, opt => opt.MapFrom(src => src.Governorate.Name))
+                  .ForMember(dest => dest.CountryId, opt => opt.MapFrom(src => src.Governorate.Country.Id))
+                  .ForMember(dest => dest.CountryName, opt => opt.MapFrom(src => src.Governorate.Country.Name))
+                  .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email ?? src.UserName));
 
             CreateMap<Schedule, ScheduleDto>()
             .ForMember(dest => dest.DoctorFirstName, opt => opt.MapFrom(src => src.Doctor.FirstName))

@@ -127,21 +127,23 @@ namespace Elagy.BL.Services
                     _logger.LogWarning($"Doctor creation failed: Associated global specialty '{hospitalSpecialty.Specialty.Name}' is inactive.");
                     throw new InvalidOperationException($"Cannot create doctor for an inactive global specialty.");
                 }
-               
-                // 2. Validate Governorate and Country IDs for the doctor's address.
-                // Assuming _unitOfWork.Governorates.GetByIdAsync exists.
-                //var governorate = await _unitOfWork.Governorates.GetByIdAsync(createDto.GovernorateId);
-                //if (governorate == null)
-                //{
-                //    _logger.LogWarning($"Doctor creation failed: Governorate with ID {createDto.GovernorateId} not found.");
-                //    throw new ArgumentException($"Governorate with ID {createDto.GovernorateId} does not exist.");
-                //}
-                //// Assuming Governorate entity has a CountryId property to validate consistency.
-                //if (governorate.CountryId != createDto.CountryId)
-                //{
-                //    _logger.LogWarning($"Doctor creation failed: Country ID {createDto.CountryId} does not match Governorate {createDto.GovernorateId}.");
-                //    throw new ArgumentException($"Country with ID {createDto.CountryId} does not match the selected Governorate.");
-                //}
+
+                //2.Validate Governorate and Country IDs for the doctor's address.
+
+                //Assuming _unitOfWork.Governorates.GetByIdAsync exists.
+
+               var governorate = await _unitOfWork.Governorates.GetByIdAsync( createDto.GovernorateId);
+                if (governorate == null)
+                    {
+                        _logger.LogWarning($"Doctor creation failed: Governorate with ID {createDto.GovernorateId} not found.");
+                        throw new ArgumentException($"Governorate with ID {createDto.GovernorateId} does not exist.");
+                    }
+                // Assuming Governorate entity has a CountryId property to validate consistency.
+                if (governorate.CountryId != createDto.CountryId)
+                {
+                    _logger.LogWarning($"Doctor creation failed: Country ID {createDto.CountryId} does not match Governorate {createDto.GovernorateId}.");
+                    throw new ArgumentException($"Country with ID {createDto.CountryId} does not match the selected Governorate.");
+                }
 
                 // 3. Check if the provided email is already in use by another Identity user.
                 if (await _userManager.FindByEmailAsync(createDto.Email) != null)

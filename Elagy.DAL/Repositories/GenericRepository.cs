@@ -65,5 +65,10 @@ namespace Elagy.DAL.Repositories
         {
             return _dbSet.AsQueryable();
         }
+
+        public async Task<T> GetByIdAsync(int id)
+        {
+            return await _dbSet.FindAsync(id);
+        }
     }
 }

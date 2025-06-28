@@ -20,8 +20,11 @@ namespace Elagy.Core.DTOs.Doctor
         #region doctor address
         public string Address { get; set; }
         public string City { get; set; }
-        public Governorate? Governorate { get; set; }
-        public Country? Country { get; set; }
+        public int GovernorateId { get; set; }
+        public string GovernorateName { get; set; }
+        // MODIFIED: Replace Country object with ID and Name
+        public int CountryId { get; set; }
+        public string CountryName { get; set; }
         #endregion
 
         public string Phone { get; set; }

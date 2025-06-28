@@ -22,6 +22,6 @@ namespace Elagy.Core.Entities
         //refernce key to specialty at specific hospital 
         public HospitalSpecialty HospitalSpecialty { get; set; }
 
-        public ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
+        public ICollection<Schedule>?Schedules { get; set; } 
     }
 }

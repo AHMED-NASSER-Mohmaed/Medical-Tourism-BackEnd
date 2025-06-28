@@ -30,10 +30,7 @@ namespace Elagy.APIs.Controllers
         // --- PUBLIC/WEBSITE ENDPOINTS ---
 
         [HttpGet("hospital-specialty/{hospitalSpecialtyId}")]
-        [AllowAnonymous] // Publicly accessible for website visitors
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResponseDto<DoctorProfileDto>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [AllowAnonymous] 
         public async Task<IActionResult> GetDoctorsByHospitalSpecialty(
             int hospitalSpecialtyId,
             [FromQuery] int PageNumber = 1,
@@ -60,11 +57,7 @@ namespace Elagy.APIs.Controllers
         // --- HOSPITAL ADMIN DASHBOARD ENDPOINTS ---
 
         [HttpGet("my-hospital")]
-        [Authorize(Roles = "HospitalAdmin")] // Only Hospital Admins can view doctors for their hospital
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResponseDto<DoctorProfileDto>))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)] // If GetCurrentUserId fails
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "HospitalServiceProvider")] 
         public async Task<IActionResult> GetMyHospitalDoctors(
             [FromQuery] int PageNumber = 1,
             [FromQuery] int PageSize = 10,
@@ -91,12 +84,7 @@ namespace Elagy.APIs.Controllers
 
         // POST: api/Doctors
         [HttpPost]
-        [Authorize(Roles = "HospitalAdmin")] // Only Hospital Admins can add doctors
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(DoctorProfileDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)] // If GetCurrentUserId fails
-        [ProducesResponseType(StatusCodes.Status409Conflict)] // For email already exists/other business conflicts
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "HospitalServiceProvider")]
         public async Task<IActionResult> CreateDoctor([FromBody] DoctorCreateDto createDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -107,8 +95,7 @@ namespace Elagy.APIs.Controllers
             try
             {
                 var result = await _doctorService.CreateDoctorAsync(createDto, hospitalId);
-                // CreatedAtAction requires a route name and route values to build the URL for the created resource.
-                // Assuming a GET endpoint for a single doctor like GetDoctorById exists at "api/Doctors/{doctorId}".
+     
                 return CreatedAtAction(nameof(GetDoctorById), new { doctorId = result.Id }, result);
             }
             catch (ArgumentException ex) // For invalid HospitalSpecialtyId, GovernorateId, CountryId etc.
@@ -129,11 +116,7 @@ namespace Elagy.APIs.Controllers
         // GET: api/Doctors/{doctorId}
 
         [HttpGet("{doctorId}")]
-        [Authorize(Roles = "HospitalAdmin")] // Assuming HospitalAdmin can view individual doctors
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DoctorProfileDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)] // For invalid doctorId format
-        [ProducesResponseType(StatusCodes.Status404NotFound)] // If doctor not found
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "HospitalServiceProvider")] 
         public async Task<IActionResult> GetDoctorById(string doctorId)
         {
             if (string.IsNullOrWhiteSpace(doctorId)) return BadRequest("Doctor ID cannot be empty.");
@@ -150,23 +133,9 @@ namespace Elagy.APIs.Controllers
             }
         }
 
-        // PUT: api/Doctors/{doctorId}
-        /// <summary>
-        /// Updates an existing doctor's profile and/or assigned hospital specialty.
-        /// Ensures the doctor is affiliated with the current authenticated hospital.
-        /// </summary>
-        /// <param name="doctorId">The ID of the doctor to update (from route).</param>
-        /// <param name="updateDto">Doctor update data.</param>
-        /// <returns>The updated DoctorProfileDto.</returns>
+
         [HttpPut("{doctorId}")]
-        [Authorize(Roles = "HospitalAdmin")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DoctorProfileDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)] // For validation errors
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)] // If GetCurrentUserId fails
-        [ProducesResponseType(StatusCodes.Status403Forbidden)] // If doctor not affiliated with hospital
-        [ProducesResponseType(StatusCodes.Status404NotFound)] // If doctor not found
-        [ProducesResponseType(StatusCodes.Status409Conflict)] // For email conflict / business rule violation
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "HospitalServiceProvider")]
         public async Task<IActionResult> UpdateDoctor(string doctorId, [FromBody] DoctorUpdateDto updateDto)
         {
             // Validate route ID matches DTO ID (if DTO had ID) or simply ensures route ID is valid
@@ -205,15 +174,9 @@ namespace Elagy.APIs.Controllers
             }
         }
 
-        // DELETE: api/Doctors/{doctorId}
-        [HttpDelete("{doctorId}")]
-        [Authorize(Roles = "HospitalAdmin")] // Assuming HospitalAdmin can soft delete doctors
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DoctorProfileDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)] // For invalid doctorId
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)] // If GetCurrentUserId fails
-        [ProducesResponseType(StatusCodes.Status403Forbidden)] // If doctor not affiliated with hospital
-        [ProducesResponseType(StatusCodes.Status404NotFound)] // If doctor not found
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        
+        [HttpDelete("Deactivate/{doctorId}")]
+        [Authorize(Roles = "HospitalServiceProvider")]
         public async Task<IActionResult> DeleteDoctor(string doctorId)
         {
             if (string.IsNullOrWhiteSpace(doctorId)) return BadRequest("Doctor ID cannot be empty.");
@@ -247,8 +210,8 @@ namespace Elagy.APIs.Controllers
         }
 
 
-        [HttpPut("{doctorId}/activate")]
-        [Authorize(Roles = "HospitalAdmin")]
+        [HttpPut("activate/{doctorId}")]
+        [Authorize(Roles = "HospitalServiceProvider")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DoctorProfileDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -289,8 +252,8 @@ namespace Elagy.APIs.Controllers
                     Gender = currentDoctorProfile.Gender,
                     Address = currentDoctorProfile.Address,
                     City = currentDoctorProfile.City,
-                    GovernorateId = currentDoctorProfile.Governorate?.Id ?? 0, 
-                    CountryId = currentDoctorProfile.Country?.Id ?? 0,
+                    GovernorateId = currentDoctorProfile.GovernorateId, 
+                    CountryId = currentDoctorProfile.CountryId,
                     DateOfBirth = currentDoctorProfile.DateOfBirth,
                     MedicalLicenseNumber = currentDoctorProfile.MedicalLicenseNumber,
                     YearsOfExperience = currentDoctorProfile.YearsOfExperience,
