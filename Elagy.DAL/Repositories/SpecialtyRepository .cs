@@ -12,13 +12,13 @@ namespace Elagy.DAL.Repositories
 {
     public class SpecialtyRepository : GenericRepository<Specialty>, ISpecialtyRepository
     {
-        protected readonly ApplicationDbContext _context;
+     
         public SpecialtyRepository(ApplicationDbContext _context) : base(_context) { }
 
         public async Task<Specialty> GetSpecialtyIdAsync(int id)
         {
             return await _context.Specialties
-                .Where(s => s.Id == id && s.IsActive)
+                .Where(s => s.Id == id)
                 .Include(s => s.HospitalSpecialties)
                 .ThenInclude(hs => hs.HospitalAsset)
                 .FirstOrDefaultAsync();
@@ -52,18 +52,21 @@ namespace Elagy.DAL.Repositories
         //for hospital admin to link specilities
         public async Task<IEnumerable<Specialty>> GetUnlinkedSpecialtiesForHospitalAsync(string hospitalId)
         {
-            var linkedSpecialtyIds = await _context.HospitalSpecialties.Include(s=>s.Specialty)
-                .Where(hs => hs.HospitalAssetId == hospitalId  )
-                .Select(hs => hs.SpecialtyId)
-                .ToListAsync();
+            var linkedSpecialtyIds = await _context.HospitalSpecialties
+                    .Where(hs => hs.HospitalAssetId == hospitalId)
+                    .Select(hs => hs.SpecialtyId)
+                    .ToListAsync();
 
             var query = _context.Specialties
                 .Where(s => !linkedSpecialtyIds.Contains(s.Id));
-            
-                query = query.Where(s => s.IsActive);
-            
+
+           
+            query = query.Where(s => s.IsActive);
 
             return await query.ToListAsync();
         }
+
+ 
+    
     }
 }

@@ -147,12 +147,8 @@ namespace Elagy.APIs.Controllers
         /// </summary>
         /// <param name="createDto">Specialty creation data.</param>
         /// <returns>The created specialty response DTO.</returns>
-        [HttpPost]
-        [Authorize(Roles = "SuperAdmin")] // Only SuperAdmins can create global specialties
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(SpecialtyResponseDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpPost("Add-Specialty")]
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> CreateSpecialty([FromBody] SpecialtyCreateDto createDto)
         {
             if (!ModelState.IsValid)
@@ -257,35 +253,40 @@ namespace Elagy.APIs.Controllers
             }
         }
 
-        // PUT: api/Specialties/my-hospital/status
-        [HttpPut("my-hospital/status")] // Changed route
+        [HttpPut("myhospital/status-link/{specialtyId}")]
         [Authorize(Roles = "HospitalServiceProvider")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SpecialtyLinkToHospitalDto))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)] // Added for GetCurrentUserId failure
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> ChangeSpecialtiesStatusForMyHospital([FromBody] Status status) // Removed hospitalId from parameter
+        public async Task<IActionResult> ChangeSpecificHospitalSpecialtyLinkStatus(
+     int specialtyId,
+     [FromBody] Status status)
         {
-            var hospitalId = GetCurrentUserId(); // <<< Using GetCurrentUserId() here
+            var hospitalId = GetCurrentUserId();
             if (hospitalId == null)
-            {
-                return Unauthorized("Hospital ID could not be determined from your token.");
-            }
+                return Unauthorized("Hospital ID not found in token");
+
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
+
             try
             {
-                var result = await _specialtyService.CahngeSTSpecialtiesForHospitalAdminDashboard(hospitalId, status);
-                return Ok(result); // Returns the placeholder DTO from the service
+                var result = await _specialtyService.ChangeSpecificHospitalSpecialtyStatusAsync(
+                    hospitalId, specialtyId, status);
+
+                if (result == null)
+                    return NotFound($"Specialty link {specialtyId} not found or not associated with your hospital");
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Internal server error: {ex.Message}");
             }
         }
-
 
         // --- DELETE Endpoints ---
         [HttpDelete("{id}")]
@@ -312,6 +313,32 @@ namespace Elagy.APIs.Controllers
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
+            }
+        }
+
+
+        [HttpPut("activate/{id}")]
+        [Authorize(Roles = "SuperAdmin")] // Typically, only SuperAdmin can change global specialty status
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SpecialtyResponseDto))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> ActivateSpecialty(int id)
+        {
+            try
+            {
+           
+                var result = await _specialtyService.ChangeSpecialtyStatusAsync(id, true); // Call with true for active
+
+                if (result == null)
+                {
+                    return NotFound($"Specialty with ID {id} not found.");
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+            
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while activating the specialty: {ex.Message}");
             }
         }
     }

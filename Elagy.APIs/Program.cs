@@ -5,6 +5,7 @@ using Elagy.Core.Entities;
 using Elagy.Core.Helpers; // for intefaceses like IEmailService, IJwtTokenGenerator, etc.
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
+using Elagy.Core.IServices.ISpecialtyService;
 using Elagy.Core.Temps;
 using Elagy.DAL;
 using Microsoft.AspNetCore.Identity;
@@ -79,6 +80,9 @@ builder.Services.AddScoped<IHotelProviderService, HotelProviderService>();
 builder.Services.AddScoped<IHospitalProviderService, HospitalProviderService>();
 builder.Services.AddScoped<ICarRentalProviderService, CarRentalProviderService>();
 builder.Services.AddScoped<ISuperAdminService, SuperAdminService>();
+builder.Services.AddScoped<ISpecialtyService, SpecialtyService>();
+builder.Services.AddScoped<IDoctorService, DoctorService>();
+
 
 // Register Helper Services
 builder.Services.AddTransient<IEmailService, EmailService>(); // Transient because SmtpClient can have issues with Scoped/Singleton

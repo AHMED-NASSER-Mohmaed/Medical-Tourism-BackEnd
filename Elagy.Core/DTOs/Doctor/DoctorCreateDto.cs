@@ -38,10 +38,10 @@ namespace Elagy.Core.DTOs.Doctor
 
         #region
         [Required]
-        public string Address { get; set; } // Full address as a single string
+        public string? Address { get; set; } // Full address as a single string
 
         [Required]
-        public string City { get; set; }
+        public string? City { get; set; }
 
         [Required]
         public int GovernorateId { get; set; }

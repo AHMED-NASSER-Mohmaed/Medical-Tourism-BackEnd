@@ -13,26 +13,51 @@ namespace Elagy.DAL.Repositories
     {
         public HospitalSpecialtyRepository(ApplicationDbContext context) : base(context)
         {
-            Context = context;
+           
         }
 
-        public ApplicationDbContext Context { get; }
+       
 
-        public async Task<HospitalSpecialty?> GetByHospitalAndSpecialtyIdAsync(string hospitalId, int specialtyId)
+        public async Task<HospitalSpecialty?> GetByHospitalAndSpecialtyIdAsync(string hospitalId, int specialtyId, Func<IQueryable<HospitalSpecialty>, IQueryable<HospitalSpecialty>>? includes = null)
         {
-            return await _dbSet
-                 .FirstOrDefaultAsync(hs => hs.HospitalAssetId == hospitalId && hs.SpecialtyId == specialtyId);
+            var query = _dbSet
+         .Where(hs => hs.HospitalAssetId == hospitalId && hs.SpecialtyId == specialtyId);
+
+            if (includes != null)
+            {
+                query = includes(query);
+            }
+
+            return await query.FirstOrDefaultAsync();
         }
 
         public async Task<HospitalSpecialty?> GetByIdWithDetailsAsync(int hospitalspecialtyid)
         {
-            return await _dbSet // _dbSet is from GenericRepository<HospitalSpecialty, int>
+            return await _dbSet 
                .Where(hs => hs.Id == hospitalspecialtyid)
-               .Include(hs => hs.Specialty) // Include the Specialty navigation property
-               .Include(hs => hs.HospitalAsset) // Include the HospitalAsset navigation property
+               .Include(hs => hs.Specialty) 
+               .Include(hs => hs.HospitalAsset) 
                .FirstOrDefaultAsync();
         }
 
+        public async Task<bool> UpdateHospitalSpecialtyLinkStatusAsync(
+      string hospitalId,
+      int specialtyId,
+      bool newIsActiveStatus)
+        {
+            var link = await _dbSet
+                .FirstOrDefaultAsync(hs =>
+                    hs.HospitalAssetId == hospitalId &&
+                    hs.SpecialtyId == specialtyId);
 
+            if (link == null) return false;
+
+     
+            if (link.IsActive == newIsActiveStatus) return true;
+
+            link.IsActive = newIsActiveStatus;
+
+            return true;
+        }
     }
 }

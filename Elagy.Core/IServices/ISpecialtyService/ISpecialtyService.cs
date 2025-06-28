@@ -19,7 +19,7 @@ namespace Elagy.Core.IServices.ISpecialtyService
         Task<SpecialtyResponseDto> DeleteSpecialtyAsync(int id);
         Task<SpecialtyResponseDto> UpdateSpecialty(int specialtyId,SpecialtyUpdateDto updateDto);
         #endregion
-
+        Task<SpecialtyResponseDto?> ChangeSpecialtyStatusAsync(int id, bool newIsActiveStatus);
         Task<SpecialtyResponseDto?> GetSpecialtyIdAsync(int id);
         Task<SpecialtyLinkToHospitalDto?> LinkSpecialtyToHospital(int specialtyId, string hospitalId);
 
@@ -27,8 +27,7 @@ namespace Elagy.Core.IServices.ISpecialtyService
         //for supper admin dashboard and external site 
         //<summary>
         Task<PagedResponseDto<SpecialtyResponseDto>> GetAllSpecialtiesForHospital(string hospitalId);
-        Task<SpecialtyLinkToHospitalDto> CahngeSTSpecialtiesForHospitalAdminDashboard(string hospitalId,Status St);
-
+        Task<SpecialtyLinkToHospitalDto?> ChangeSpecificHospitalSpecialtyStatusAsync(string hospitalId, int specialtyId, Status newStatus);
         // do not return description
         Task<IEnumerable<SpecialtyResponseDto>> GetAvailableGlobalSpecialtiesToLinkAsync(string hospitalId);
 

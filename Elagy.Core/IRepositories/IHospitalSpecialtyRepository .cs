@@ -11,7 +11,11 @@ namespace Elagy.Core.IRepositories
     public interface IHospitalSpecialtyRepository : IGenericRepository<HospitalSpecialty>
     {
         Task<HospitalSpecialty?> GetByIdWithDetailsAsync(int hospitalspecialtyid);
-        Task<HospitalSpecialty?> GetByHospitalAndSpecialtyIdAsync(string hospitalId, int specialtyId);
+        Task<HospitalSpecialty?> GetByHospitalAndSpecialtyIdAsync(
+    string hospitalId,
+    int specialtyId,
+    Func<IQueryable<HospitalSpecialty>, IQueryable<HospitalSpecialty>>? includes = null);
+        Task<bool> UpdateHospitalSpecialtyLinkStatusAsync(string hospitalId, int specialtyId, bool newIsActiveStatus);
 
     }
 }

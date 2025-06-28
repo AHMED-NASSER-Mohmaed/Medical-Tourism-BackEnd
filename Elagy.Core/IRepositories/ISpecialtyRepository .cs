@@ -1,4 +1,6 @@
-﻿using Elagy.Core.Entities;
+﻿using Elagy.Core.DTOs.Specialty;
+using Elagy.Core.Entities;
+using Elagy.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +16,8 @@ namespace Elagy.Core.IRepositories
         Task<IEnumerable<Specialty>> GetSpecialtiesByHospitalIdAsync(string hospitalId, bool isActive = true);
         Task<IEnumerable<Specialty>> GetAllSpecialtiesAsync(bool isActive = true);
         Task<IEnumerable<Specialty>> GetUnlinkedSpecialtiesForHospitalAsync(string hospitalId);
+      
+
 
     }
 }
