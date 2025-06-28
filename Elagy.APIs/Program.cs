@@ -72,7 +72,7 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(o =>
 // Configure Dependency Injection for Services and Unit of Work
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// Register your application services
+// Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IImageProfile, ImageProfile>();
 builder.Services.AddScoped<IPatientService, PatientService>();
@@ -80,6 +80,8 @@ builder.Services.AddScoped<IHotelProviderService, HotelProviderService>();
 builder.Services.AddScoped<IHospitalProviderService, HospitalProviderService>();
 builder.Services.AddScoped<ICarRentalProviderService, CarRentalProviderService>();
 builder.Services.AddScoped<ISuperAdminService, SuperAdminService>();
+builder.Services.AddScoped<ICountryService, CountryService>();
+
 builder.Services.AddScoped<ISpecialtyService, SpecialtyService>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
 

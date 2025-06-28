@@ -3,7 +3,7 @@ using Elagy.Core.Entities;
 using Elagy.DAL.Repositories;
 using System;
 using System.Threading.Tasks;
-using Elagy.Core.Entities;
+using Elagy.Core.IServices;
 
 namespace Elagy.DAL
 {
@@ -18,6 +18,9 @@ namespace Elagy.DAL
         public IGenericRepository<HotelAsset> HotelAssets { get; private set; }
         public IGenericRepository<HospitalAsset> HospitalAssets { get; private set; }
         public IGenericRepository<CarRentalAsset> CarRentalAssets { get; private set; }
+        public IGenericRepository<Country> Countries{ get; private set; }
+        public IGenericRepository<Governorate> Governates { get; private set; }
+
 
 
         public ISpecialtyRepository Specialties { get; private set; }
@@ -35,6 +38,7 @@ namespace Elagy.DAL
         public UnitOfWork(ApplicationDbContext context)
         {
             //IRepo injection
+            //later i am going to make it lazy init
             _context = context;
             Patients = new GenericRepository<Patient>(_context);
             ServiceProviders = new GenericRepository<ServiceProvider>(_context);
@@ -43,6 +47,10 @@ namespace Elagy.DAL
             HotelAssets = new GenericRepository<HotelAsset>(_context);
             HospitalAssets = new GenericRepository<HospitalAsset>(_context);
             CarRentalAssets = new GenericRepository<CarRentalAsset>(_context);
+            Countries = new GenericRepository<Country>(_context);
+            Governates = new GenericRepository<Governorate>(_context);
+
+
 
             HospitalSpecialties = new HospitalSpecialtyRepository(_context);
             Specialties = new SpecialtyRepository(_context);

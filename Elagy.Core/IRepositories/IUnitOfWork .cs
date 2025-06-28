@@ -1,4 +1,5 @@
 ﻿using Elagy.Core.Entities;
+using Elagy.Core.IServices;
 using System.Threading.Tasks;
 
 namespace Elagy.Core.IRepositories
@@ -25,6 +26,13 @@ namespace Elagy.Core.IRepositories
         IHospitalRepository Hospitals { get; }
         IHospitalSpecialtyRepository HospitalSpecialties { get; }
         ///////////////////////////
+
+        public IGenericRepository<Country> Countries { get;  }
+        
+        public IGenericRepository<Governorate> Governates { get; }
+        
+        
+
 
 
         public IScheduleRepository Schedules { get; }
