@@ -212,13 +212,6 @@ namespace Elagy.APIs.Controllers
 
         [HttpPut("activate/{doctorId}")]
         [Authorize(Roles = "HospitalServiceProvider")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DoctorProfileDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)] // If doctor not affiliated
-        [ProducesResponseType(StatusCodes.Status404NotFound)] // If doctor not found
-        [ProducesResponseType(StatusCodes.Status409Conflict)] // If already active or other business conflicts
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> ActivateDoctor(string doctorId)
         {
             if (string.IsNullOrWhiteSpace(doctorId)) return BadRequest("Doctor ID cannot be empty.");
@@ -228,9 +221,6 @@ namespace Elagy.APIs.Controllers
 
             try
             {
-                // 1. Get the current doctor's full profile. This is crucial
-                // because DoctorUpdateDto has [Required] fields that must be sent,
-                // even if only Status is changing.
                 var currentDoctorProfile = await _doctorService.GetDoctorByIdAsync(doctorId);
                 if (currentDoctorProfile == null) return NotFound("Doctor not found.");
 
@@ -260,13 +250,13 @@ namespace Elagy.APIs.Controllers
                     Bio = currentDoctorProfile.Bio,
                     Qualification = currentDoctorProfile.Qualification,
                     HospitalSpecialtyId = currentDoctorProfile.SpecialtyId,
-                    Status = Status.Active // Set the desired status
+                    Status = Status.Active 
                 };
 
                 // 4. Call the main UpdateDoctorAsync service method
                 var result = await _doctorService.UpdateDoctorAsync(doctorId, updateDto, hospitalId);
 
-                return Ok(result); // Return the updated DoctorProfileDto
+                return Ok(result); 
             }
             catch (KeyNotFoundException ex)
             {

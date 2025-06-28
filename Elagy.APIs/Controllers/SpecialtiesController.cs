@@ -29,14 +29,11 @@ namespace Elagy.APIs.Controllers
 
         [HttpGet] // MODIFIED: Added FromQuery parameters
         [Authorize(Roles = "SuperAdmin")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResponseDto<SpecialtyResponseDto>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllSpecialtiesForSuperAdminDashboard(
              [FromQuery] int PageNumber = 1,
              [FromQuery] int PageSize = 10,
              [FromQuery] string? SearchTerm = null,
-             [FromQuery] Status? UserStatus = null) // MODIFIED: Added query parameters
+             [FromQuery] Status? UserStatus = null) 
         {
             if (PageNumber < 1 || PageSize < 1)
             {
@@ -89,9 +86,6 @@ namespace Elagy.APIs.Controllers
 
         [HttpGet("my-hospital")] 
         [Authorize(Roles = "HospitalServiceProvider")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResponseDto<SpecialtyResponseDto>))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)] // Added for GetCurrentUserId failure
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetMyHospitalSpecialties() // Renamed to reflect 'my-hospital'
         {
             var hospitalId = GetCurrentUserId(); // <<< Using GetCurrentUserId() here
@@ -117,10 +111,8 @@ namespace Elagy.APIs.Controllers
         /// <param name="id">The ID of the specialty.</param>
         /// <returns>The specialty response DTO.</returns>
         [HttpGet("{id}")]
-        [Authorize(Roles = "SuperAdmin, HospitalServiceProvider")] // Both roles can view specific specialties
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SpecialtyResponseDto))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "SuperAdmin, HospitalServiceProvider")] 
+
         public async Task<IActionResult> GetSpecialtyById(int id)
         {
             try
@@ -141,12 +133,6 @@ namespace Elagy.APIs.Controllers
 
         // --- POST Endpoints ---
 
-        // POST: api/Specialties
-        /// <summary>
-        /// Creates a new global specialty.
-        /// </summary>
-        /// <param name="createDto">Specialty creation data.</param>
-        /// <returns>The created specialty response DTO.</returns>
         [HttpPost("Add-Specialty")]
         [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> CreateSpecialty([FromBody] SpecialtyCreateDto createDto)
@@ -174,21 +160,11 @@ namespace Elagy.APIs.Controllers
             }
         }
 
-        // POST: api/Specialties/{specialtyId}/link-to-my-hospital
-        /// <summary>
-        /// Links an active global specialty to the current authenticated hospital.
-        /// </summary>
-        /// <param name="specialtyId">The ID of the specialty to link.</param>
-        /// <returns>The SpecialtyLinkToHospitalDto representing the new/reactivated link.</returns>
-        [HttpPost("link-to-my-hospital/{specialtyId}")] // Changed route
+
+        [HttpPost("link-to-my-hospital/{specialtyId}")]
         [Authorize(Roles = "HospitalServiceProvider")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SpecialtyLinkToHospitalDto))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)] // Added for GetCurrentUserId failure
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> LinkSpecialtyToMyHospital(int specialtyId) // Removed hospitalId from parameter
+
+        public async Task<IActionResult> LinkSpecialtyToMyHospital(int specialtyId) 
         {
             var hospitalId = GetCurrentUserId(); 
             if (hospitalId == null)
@@ -222,11 +198,6 @@ namespace Elagy.APIs.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "SuperAdmin")] // Only SuperAdmins can update global specialties
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SpecialtyResponseDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateSpecialty(int id, [FromBody] SpecialtyUpdateDto updateDto)
         {
             if (!ModelState.IsValid)
@@ -255,11 +226,6 @@ namespace Elagy.APIs.Controllers
 
         [HttpPut("myhospital/status-link/{specialtyId}")]
         [Authorize(Roles = "HospitalServiceProvider")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SpecialtyLinkToHospitalDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> ChangeSpecificHospitalSpecialtyLinkStatus(
      int specialtyId,
      [FromBody] Status status)
@@ -290,11 +256,7 @@ namespace Elagy.APIs.Controllers
 
         // --- DELETE Endpoints ---
         [HttpDelete("{id}")]
-        [Authorize(Roles = "SuperAdmin")] // Only SuperAdmins can delete global specialties
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SpecialtyResponseDto))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)] // If associated with hospitals
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> DeleteSpecialty(int id)
         {
             try
@@ -318,10 +280,8 @@ namespace Elagy.APIs.Controllers
 
 
         [HttpPut("activate/{id}")]
-        [Authorize(Roles = "SuperAdmin")] // Typically, only SuperAdmin can change global specialty status
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SpecialtyResponseDto))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "SuperAdmin")] 
+
         public async Task<IActionResult> ActivateSpecialty(int id)
         {
             try
