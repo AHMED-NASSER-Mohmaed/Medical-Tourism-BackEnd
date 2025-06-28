@@ -16,12 +16,13 @@ namespace Elagy.APIs.Controllers
 {
     [ApiController]
     [Route("api/[controller]")] // Base route: /api/Doctors
-    public class DoctorsController : BaseApiController // Inherits from your BaseApiController
+    public class DoctorsController : ProfileImageBaseController // Inherits from your BaseApiController
     {
         private readonly IDoctorService _doctorService;
         private readonly ILogger<DoctorsController> _logger;
 
-        public DoctorsController(IDoctorService doctorService, ILogger<DoctorsController> logger)
+        public DoctorsController(IDoctorService doctorService, IImageProfile _imageProfile,ILogger<DoctorsController> logger)
+        :base(_imageProfile,logger) 
         {
             _doctorService = doctorService;
             _logger = logger;

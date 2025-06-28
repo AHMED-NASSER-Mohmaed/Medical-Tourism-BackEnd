@@ -19,7 +19,19 @@ namespace Elagy.Core.IRepositories
         void Remove(T entity);
         void RemoveRange(IEnumerable<T> entities);
 
+
+
+
+        // overloads for including related entities
+        Task<T> GetByIdAsync(int id, params Expression<Func<T, object>>[] includeProperties);
+        Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includeProperties);
+        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includeProperties);
+
+
+
+
         // This method is crucial for fluent LINQ queries with EF Core, including .Include()
+        //we are going to remove this function in the future becouse it expose the details of the ORM
         IQueryable<T> AsQueryable();
     }
 }
