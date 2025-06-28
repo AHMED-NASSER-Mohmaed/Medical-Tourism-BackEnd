@@ -19,7 +19,7 @@ namespace Elagy.Core.IRepositories
         /// ///////////////////////////////
         /// </summary>
         IGenericRepository<Country> Countries { get; }
-        IGenericRepository<Governorate> Governorates { get; }
+        IGenericRepository<Governorate> Governates { get; }
 
         ISpecialtyRepository Specialties { get; }
         IDoctorRepository Doctors { get; }
@@ -27,9 +27,7 @@ namespace Elagy.Core.IRepositories
         IHospitalSpecialtyRepository HospitalSpecialties { get; }
         ///////////////////////////
 
-        public IGenericRepository<Country> Countries { get;  }
-        
-        public IGenericRepository<Governorate> Governates { get; }
+ 
         
         
 

@@ -132,7 +132,7 @@ namespace Elagy.BL.Services
 
                 //Assuming _unitOfWork.Governorates.GetByIdAsync exists.
 
-               var governorate = await _unitOfWork.Governorates.GetByIdAsync( createDto.GovernorateId);
+               var governorate = await _unitOfWork.Governates.GetByIdAsync( createDto.GovernorateId);
                 if (governorate == null)
                     {
                         _logger.LogWarning($"Doctor creation failed: Governorate with ID {createDto.GovernorateId} not found.");
