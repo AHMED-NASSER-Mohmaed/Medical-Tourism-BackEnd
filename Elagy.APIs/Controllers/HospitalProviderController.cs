@@ -105,7 +105,7 @@ namespace Elagy.APIs.Controllers
         }
 
         // POST: api/Schedules
-        [HttpPost("AddSchedule")]
+        [HttpPost("schedule")]
         public async Task<IActionResult> CreateSchedule([FromBody] CreateScheduleSlotDto createDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -140,7 +140,7 @@ namespace Elagy.APIs.Controllers
         }
 
         // PUT: api/Schedules/{scheduleId}
-        [HttpPut("{scheduleId}")]
+        [HttpPut("schedule/{scheduleId}")]
         [Authorize(Roles = "HospitalServiceProvider")]
         public async Task<IActionResult> UpdateSchedule(int scheduleId, [FromBody] UpdateScheduleDto updateDto)
         {
@@ -180,7 +180,7 @@ namespace Elagy.APIs.Controllers
         }
 
         // PUT: api/Schedules/{scheduleId}/status
-        [HttpPut("changestatus/{scheduleId}")]
+        [HttpPut("schedule/status/{scheduleId}")]
         public async Task<IActionResult> ChangeScheduleStatus(int scheduleId, [FromBody] bool newIsActiveStatus)
         {
             if (scheduleId <= 0) return BadRequest("Schedule ID must be a positive integer.");
@@ -219,7 +219,7 @@ namespace Elagy.APIs.Controllers
 
 
         // --- PUBLIC/WEBSITE SCHEDULE DISPLAY ENDPOINTS ---
-        [HttpGet("available-slots")]
+        [HttpGet("schedule/available-slots")]
         [AllowAnonymous] // Publicly accessible
         public async Task<IActionResult> GetAvailablePatientSlots(
             [FromQuery] int PageNumber = 1,
@@ -260,7 +260,7 @@ namespace Elagy.APIs.Controllers
 
 
         // GET: api/Schedules/{scheduleId}
-        [HttpGet("{scheduleId}")]
+        [HttpGet("schedule/{scheduleId}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetScheduleById(int scheduleId)
         {
