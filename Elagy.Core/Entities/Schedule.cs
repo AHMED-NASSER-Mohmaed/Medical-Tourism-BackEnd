@@ -14,6 +14,7 @@ namespace Elagy.Core.Entities
         public string DoctorId { get; set; }
 
         public int HospitalSpecialtyId { get; set; }
+        public int DayOfWeekId { get; set; }
 
         public DateTime Date { get; set; }
 
@@ -27,10 +28,12 @@ namespace Elagy.Core.Entities
 
         public bool IsActive { get; set; } = true;
 
+        public bool IsRecurring { get; set; }
+
         public Doctor Doctor { get; set; }
 
         public HospitalSpecialty HospitalSpecialty { get; set; }
+        public DayOfWeek DayOfWeek { get; set; }
 
-        //public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
     }
 }

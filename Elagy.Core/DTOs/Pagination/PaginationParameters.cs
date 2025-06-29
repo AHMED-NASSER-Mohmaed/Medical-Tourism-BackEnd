@@ -18,7 +18,16 @@ namespace Elagy.Core.DTOs.Pagination
         public Status? UserStatus { get; set; } 
         public string? SearchTerm { get; set; }  
 
-        // order acs , desc
+        public int? SpecialtyId {  get; set; }
+        public int? FilterDayOfWeekId { get; set; }
+        public DateTime? FilterStartDate { get; set; }
+        public DateTime? FilterEndDate { get; set; }
+        public string? FilterDoctorId { get; set; }
+        public bool? FilterIsRecurring { get; set; }
+        public bool? FilterIsActive { get; set; }
+        
+
+        // order acs , desc 
 
     }
 }

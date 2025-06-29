@@ -14,58 +14,47 @@ namespace Elagy.DAL.Configurations
         public void Configure(EntityTypeBuilder<Schedule> builder)
         {
             builder.HasKey(s => s.Id);
-            // Properties
-            builder.Property(s => s.Id)
-                   .ValueGeneratedOnAdd(); 
 
-            builder.Property(s => s.Date)
-                   .IsRequired(); 
+            // Configure properties (ensure required properties are marked)
+            builder.Property(s => s.DoctorId).IsRequired();
+            builder.Property(s => s.HospitalSpecialtyId).IsRequired();
+            builder.Property(s => s.DayOfWeekId).IsRequired();
+            builder.Property(s => s.Date).IsRequired();
+            builder.Property(s => s.StartTime).IsRequired();
+            builder.Property(s => s.EndTime).IsRequired();
+            builder.Property(s => s.MaxCapacity).IsRequired();
+            builder.Property(s => s.BookedSlots).IsRequired();
+            builder.Property(s => s.IsActive).IsRequired();
+            builder.Property(s => s.IsRecurring).IsRequired();
 
-            builder.Property(s => s.StartTime)
-                   .IsRequired(); 
-
-            builder.Property(s => s.EndTime)
-                   .IsRequired();
-
-            builder.Property(s => s.MaxCapacity)
-                   .IsRequired(); 
-            builder.Property(s => s.BookedSlots)
-                   .IsRequired(); 
-            builder.Property(s => s.IsActive)
-                   .IsRequired()
-                   .HasDefaultValue(true);
-
-
-            // Relationships
+            // Relationships:
 
             // Schedule (Many) to Doctor (One)
+            // A Schedule belongs to one Doctor, and a Doctor can have many Schedules.
             builder.HasOne(s => s.Doctor)
                    .WithMany(d => d.Schedules)
                    .HasForeignKey(s => s.DoctorId)
-                   .IsRequired()
-                   .OnDelete(DeleteBehavior.Restrict); 
+                   .OnDelete(DeleteBehavior.Restrict); // Or .Cascade, .NoAction, etc., based on your policy
 
             // Schedule (Many) to HospitalSpecialty (One)
+            // A Schedule belongs to one HospitalSpecialty, and a HospitalSpecialty can have many Schedules.
             builder.HasOne(s => s.HospitalSpecialty)
                    .WithMany(hs => hs.Schedules)
                    .HasForeignKey(s => s.HospitalSpecialtyId)
-                   .IsRequired()
-                   .OnDelete(DeleteBehavior.Restrict); 
+                   .OnDelete(DeleteBehavior.Restrict);
 
-            //// Schedule (One) to Appointment (Many)
-            //// This relationship is also defined in AppointmentConfiguration for the other side
-            //builder.HasMany(s => s.Appointments)
-            //       .WithOne(a => a.Schedule)
-            //       .HasForeignKey(a => a.ScheduleId)
-            //       .IsRequired()
-            //       .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete if a schedule has appointments
+            // Schedule (Many) to DayOfWeek (One)
+            // A Schedule belongs to one DayOfWeek, and a DayOfWeek can have many Schedules.
+            builder.HasOne(s => s.DayOfWeek)
+                   .WithMany(dow => dow.Schedules)
+                   .HasForeignKey(s => s.DayOfWeekId)
+                   .OnDelete(DeleteBehavior.Restrict);
 
-            // Indexes
-            // Add an index for efficient lookup of a doctor's schedules on a specific date.
-            //builder.HasIndex(s => new { s.DoctorId, s.Date, s.StartTime })
-            //       .IsUnique(false); // Not unique, as a doctor can have multiple schedules on a date, just different times
+            // Optional: Unique constraint if a doctor can only have one schedule per specific time/date/specialty
+            // builder.HasIndex(s => new { s.DoctorId, s.HospitalSpecialtyId, s.Date, s.StartTime }).IsUnique();
 
-   
+
+
         }
     }
     }

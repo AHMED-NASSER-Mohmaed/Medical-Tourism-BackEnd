@@ -1,6 +1,7 @@
 ﻿using Elagy.Core.Entities;
 using Elagy.Core.IServices;
 using System.Threading.Tasks;
+using DayOfWeek = Elagy.Core.Entities.DayOfWeek;
 
 namespace Elagy.Core.IRepositories
 {
@@ -20,20 +21,15 @@ namespace Elagy.Core.IRepositories
         /// </summary>
         IGenericRepository<Country> Countries { get; }
         IGenericRepository<Governorate> Governates { get; }
-
+        IGenericRepository<DayOfWeek> DayOfWeeks { get; }
         ISpecialtyRepository Specialties { get; }
         IDoctorRepository Doctors { get; }
         IHospitalRepository Hospitals { get; }
         IHospitalSpecialtyRepository HospitalSpecialties { get; }
+         IScheduleRepository Schedules { get; }
+
+
         ///////////////////////////
-
- 
-        
-        
-
-
-
-        public IScheduleRepository Schedules { get; }
         Task<int> CompleteAsync();
     }
 }

@@ -1,22 +1,18 @@
-﻿// Elagy.APIs/Controllers/SpecialtiesController.cs
+﻿
 
-using Elagy.Core.DTOs.Pagination; // Needed for PagedResponseDto
+using Elagy.Core.DTOs.Pagination; 
 using Elagy.Core.DTOs.Specialty;
 using Elagy.Core.Enums; // Needed for Status enum
 using Elagy.Core.IServices.ISpecialtyService;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http; // For StatusCodes
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace Elagy.APIs.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")] // Base route: /api/Specialties
-    public class SpecialtiesController : BaseApiController // Assumes BaseApiController is defined
+    [Route("api/[controller]")] 
+    public class SpecialtiesController : BaseApiController
     {
         private readonly ISpecialtyService _specialtyService;
 
@@ -25,15 +21,17 @@ namespace Elagy.APIs.Controllers
             _specialtyService = specialtyService;
         }
 
-        // --- GET Endpoints ---
+       
 
-        [HttpGet] // MODIFIED: Added FromQuery parameters
+        [HttpGet] 
         [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> GetAllSpecialtiesForSuperAdminDashboard(
              [FromQuery] int PageNumber = 1,
              [FromQuery] int PageSize = 10,
              [FromQuery] string? SearchTerm = null,
-             [FromQuery] Status? UserStatus = null) 
+             [FromQuery] Status? UserStatus = null,
+             [FromQuery] int? specialtyId = null)
+             
         {
             if (PageNumber < 1 || PageSize < 1)
             {
@@ -47,7 +45,9 @@ namespace Elagy.APIs.Controllers
                     PageNumber = PageNumber,
                     PageSize = PageSize,
                     SearchTerm = SearchTerm,
-                    UserStatus = UserStatus // Maps to Specialty.IsActive
+                    UserStatus = UserStatus,
+                    SpecialtyId=specialtyId
+                    
                 };
 
                 var result = await _specialtyService.GetAllSpecialties(paginationParameters); 
@@ -63,9 +63,6 @@ namespace Elagy.APIs.Controllers
 
         [HttpGet("available-for-linking/my-hospital")] // Changed route to directly use current user's hospital
         [Authorize(Roles = "HospitalServiceProvider")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<SpecialtyResponseDto>))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)] // Added for GetCurrentUserId failure
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAvailableSpecialtiesToLinkToMyHospital() 
         {
             var hospitalId = GetCurrentUserId();
@@ -105,11 +102,6 @@ namespace Elagy.APIs.Controllers
         }
 
         // GET: api/Specialties/{id}
-        /// <summary>
-        /// Retrieves a single specialty by its ID (globally active).
-        /// </summary>
-        /// <param name="id">The ID of the specialty.</param>
-        /// <returns>The specialty response DTO.</returns>
         [HttpGet("{id}")]
         [Authorize(Roles = "SuperAdmin, HospitalServiceProvider")] 
 
@@ -117,8 +109,8 @@ namespace Elagy.APIs.Controllers
         {
             try
             {
-                // Your service method GetSpecialtyIdAsync implicitly filters by IsActive=true.
-                var result = await _specialtyService.GetSpecialtyIdAsync(id); // Using the specific GetSpecialtyIdAsync from your repo interface
+                
+                var result = await _specialtyService.GetSpecialtyIdAsync(id); 
                 if (result == null)
                 {
                     return NotFound($"Specialty with ID {id} not found or is inactive globally.");
@@ -197,7 +189,7 @@ namespace Elagy.APIs.Controllers
         // --- PUT Endpoints ---
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "SuperAdmin")] // Only SuperAdmins can update global specialties
+        [Authorize(Roles = "SuperAdmin")] 
         public async Task<IActionResult> UpdateSpecialty(int id, [FromBody] SpecialtyUpdateDto updateDto)
         {
             if (!ModelState.IsValid)
@@ -262,7 +254,7 @@ namespace Elagy.APIs.Controllers
             try
             {
                 var result = await _specialtyService.DeleteSpecialtyAsync(id);
-                if (result == null) // Service returns null if not found or already inactive
+                if (result == null)
                 {
                     return NotFound($"Specialty with ID {id} not found or is already inactive.");
                 }

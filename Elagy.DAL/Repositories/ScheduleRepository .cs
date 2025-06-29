@@ -9,82 +9,77 @@ using System.Threading.Tasks;
 
 namespace Elagy.DAL.Repositories
 {
-    public class ScheduleRepository : IScheduleRepository
+    public class ScheduleRepository : GenericRepository<Schedule>, IScheduleRepository
     {
-        private readonly ApplicationDbContext _context;
-        public ScheduleRepository(ApplicationDbContext _context)
+       
+        public ScheduleRepository(ApplicationDbContext _context):base(_context) { }
+
+        private IQueryable<Schedule> GetSchedulesWithAllDetails()
         {
-            this._context = _context;
+            return _dbSet
+                .Include(s => s.Doctor)
+                .Include(s => s.HospitalSpecialty)
+                    .ThenInclude(hs => hs.HospitalAsset)
+                .Include(s => s.HospitalSpecialty)
+                    .ThenInclude(hs => hs.Specialty)
+                .Include(s => s.DayOfWeek);
         }
-        public async Task AddAsync(Schedule schedule)
+        public async Task<Schedule?> GetScheduleByIdWithDetailsAsync(int scheduleId)
         {
-            _context.Schedules.AddAsync(schedule);
+            return await GetSchedulesWithAllDetails().FirstOrDefaultAsync(s => s.Id == scheduleId);
         }
 
-        public async Task<IEnumerable<Schedule>> GetAllAsync()
+        public async Task<IEnumerable<Schedule>> GetSchedulesByDoctorIdAsync(string doctorId, bool? isActive = null)
         {
-            return await _context.Schedules
-                 .Include(s => s.Doctor)
-                     .ThenInclude(d => d.HospitalSpecialty)
-                         .ThenInclude(hs => hs.HospitalAsset)
-                 .Include(s => s.HospitalSpecialty)
-                     .ThenInclude(hs => hs.Specialty)
-                 .ToListAsync();
+            var query = GetSchedulesWithAllDetails().Where(s => s.DoctorId == doctorId);
+
+            if (isActive.HasValue)
+            {
+                query = query.Where(s => s.IsActive == isActive.Value);
+            }
+            return await query.ToListAsync();
+        }
+        public async Task<IEnumerable<Schedule>> GetSchedulesByHospitalIdAsync(string hospitalId, bool? isActive = null)
+        {
+            var query = GetSchedulesWithAllDetails() 
+                .Where(s => s.HospitalSpecialty.HospitalAssetId == hospitalId); 
+
+            if (isActive.HasValue)
+            {
+                query = query.Where(s => s.IsActive == isActive.Value); 
+            }
+
+            return await query.ToListAsync();
+        }
+        public async Task<IEnumerable<Schedule>> GetSchedulesByHospitalSpecialtyIdAsync(int hospitalSpecialtyId, bool? isActive = null)
+        {
+            var query = GetSchedulesWithAllDetails()
+                .Where(s => s.HospitalSpecialtyId == hospitalSpecialtyId);
+
+            if (isActive.HasValue)
+            {
+                query = query.Where(s => s.IsActive == isActive.Value);
+            }
+            return await query.ToListAsync();
         }
 
-        public async Task<Schedule> GetByIdAsync(int id)
+        public async Task<bool> UpdateScheduleStatusAsync(int scheduleId, bool newIsActiveStatus)
         {
-            return await _context.Schedules
-              .Include(s => s.Doctor)
-                  .ThenInclude(d => d.HospitalSpecialty)
-                      .ThenInclude(hs => hs.HospitalAsset)
-              .Include(s => s.HospitalSpecialty)
-                  .ThenInclude(hs => hs.Specialty)
-              .FirstOrDefaultAsync(s => s.Id == id);
-        }
+            var schedule = await _dbSet.FirstOrDefaultAsync(s => s.Id == scheduleId);
+            if (schedule == null)
+            {
+                return false; 
+            }
 
-        public async Task<IEnumerable<Schedule>> GetDoctorSchedulesOnDateAsync(string doctorId, DateTime date)
-        {
-            return await _context.Schedules
-                .Where(s => s.DoctorId == doctorId && s.Date.Date == date.Date && s.IsActive)
-                .ToListAsync();
-        }
+            if (schedule.IsActive == newIsActiveStatus)
+            {
+                return true; 
+            }
 
-        public async Task<Schedule> GetScheduleByIdAndHospitalIdAsync(int id, string hospitalId)
-        {
-            return await _context.Schedules
-                 .Where(s => s.Id == id && s.HospitalSpecialty.HospitalAssetId == hospitalId)
-                 .Include(s => s.Doctor)
-                     .ThenInclude(d => d.HospitalSpecialty)
-                         .ThenInclude(hs => hs.HospitalAsset)
-                 .Include(s => s.HospitalSpecialty)
-                     .ThenInclude(hs => hs.Specialty)
-                 .FirstOrDefaultAsync();
-        }
-
-        public async Task<IEnumerable<Schedule>> GetSchedulesByHospitalIdAsync(string hospitalId)
-        {
-            return await _context.Schedules
-             .Where(s => s.HospitalSpecialty.HospitalAssetId == hospitalId)
-             .Include(s => s.Doctor)
-                 .ThenInclude(d => d.HospitalSpecialty) // Include necessary for Doctor properties
-                     .ThenInclude(hs => hs.HospitalAsset) // Include if HospitalAsset details needed directly from Doctor path
-             .Include(s => s.HospitalSpecialty)
-                 .ThenInclude(hs => hs.Specialty) // Include Specialty name for DTO
-             .OrderBy(s => s.Date) // Order for consistent display
-             .ThenBy(s => s.StartTime)
-             .ToListAsync();
-        }
-
-        public async Task SoftDeleteAsync(Schedule schedule)
-        {
-            schedule.IsActive = false;
-            _context.Schedules.Update(schedule);
-        }
-
-        public async Task UpdateAsync(Schedule schedule)
-        {
-            _context.Schedules.Update(schedule);
+            schedule.IsActive = newIsActiveStatus;
+            _context.Entry(schedule).State = EntityState.Modified; 
+          
+            return true;
         }
     }
 }

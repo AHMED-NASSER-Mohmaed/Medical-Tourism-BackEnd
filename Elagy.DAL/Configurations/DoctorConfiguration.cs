@@ -30,7 +30,12 @@ namespace Elagy.DAL.Configurations
                    .WithMany(hs => hs.Doctors)
                    .HasForeignKey(d => d.HospitalSpecialtyId)
                    .IsRequired()
-                   .OnDelete(DeleteBehavior.Restrict); // Restrict deletion of HospitalSpecialty if doctors are linked
+                   .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(d => d.Schedules) // A Doctor can have many Schedules
+                  .WithOne(s => s.Doctor) // A Schedule belongs to one Doctor
+                  .HasForeignKey(s => s.DoctorId) // Foreign key in Schedule
+                  .OnDelete(DeleteBehavior.Restrict); // Prevent deleting a Doctor if schedules depend on them
         }
     }
 }

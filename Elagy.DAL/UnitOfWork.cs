@@ -4,6 +4,7 @@ using Elagy.DAL.Repositories;
 using System;
 using System.Threading.Tasks;
 using Elagy.Core.IServices;
+using DayOfWeek = Elagy.Core.Entities.DayOfWeek;
 
 namespace Elagy.DAL
 {
@@ -29,8 +30,12 @@ namespace Elagy.DAL
 
         public IHospitalRepository Hospitals { get; private set; }
         public IHospitalSpecialtyRepository HospitalSpecialties { get; private set; }
-        public IScheduleRepository Schedules { get; private set; }
 
+      
+
+        public IScheduleRepository Schedules {  get; private set; }
+
+        public IGenericRepository<Core.Entities.DayOfWeek> DayOfWeeks { get; private set; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -48,14 +53,12 @@ namespace Elagy.DAL
             Governates = new GenericRepository<Governorate>(_context);
 
 
-
+            DayOfWeeks=new GenericRepository<DayOfWeek>(_context);
             HospitalSpecialties = new HospitalSpecialtyRepository(_context);
             Specialties = new SpecialtyRepository(_context);
             Doctors = new DoctorRepository(_context);
             Hospitals = new HospitalRepository(_context);
-            Schedules=new ScheduleRepository(_context);
-
-
+            Schedules = new ScheduleRepository(_context);
         }
 
         public async Task<int> CompleteAsync()

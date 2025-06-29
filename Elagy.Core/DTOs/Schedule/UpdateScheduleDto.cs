@@ -6,17 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elagy.Core.DTOs.DoctorSchedule
+namespace Elagy.Core.DTOs.Schedule
 {
     public class UpdateScheduleDto
     {
-        [Required(ErrorMessage = "Schedule ID is required for update.")]
-        [Range(1, int.MaxValue, ErrorMessage = "Schedule ID must be a positive integer.")]
-        public int Id { get; set; }
-
-        // DoctorId and HospitalSpecialtyId are typically not changed directly via update,
-        // but can be included if your business logic allows re-assigning a schedule slot.
-        // For simplicity, we'll allow it as optional, but service will validate.
         public string? DoctorId { get; set; } // Can change the doctor for this slot
         public int? HospitalSpecialtyId { get; set; } // Can change the HS for this slot
 

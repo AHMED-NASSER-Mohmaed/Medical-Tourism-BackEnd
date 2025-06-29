@@ -1,171 +1,342 @@
-﻿using AutoMapper;
-using Elagy.Core.DTOs.DoctorSchedule;
-using Elagy.Core.Entities;
+﻿
+using AutoMapper;
+using Elagy.Core.DTOs.Pagination;
+using Elagy.Core.DTOs.Schedule;
+using Elagy.Core.Entities; 
+
 using Elagy.Core.IRepositories;
+
 using Elagy.Core.IServices.ISpecialtyService;
-using Elagy.DAL.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Elagy.BL.Services
 {
     public class ScheduleService : IScheduleService
     {
-
-    private readonly IUnitOfWork _unitOfWork;
-        private readonly ILogger<ScheduleService> _logger;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ILogger<ScheduleService> _logger;
 
-        public ScheduleService(
-
-            IUnitOfWork unitOfWork,
-            ILogger<ScheduleService> logger,
-            IMapper mapper)
+        public ScheduleService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<ScheduleService> logger)
         {
-
             _unitOfWork = unitOfWork;
-            _logger = logger;
             _mapper = mapper;
+            _logger = logger;
         }
-        public async Task<ScheduleDto> AssignScheduleByAdminAsync(CreateScheduleDto createDto, string hospitalAdminId)
+
+      
+        /// Retrieves a paginated list of all schedules for a specific hospital's admin dashboard
+        public async Task<PagedResponseDto<ScheduleResponseDto>> GetAllSchedulesForHospitalAdminAsync(string hospitalId, PaginationParameters paginationParameters)
         {
-            var doctor = await _unitOfWork.Doctors.GetByIdAsync(createDto.DoctorId);
-            if (doctor == null)
-                throw new ArgumentException($"Doctor with ID '{createDto.DoctorId}' not found.");
-
-            //var hospitalSpecialty = await _unitOfWork.HospitalSpecialties.GetByIdAsync(createDto.HospitalSpecialtyId);
-            //if (hospitalSpecialty == null)
-            //    throw new ArgumentException($"Hospital Specialty with ID '{createDto.HospitalSpecialtyId}' not found.");
-
-            //if (doctor.HospitalSpecialtyId != createDto.HospitalSpecialtyId)
-            //    throw new ArgumentException($"Doctor '{doctor.FirstName} {doctor.LastName}' is not primarily assigned to specialty '{hospitalSpecialty.Specialty?.Name}' at '{hospitalSpecialty.HospitalAsset?.Name}'.");
-
-            //if (hospitalSpecialty.HospitalAssetId != hospitalAdminId)
-            //    throw new UnauthorizedAccessException("You do not have permission to assign schedules for this hospital specialty.");
-
-            if (createDto.StartTime >= createDto.EndTime)
-                throw new ArgumentException("Schedule start time must be before end time.");
-
-            var existingSchedules = await _unitOfWork.Schedules.GetDoctorSchedulesOnDateAsync(createDto.DoctorId, createDto.Date);
-            bool hasConflict = existingSchedules.Any(s =>
-                createDto.StartTime < s.EndTime && createDto.EndTime > s.StartTime
-            );
-
-            if (hasConflict)
-                throw new ArgumentException("The proposed time slot conflicts with an existing schedule for this doctor on this date.");
-
-            var schedule = new Schedule
+            try
             {
-                DoctorId = createDto.DoctorId,
-                HospitalSpecialtyId = createDto.HospitalSpecialtyId,
-                Date = createDto.Date.Date,
-                StartTime = createDto.StartTime,
-                EndTime = createDto.EndTime,
-                MaxCapacity = createDto.MaxCapacity,
-                BookedSlots = 0,
-                IsActive = createDto.IsActive
-            };
+                
+                var schedules = await _unitOfWork.Schedules.GetSchedulesByHospitalIdAsync(hospitalId, isActive: null);
 
-            await _unitOfWork.Schedules.AddAsync(schedule);
-            await _unitOfWork.CompleteAsync();
+            
+                var query = schedules.AsQueryable();
 
-            var createdScheduleWithDetails = await _unitOfWork.Schedules.GetByIdAsync(schedule.Id);
-            return _mapper.Map<ScheduleDto>(createdScheduleWithDetails);
-        }
+                if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
+                {
+                    string term = paginationParameters.SearchTerm.Trim().ToLower();
+                    query = query.Where(s =>
+                        s.Doctor.FirstName.ToLower().Contains(term) ||
+                        s.Doctor.LastName.ToLower().Contains(term) ||
+                        s.HospitalSpecialty.Specialty.Name.ToLower().Contains(term)
+                    );
+                }
 
-        public async Task<IEnumerable<ScheduleDto>> GetSchedulesForAdminAsync(string hospitalAdminId)
-        {
-            var schedules = await _unitOfWork.Schedules.GetSchedulesByHospitalIdAsync(hospitalAdminId);
-            return _mapper.Map<IEnumerable<ScheduleDto>>(schedules);
-        }
+                if (paginationParameters.FilterDayOfWeekId.HasValue)
+                {
+                    query = query.Where(s => s.DayOfWeekId == paginationParameters.FilterDayOfWeekId.Value);
+                }
 
-        public async Task<ScheduleDto> GetScheduleByIdForAdminAsync(int id, string hospitalAdminId)
-        {
-            var schedule = await _unitOfWork.Schedules.GetScheduleByIdAndHospitalIdAsync(id, hospitalAdminId);
-            return _mapper.Map<ScheduleDto>(schedule);
-        }
+                if (paginationParameters.FilterStartDate.HasValue)
+                {
+                    query = query.Where(s => s.Date >= paginationParameters.FilterStartDate.Value);
+                }
+                if (paginationParameters.FilterEndDate.HasValue)
+                {
+                    query = query.Where(s => s.Date <= paginationParameters.FilterEndDate.Value);
+                }
 
-        public async Task<bool> UpdateScheduleByAdminAsync(UpdateScheduleDto updateDto, string hospitalAdminId)
-        {
-            var schedule = await _unitOfWork.Schedules.GetScheduleByIdAndHospitalIdAsync(updateDto.Id, hospitalAdminId);
-            if (schedule == null) return false;
+                if (paginationParameters.FilterIsRecurring.HasValue)
+                {
+                    query = query.Where(s => s.IsRecurring == paginationParameters.FilterIsRecurring.Value);
+                }
 
-            Doctor updatedDoctor = schedule.Doctor;
-            HospitalSpecialty updatedHospitalSpecialty = schedule.HospitalSpecialty;
-            bool doctorChanged = false;
-            bool hospitalSpecialtyChanged = false;
+                if (paginationParameters.FilterIsActive.HasValue)
+                {
+                    query = query.Where(s => s.IsActive == paginationParameters.FilterIsActive.Value);
+                }
 
-            if (updateDto.DoctorId != null && updateDto.DoctorId != schedule.DoctorId)
-            {
-                updatedDoctor = await _unitOfWork.Doctors.GetByIdAsync(updateDto.DoctorId);
-                if (updatedDoctor == null) throw new ArgumentException($"Doctor with ID '{updateDto.DoctorId}' not found.");
-                doctorChanged = true;
+
+                var totalCount = query.Count();
+
+                
+                var pagedSchedules = query
+                    .OrderBy(s => s.Date)
+                    .ThenBy(s => s.StartTime)
+                    .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+                    .Take(paginationParameters.PageSize)
+                    .ToList();
+
+                var scheduleDtos = _mapper.Map<IEnumerable<ScheduleResponseDto>>(pagedSchedules);
+
+                return new PagedResponseDto<ScheduleResponseDto>(scheduleDtos, totalCount, paginationParameters.PageNumber, paginationParameters.PageSize);
             }
-
-            if (updateDto.HospitalSpecialtyId.HasValue && updateDto.HospitalSpecialtyId.Value != schedule.HospitalSpecialtyId)
+            catch (Exception ex)
             {
-                //updatedHospitalSpecialty = await _unitOfWork.HospitalSpecialties.GetByIdAsync(updateDto.HospitalSpecialtyId.Value);
-                if (updatedHospitalSpecialty == null) throw new ArgumentException($"Hospital Specialty with ID '{updateDto.HospitalSpecialtyId.Value}' not found.");
-                hospitalSpecialtyChanged = true;
+                _logger.LogError(ex, $"Error getting schedules for Hospital Admin Dashboard for Hospital ID: {hospitalId}.");
+                return new PagedResponseDto<ScheduleResponseDto>(Enumerable.Empty<ScheduleResponseDto>(), 0, paginationParameters.PageNumber, paginationParameters.PageSize);
             }
+        }
 
-            if (doctorChanged || hospitalSpecialtyChanged)
+        /// Creates a new schedule slot for a doctor within a specific hospital specialty.
+        public async Task<ScheduleResponseDto> CreateScheduleAsync(CreateScheduleSlotDto createDto, string hospitalId)
+        {
+            try
             {
-                if (updatedDoctor.HospitalSpecialtyId != updatedHospitalSpecialty.Id)
-                    throw new ArgumentException($"Doctor '{updatedDoctor.FirstName} {updatedDoctor.LastName}' is not primarily assigned to specialty '{updatedHospitalSpecialty.Specialty?.Name}' at '{updatedHospitalSpecialty.HospitalAsset?.Name}'.");
+            
+                var doctor = await _unitOfWork.Doctors.GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync(createDto.DoctorId);
+                if (doctor == null) throw new ArgumentException($"Doctor with ID {createDto.DoctorId} not found.");
+                if (doctor.HospitalSpecialty?.HospitalAssetId != hospitalId) throw new UnauthorizedAccessException($"Doctor {createDto.DoctorId} is not affiliated with your hospital.");
+                if (doctor.HospitalSpecialtyId != createDto.HospitalSpecialtyId) throw new InvalidOperationException($"Doctor {createDto.DoctorId} is assigned to HS {doctor.HospitalSpecialtyId}, not {createDto.HospitalSpecialtyId}.");
+                if (!doctor.HospitalSpecialty.IsActive) throw new InvalidOperationException($"Hospital Specialty {createDto.HospitalSpecialtyId} is not active.");
 
-                if (updatedHospitalSpecialty.HospitalAssetId != hospitalAdminId)
-                    throw new UnauthorizedAccessException("You do not have permission to assign schedules to this hospital specialty.");
-            }
+                // 2. Validate DayOfWeek based on the Date
+                var dayOfWeekEntity = await _unitOfWork.DayOfWeeks.GetByIdAsync((int)createDto.Date.DayOfWeek + 1);
+                if (dayOfWeekEntity == null) throw new ArgumentException("Invalid DayOfWeek mapping based on provided date.");
 
-            schedule.DoctorId = updateDto.DoctorId ?? schedule.DoctorId;
-            schedule.HospitalSpecialtyId = updateDto.HospitalSpecialtyId ?? schedule.HospitalSpecialtyId;
-            schedule.Date = updateDto.Date?.Date ?? schedule.Date.Date;
-            schedule.StartTime = updateDto.StartTime ?? schedule.StartTime;
-            schedule.EndTime = updateDto.EndTime ?? schedule.EndTime;
-            schedule.MaxCapacity = updateDto.MaxCapacity ?? schedule.MaxCapacity;
-            schedule.IsActive = updateDto.IsActive ?? schedule.IsActive;
-
-            if (updateDto.Date.HasValue || updateDto.StartTime.HasValue || updateDto.EndTime.HasValue || doctorChanged)
-            {
-                if (schedule.StartTime >= schedule.EndTime)
-                    throw new ArgumentException("Schedule start time must be before end time.");
-
-                var conflictingSchedules = await _unitOfWork.Schedules.GetDoctorSchedulesOnDateAsync(schedule.DoctorId, schedule.Date);
-                bool hasConflict = conflictingSchedules.Any(s =>
-                    s.Id != schedule.Id &&
-                    s.IsActive &&
-                    (schedule.StartTime < s.EndTime && schedule.EndTime > s.StartTime)
+                // 3. Check for overlapping schedules for the same doctor on the same day (for active schedules)
+                var existingSchedules = await _unitOfWork.Schedules.GetSchedulesByDoctorIdAsync(createDto.DoctorId, isActive: true);
+                bool isOverlap = existingSchedules.Any(s =>
+                    s.Date.Date == createDto.Date.Date && 
+                    (
+                        (createDto.StartTime < s.EndTime && createDto.EndTime > s.StartTime) || // Overlaps
+                        (createDto.StartTime == s.StartTime && createDto.EndTime == s.EndTime) // Exact match
+                    )
                 );
+                if (isOverlap) throw new InvalidOperationException("Doctor already has an overlapping schedule for the specified date and time.");
 
-                if (hasConflict)
-                    throw new ArgumentException("The updated time slot conflicts with an existing active schedule for this doctor on this date.");
+                // 4. Map DTO to Schedule entity
+                var schedule = _mapper.Map<Schedule>(createDto);
+                schedule.IsActive = true; 
+                schedule.IsRecurring = false;
+                schedule.BookedSlots = 0; 
+                schedule.DayOfWeekId = dayOfWeekEntity.Id; 
+
+                // 5. Add to repository and persist
+                await _unitOfWork.Schedules.AddAsync(schedule);
+                await _unitOfWork.CompleteAsync();
+
+                _logger.LogInformation($"Schedule slot (ID: {schedule.Id}) created successfully for Doctor {createDto.DoctorId} at {createDto.HospitalSpecialtyId}.");
+
+
+                var createdScheduleWithDetails = await _unitOfWork.Schedules.GetScheduleByIdWithDetailsAsync(schedule.Id);
+                if (createdScheduleWithDetails == null) throw new Exception("Created schedule not found after save.");
+
+                return _mapper.Map<ScheduleResponseDto>(createdScheduleWithDetails);
             }
-
-            if (schedule.MaxCapacity < schedule.BookedSlots)
-                throw new InvalidOperationException($"Cannot reduce max capacity to {schedule.MaxCapacity} as there are already {schedule.BookedSlots} booked appointments.");
-
-            await _unitOfWork.Schedules.UpdateAsync(schedule);
-            await _unitOfWork.CompleteAsync();
-            return true;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error creating schedule for Hospital {hospitalId}.");
+                throw;
+            }
         }
 
-        public async Task<bool> DeleteScheduleByAdminAsync(int id, string hospitalAdminId)
+        public async Task<ScheduleResponseDto> UpdateScheduleAsync(int scheduleId, UpdateScheduleDto updateDto, string hospitalId)
         {
-            var schedule = await _unitOfWork.Schedules.GetScheduleByIdAndHospitalIdAsync(id, hospitalAdminId);
-            if (schedule == null) return false;
+            try
+            {
+                // 1. Retrieve the existing schedule with details
+                var schedule = await _unitOfWork.Schedules.GetScheduleByIdWithDetailsAsync(scheduleId);
+                if (schedule == null) throw new KeyNotFoundException($"Schedule with ID {scheduleId} not found for update.");
 
-            if (schedule.BookedSlots > 0)
-                throw new InvalidOperationException($"Schedule {id} has booked appointments and cannot be deleted. Please cancel appointments first or deactivate the schedule instead.");
+                // 2. Validate schedule's affiliation to the requesting hospital admin
+                if (schedule.HospitalSpecialty.HospitalAssetId != hospitalId) throw new UnauthorizedAccessException($"Schedule with ID {scheduleId} is not affiliated with your hospital.");
 
-            await _unitOfWork.Schedules.SoftDeleteAsync(schedule);
-            await _unitOfWork.CompleteAsync();
-            return true;
+                // 3. Handle specific updates based on DTO fields validation
+                // MaxCapacity: Cannot be less than BookedSlots
+                if (updateDto.MaxCapacity.HasValue && updateDto.MaxCapacity.Value < schedule.BookedSlots)
+                {
+                    throw new InvalidOperationException($"Max capacity ({updateDto.MaxCapacity.Value}) cannot be less than booked slots ({schedule.BookedSlots}).");
+                }
+
+
+                // If Date changes, DayOfWeekId must be re-calculated
+                if (updateDto.Date.HasValue && schedule.Date.DayOfWeek != updateDto.Date.Value.DayOfWeek)
+                {
+                    // Assuming DayOfWeekId in DB is 1-7 (Sun-Sat) vs enum 0-6
+                    schedule.DayOfWeekId = (int)updateDto.Date.Value.DayOfWeek + 1;
+                }
+
+                // Overlap check if time/date/doctor changes
+                if ((updateDto.Date.HasValue || updateDto.StartTime.HasValue || updateDto.EndTime.HasValue))
+                {
+                    var proposedDate = updateDto.Date ?? schedule.Date;
+                    var proposedStartTime = updateDto.StartTime ?? schedule.StartTime;
+                    var proposedEndTime = updateDto.EndTime ?? schedule.EndTime;
+
+                    // Check for overlaps with other active schedules of the same doctor
+                    var existingSchedules = await _unitOfWork.Schedules.GetSchedulesByDoctorIdAsync(schedule.DoctorId, isActive: true);
+                    bool isOverlap = existingSchedules.Any(s =>
+                        s.Id != schedule.Id && // Exclude current schedule itself
+                        s.Date.Date == proposedDate.Date && // Same date
+                        (
+                            (proposedStartTime < s.EndTime && proposedEndTime > s.StartTime) || // Overlaps
+                            (proposedStartTime == s.StartTime && proposedEndTime == s.EndTime) // Exact match
+                        )
+                    );
+                    if (isOverlap) throw new InvalidOperationException("Updated schedule time/date overlaps with an existing schedule for this doctor.");
+                }
+
+                // 4. Map remaining DTO properties to the entity
+                // This maps Date, StartTime, EndTime, MaxCapacity, IsActive, IsRecurring
+                _mapper.Map(updateDto, schedule);
+
+                // 5. Update the entity in the repository and save changes
+                _unitOfWork.Schedules.Update(schedule);
+                await _unitOfWork.CompleteAsync();
+
+                _logger.LogInformation($"Schedule slot (ID: {schedule.Id}) updated successfully for Doctor {schedule.DoctorId}.");
+
+                // 6. Re-fetch the updated schedule with details for comprehensive response DTO
+                var updatedScheduleWithDetails = await _unitOfWork.Schedules.GetScheduleByIdWithDetailsAsync(scheduleId);
+                if (updatedScheduleWithDetails == null) throw new Exception("Updated schedule not found after save.");
+
+                return _mapper.Map<ScheduleResponseDto>(updatedScheduleWithDetails);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating schedule ID: {scheduleId} for Hospital {hospitalId}.");
+                throw;
+            }
+        }
+        public async Task<ScheduleResponseDto?> ChangeScheduleStatusAsync(int scheduleId, bool newIsActiveStatus, string hospitalId)
+        {
+            try
+            {
+                // 1. Retrieve the existing schedule with details (to check affiliation and current status)
+                var schedule = await _unitOfWork.Schedules.GetScheduleByIdWithDetailsAsync(scheduleId);
+                if (schedule == null) throw new KeyNotFoundException($"Schedule with ID {scheduleId} not found for status change.");
+
+                // 2. Validate schedule's affiliation to the requesting hospital admin
+                if (schedule.HospitalSpecialty.HospitalAssetId != hospitalId) throw new UnauthorizedAccessException($"Schedule with ID {scheduleId} is not affiliated with your hospital.");
+
+                // 3. If the status is already the target status, no action needed.
+                if (schedule.IsActive == newIsActiveStatus)
+                {
+                    _logger.LogInformation($"Schedule with ID {scheduleId} is already in the target status ({newIsActiveStatus}). No action needed.");
+                    return _mapper.Map<ScheduleResponseDto>(schedule);
+                }
+
+                // 4. Update the IsActive status
+                schedule.IsActive = newIsActiveStatus;
+                _unitOfWork.Schedules.Update(schedule); // Mark as modified
+                await _unitOfWork.CompleteAsync(); // Save changes
+
+                _logger.LogInformation($"Schedule '{scheduleId}' status changed to {newIsActiveStatus} successfully for Hospital {hospitalId}.");
+
+                // 5. Re-fetch for full DTO response (to ensure navigation properties are loaded)
+                var updatedScheduleWithDetails = await _unitOfWork.Schedules.GetScheduleByIdWithDetailsAsync(scheduleId);
+                if (updatedScheduleWithDetails == null) throw new Exception("Updated schedule not found after save.");
+
+                return _mapper.Map<ScheduleResponseDto>(updatedScheduleWithDetails);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error changing status for schedule ID: {scheduleId} for Hospital {hospitalId}.");
+                throw;
+            }
+        }
+
+        public async Task<PagedResponseDto<ScheduleResponseDto>> GetAvailablePatientSlotsAsync(PaginationParameters paginationParameters)
+        {
+            try
+            {
+                // 1. Start with an IQueryable from the repository for all schedules
+                var query = _unitOfWork.Schedules.AsQueryable();
+
+                // 2. Filter for truly available slots (active and has capacity)
+                query = query.Where(s => s.IsActive == true && s.BookedSlots < s.MaxCapacity);
+
+                // 3. Apply optional filters from PaginationParameters
+
+                // Filter by Specialty (SpecialtyId) - requires Include
+                if (paginationParameters.SpecialtyId.HasValue) // Using SpecialtyId from PaginationParameters
+                {
+                    query = query.Where(s => s.HospitalSpecialty.SpecialtyId == paginationParameters.SpecialtyId.Value);
+                }
+                // Filter by DoctorId
+                if (!string.IsNullOrWhiteSpace(paginationParameters.FilterDoctorId)) // Using FilterDoctorId from PaginationParameters
+                {
+                    query = query.Where(s => s.DoctorId == paginationParameters.FilterDoctorId);
+                }
+                // Filter by DayOfWeekId
+                if (paginationParameters.FilterDayOfWeekId.HasValue)
+                {
+                    query = query.Where(s => s.DayOfWeekId == paginationParameters.FilterDayOfWeekId.Value);
+                }
+                // Filter by Date range
+                if (paginationParameters.FilterStartDate.HasValue)
+                {
+                    query = query.Where(s => s.Date >= paginationParameters.FilterStartDate.Value);
+                }
+                if (paginationParameters.FilterEndDate.HasValue)
+                {
+                    query = query.Where(s => s.Date <= paginationParameters.FilterEndDate.Value);
+                }
+
+                // 4. Get total count AFTER applying filters
+                var totalCount = await query.CountAsync();
+
+                // 5. Apply pagination and eager load navigation properties for DTO mapping
+                var pagedSchedules = await query
+                    .Include(s => s.Doctor) // Needed for DoctorName, Email
+                    .Include(s => s.HospitalSpecialty) // Needed for HospitalName, SpecialtyName
+                        .ThenInclude(hs => hs.HospitalAsset)
+                    .Include(s => s.HospitalSpecialty)
+                        .ThenInclude(hs => hs.Specialty)
+                    .Include(s => s.DayOfWeek) // Needed for DayOfWeekName, ShortCode
+                    .OrderBy(s => s.Date) // Order by date then start time
+                    .ThenBy(s => s.StartTime)
+                    .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+                    .Take(paginationParameters.PageSize)
+                    .ToListAsync();
+
+                // 6. Map to DTOs
+                var scheduleDtos = _mapper.Map<IEnumerable<ScheduleResponseDto>>(pagedSchedules);
+
+                return new PagedResponseDto<ScheduleResponseDto>(scheduleDtos, totalCount, paginationParameters.PageNumber, paginationParameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting available patient slots.");
+                return new PagedResponseDto<ScheduleResponseDto>(Enumerable.Empty<ScheduleResponseDto>(), 0, paginationParameters.PageNumber, paginationParameters.PageSize);
+            }
+        }
+
+        /// Retrieves a single schedule slot by its ID for detail view.
+ 
+        public async Task<ScheduleResponseDto?> GetScheduleByIdAsync(int scheduleId)
+        {
+            try
+            {
+                var schedule = await _unitOfWork.Schedules.GetScheduleByIdWithDetailsAsync(scheduleId);
+                if (schedule == null)
+                {
+                    _logger.LogInformation($"Schedule with ID {scheduleId} not found.");
+                    return null;
+                }
+                return _mapper.Map<ScheduleResponseDto>(schedule);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting schedule by ID: {scheduleId}.");
+                throw;
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Elagy.Core.DTOs.DoctorSchedule;
+﻿using Elagy.Core.DTOs.Pagination;
+using Elagy.Core.DTOs.Schedule;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,31 +10,26 @@ namespace Elagy.Core.IServices.ISpecialtyService
 {
     public interface IScheduleService
     {
-        /// <summary>
-        /// Allows a Hospital Admin to assign a new schedule (time slot) to a doctor.
-        /// Performs validation to ensure the doctor and hospital specialty are valid and associated with the admin's hospital.
-        /// Checks for time conflicts for the doctor.
-        /// </summary>
-        Task<ScheduleDto> AssignScheduleByAdminAsync(CreateScheduleDto createDto, string hospitalAdminId);
+        //Retrieves list of all schedules hospital's admin dashboard
+        Task<PagedResponseDto<ScheduleResponseDto>> GetAllSchedulesForHospitalAdminAsync(string hospitalId, PaginationParameters paginationParameters);
+    
+        //Creates a new schedule slot for a doctor within a specific hospital specialty.
+        Task<ScheduleResponseDto> CreateScheduleAsync(CreateScheduleSlotDto createDto, string hospitalId);
 
-        /// <summary>
-        /// Retrieves all schedules for the authenticated hospital admin's hospital.
-        /// </summary>
-        Task<IEnumerable<ScheduleDto>> GetSchedulesForAdminAsync(string hospitalAdminId);
+        Task<ScheduleResponseDto> UpdateScheduleAsync(int scheduleId, UpdateScheduleDto updateDto, string hospitalId);
+     
+        /// Active and Deactive 
 
-        /// <summary>
-        /// Retrieves a specific schedule by ID for the authenticated hospital admin's hospital.
-        /// </summary>
-        Task<ScheduleDto> GetScheduleByIdForAdminAsync(int id, string hospitalAdminId);
+        Task<ScheduleResponseDto?> ChangeScheduleStatusAsync(int scheduleId, bool newIsActiveStatus, string hospitalId);
 
-        /// <summary>
-        /// Updates an existing schedule.
-        /// </summary>
-        Task<bool> UpdateScheduleByAdminAsync(UpdateScheduleDto updateDto, string hospitalAdminId);
+        // --- Public/Website Schedule Display ---
 
-        /// <summary>
-        /// Soft deletes a schedule by marking it as inactive.
-        /// </summary>
-        Task<bool> DeleteScheduleByAdminAsync(int id, string hospitalAdminId);
+
+        /// Retrieves a paginated list of available schedule slots for patient viewing (website).
+
+        Task<PagedResponseDto<ScheduleResponseDto>> GetAvailablePatientSlotsAsync(PaginationParameters paginationParameters);
+
+        /// Retrieves a single schedule slot by its ID, typically for detail view.
+        Task<ScheduleResponseDto?> GetScheduleByIdAsync(int scheduleId);
     }
 }
