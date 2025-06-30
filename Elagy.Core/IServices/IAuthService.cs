@@ -18,7 +18,7 @@ namespace Elagy.Core.IServices
         Task<AuthResultDto> LoginAsync(LoginRequestDto model);
         Task<AuthResultDto> ConfirmEmailAsync(string userId, string token);
         Task<AuthResultDto> ForgotPasswordAsync(string email);
-        Task<AuthResultDto> ResetPasswordAsync(ResetPasswordRequestDto model); // User initiated password reset
+        Task<AuthResultDto> ResetPasswordAsync(string userId,ResetPasswordRequestDto model); // User initiated password reset
         Task<AuthResultDto> ChangePasswordAsync(string userId, ChangePasswordRequestDto model); // User initiated password change
         Task<AuthResultDto> ChangeEmailAsync(string userId, ChangeEmailRequestDto model); // User initiated email change
 

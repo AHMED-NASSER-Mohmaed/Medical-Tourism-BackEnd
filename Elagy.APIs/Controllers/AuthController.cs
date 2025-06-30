@@ -157,13 +157,13 @@ namespace Elagy.APIs.Controllers
         }
 
         [HttpPost("reset-password")]
-        public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordRequestDto model)
+        public async Task<ActionResult> ResetPassword([FromQuery]string userId,[FromBody] ResetPasswordRequestDto model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var result = await _authService.ResetPasswordAsync(model);
+            var result = await _authService.ResetPasswordAsync(userId, model);
             return HandleAuthResult(result);
         }
 

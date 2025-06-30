@@ -477,7 +477,7 @@ namespace Elagy.BL.Services
             }
         }
 
-
+         
         public async Task<AuthResultDto> ForgotPasswordAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -489,16 +489,16 @@ namespace Elagy.BL.Services
             }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var resetLink = $"http://localhost:4200/auth/reset-password?token={Uri.EscapeDataString(token)}";
+            var resetLink = $"http://localhost:4200/auth/reset-password?userId={user.Id}&token={Uri.EscapeDataString(token)}";
             await _emailService.SendEmailAsync(user.Email, "Reset Your Password", $"Please reset your password by clicking this link: <a href='{resetLink}'>link</a>");
 
             _logger.LogInformation($"Password reset link sent to {user.Email}.");
             return new AuthResultDto { Success = true, Message = "If an account with that email exists, a password reset link has been sent." };
         }
 
-        public async Task<AuthResultDto> ResetPasswordAsync(ResetPasswordRequestDto model)
+        public async Task<AuthResultDto> ResetPasswordAsync(string userId,ResetPasswordRequestDto model)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
                 return new AuthResultDto { Success = false, Errors = new[] { "Invalid user or token." } };

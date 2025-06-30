@@ -5,10 +5,6 @@ namespace Elagy.Core.DTOs.Shared
     public class ResetPasswordRequestDto
     {
         [Required]
-        [EmailAddress]
-        public string Email { get; set; } // Mark as required in validation, but compiler needs nullable or required keyword
-
-        [Required]
         public string Token { get; set; }
 
         [Required]
