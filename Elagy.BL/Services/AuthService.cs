@@ -122,7 +122,7 @@ namespace Elagy.BL.Services
 
             // Send email confirmation
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var confirmationLink = $"YOUR_FRONTEND_APP_URL/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(token)}"; // IMPORTANT: Use actual frontend URL
+            var confirmationLink = $"http://localhost:4200/auth/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(token)}"; // IMPORTANT: Use actual frontend URL
             await _emailService.SendEmailAsync(user.Email, "Confirm Your Email", $"Please confirm your account by clicking this link: <a href='{confirmationLink}'>link</a>");
 
             _logger.LogInformation($"User {user.Email} registered successfully. Confirmation email sent.");
