@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using IEmailService = Elagy.Core.Helpers.IEmailService;
 
@@ -36,7 +37,9 @@ namespace Elagy.BL.Services
 
         public async Task<PatientDto> GetPatientProfileAsync(string patientId)
         {
-            var patient = await _unitOfWork.Patients.GetByIdAsync(patientId);
+            // Use the correct overload for including navigation properties in EF Core
+            var patient = await _unitOfWork.Patients.GetByIdAsync(patientId, new Expression<Func<Patient, object>>[] { p => p.Governorate , p => p.Governorate.Country});
+
             if (patient == null)
             {
                 _logger.LogWarning($"Patient with ID {patientId} not found.");

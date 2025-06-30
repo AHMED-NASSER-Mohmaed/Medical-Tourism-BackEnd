@@ -29,6 +29,9 @@ namespace Elagy.Core.IRepositories
 
 
 
+        Task<T> GetByIdAsync(string id, params Expression<Func<T, object>>[] includeProperties);
+
+
 
         // This method is crucial for fluent LINQ queries with EF Core, including .Include()
         //we are going to remove this function in the future becouse it expose the details of the ORM

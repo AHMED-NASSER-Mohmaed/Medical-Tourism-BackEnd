@@ -17,7 +17,11 @@ namespace Elagy.BL.Mapping
 
             // Base User to BaseProfileDto
             CreateMap<User, BaseProfileDto>()
-                .ForMember(dest => dest.Country, opt => opt.MapFrom(src => src.Governorate.Country.Name))
+                .ForMember(dest => dest.CountryName, opt => opt.MapFrom(src => src.Governorate.Country.Name))
+                .ForMember(dest => dest.CountryId, opt => opt.MapFrom(src => src.Governorate.Country.Id))
+                .ForMember(dest => dest.GovernorateName, opt => opt.MapFrom(src => src.Governorate.Name))
+                .ForMember(dest => dest.GovernorateId, opt => opt.MapFrom(src => src.Governorate.Id))
+
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.UserName)) // IdentityUser.UserName is the Email
                 .IncludeAllDerived(); // Important for TPH inheritance
 

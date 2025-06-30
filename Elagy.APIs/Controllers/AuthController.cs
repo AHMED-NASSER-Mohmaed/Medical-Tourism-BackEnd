@@ -120,6 +120,7 @@ namespace Elagy.APIs.Controllers
 
 
         [HttpGet("confirm-new-email")]
+        //[HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmNewEmail(
         [FromQuery] string userId,
         [FromQuery] string newEmail, // <--- IMPORTANT: New email from the URL

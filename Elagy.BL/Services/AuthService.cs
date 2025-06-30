@@ -489,7 +489,7 @@ namespace Elagy.BL.Services
             }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var resetLink = $"YOUR_FRONTEND_APP_URL/reset-password?userId={user.Id}&token={Uri.EscapeDataString(token)}";
+            var resetLink = $"http://localhost:4200/auth/reset-password?token={Uri.EscapeDataString(token)}";
             await _emailService.SendEmailAsync(user.Email, "Reset Your Password", $"Please reset your password by clicking this link: <a href='{resetLink}'>link</a>");
 
             _logger.LogInformation($"Password reset link sent to {user.Email}.");
@@ -561,7 +561,7 @@ namespace Elagy.BL.Services
             }
 
             var token = await _userManager.GenerateChangeEmailTokenAsync(user, model.NewEmail);
-            var confirmationLink = $"YOUR_FRONTEND_APP_URL/confirm-new-email?userId={user.Id}&newEmail={Uri.EscapeDataString(model.NewEmail)}&token={Uri.EscapeDataString(token)}";
+            var confirmationLink = $"http://localhost:4200/auth/confirm-email?userId={user.Id}&newEmail={Uri.EscapeDataString(model.NewEmail)}&token={Uri.EscapeDataString(token)}";
 
             await _emailService.SendEmailAsync(model.NewEmail, "Confirm Your New Email Address", $"Please confirm your new email by clicking this link: <a href='{confirmationLink}'>link</a>");
 

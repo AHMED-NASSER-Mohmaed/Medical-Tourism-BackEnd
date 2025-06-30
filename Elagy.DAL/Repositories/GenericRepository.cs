@@ -73,6 +73,17 @@ namespace Elagy.DAL.Repositories
         }
 
 
+        public virtual async Task<T> GetByIdAsync(string id, params Expression<Func<T, object>>[] includeProperties)
+        {
+            IQueryable<T> query = _dbSet;
+
+            query = ApplyIncludes(query, includeProperties); // Apply the includes
+
+            return await query.FirstOrDefaultAsync(e => EF.Property<string>(e, "Id") == id);
+
+        }
+
+
         public virtual async Task<T> GetByIdAsync(int id, params Expression<Func<T, object>>[] includeProperties)
         {
             IQueryable<T> query = _dbSet;
