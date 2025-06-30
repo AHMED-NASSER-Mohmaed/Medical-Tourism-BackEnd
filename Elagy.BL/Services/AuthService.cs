@@ -561,7 +561,7 @@ namespace Elagy.BL.Services
             }
 
             var token = await _userManager.GenerateChangeEmailTokenAsync(user, model.NewEmail);
-            var confirmationLink = $"http://localhost:4200/auth/confirm-email?userId={user.Id}&newEmail={Uri.EscapeDataString(model.NewEmail)}&token={Uri.EscapeDataString(token)}";
+            var confirmationLink = $"http://localhost:4200/auth/confirm-new-email?userId={user.Id}&newEmail={Uri.EscapeDataString(model.NewEmail)}&token={Uri.EscapeDataString(token)}";
 
             await _emailService.SendEmailAsync(model.NewEmail, "Confirm Your New Email Address", $"Please confirm your new email by clicking this link: <a href='{confirmationLink}'>link</a>");
 
