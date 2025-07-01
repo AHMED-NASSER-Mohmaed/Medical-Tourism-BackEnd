@@ -23,7 +23,7 @@ namespace Elagy.APIs.Controllers
 
        
 
-        [HttpGet] 
+        [HttpGet("SuperAdmin")] 
         
         public async Task<IActionResult> GetAllSpecialtiesForSuperAdminDashboard(
              [FromQuery] int PageNumber = 1,
@@ -81,7 +81,7 @@ namespace Elagy.APIs.Controllers
             }
         }
 
-        [HttpGet("my-hospital")] 
+        [HttpGet("HospitalAdmin")] 
         [Authorize(Roles = "HospitalServiceProvider")]
         public async Task<IActionResult> GetMyHospitalSpecialties() 
         {
@@ -125,7 +125,7 @@ namespace Elagy.APIs.Controllers
 
         // --- POST Endpoints ---
 
-        [HttpPost("Add-Specialty")]
+        [HttpPost("SuperAdmin")]
         [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> CreateSpecialty([FromBody] SpecialtyCreateDto createDto)
         {
@@ -153,7 +153,7 @@ namespace Elagy.APIs.Controllers
         }
 
 
-        [HttpPost("link-to-my-hospital/{specialtyId}")]
+        [HttpPost("link-to-hospital-admin/{specialtyId}")]
         [Authorize(Roles = "HospitalServiceProvider")]
 
         public async Task<IActionResult> LinkSpecialtyToMyHospital(int specialtyId) 
@@ -188,7 +188,7 @@ namespace Elagy.APIs.Controllers
 
         // --- PUT Endpoints ---
 
-        [HttpPut("{id}")]
+        [HttpPut("SuperAdmin/{id}")]
         [Authorize(Roles = "SuperAdmin")] 
         public async Task<IActionResult> UpdateSpecialty(int id, [FromBody] SpecialtyUpdateDto updateDto)
         {
@@ -247,7 +247,7 @@ namespace Elagy.APIs.Controllers
         }
 
         // --- DELETE Endpoints ---
-        [HttpDelete("{id}")]
+        [HttpDelete("SuperAdmin{id}")]
         [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> DeleteSpecialty(int id)
         {
