@@ -55,6 +55,9 @@ namespace Elagy.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("GovernateId")
+                        .HasColumnType("int");
+
                     b.Property<string>("LanguagesSupported")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -82,6 +85,8 @@ namespace Elagy.DAL.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GovernateId");
 
                     b.ToTable("Assets", (string)null);
 
@@ -777,10 +782,18 @@ namespace Elagy.DAL.Migrations
 
             modelBuilder.Entity("Elagy.Core.Entities.Asset", b =>
                 {
+                    b.HasOne("Elagy.Core.Entities.Governorate", "Governate")
+                        .WithMany()
+                        .HasForeignKey("GovernateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Elagy.Core.Entities.ServiceProvider", "ServiceProvider")
                         .WithOne("ServiceAsset")
                         .HasForeignKey("Elagy.Core.Entities.Asset", "Id")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Governate");
 
                     b.Navigation("ServiceProvider");
                 });

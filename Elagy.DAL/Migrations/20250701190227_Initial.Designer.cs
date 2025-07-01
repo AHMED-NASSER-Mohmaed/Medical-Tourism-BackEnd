@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Elagy.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250630125015_addHotelRoom")]
-    partial class addHotelRoom
+    [Migration("20250701190227_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -58,6 +58,9 @@ namespace Elagy.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("GovernateId")
+                        .HasColumnType("int");
+
                     b.Property<string>("LanguagesSupported")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -85,6 +88,8 @@ namespace Elagy.DAL.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GovernateId");
 
                     b.ToTable("Assets", (string)null);
 
@@ -250,12 +255,6 @@ namespace Elagy.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("ImageIds")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ImageURLs")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("IncludesBreakfast")
                         .HasColumnType("bit");
 
@@ -269,6 +268,11 @@ namespace Elagy.DAL.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("RoomNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("RoomType")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -288,6 +292,34 @@ namespace Elagy.DAL.Migrations
                     b.HasIndex("HotelAssetId");
 
                     b.ToTable("Rooms");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.RoomImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ImageId")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("ImageURL")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("RoomImages");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.Schedule", b =>
@@ -753,10 +785,18 @@ namespace Elagy.DAL.Migrations
 
             modelBuilder.Entity("Elagy.Core.Entities.Asset", b =>
                 {
+                    b.HasOne("Elagy.Core.Entities.Governorate", "Governate")
+                        .WithMany()
+                        .HasForeignKey("GovernateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Elagy.Core.Entities.ServiceProvider", "ServiceProvider")
                         .WithOne("ServiceAsset")
                         .HasForeignKey("Elagy.Core.Entities.Asset", "Id")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Governate");
 
                     b.Navigation("ServiceProvider");
                 });
@@ -800,6 +840,17 @@ namespace Elagy.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("HotelAsset");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.RoomImage", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.Room", "Room")
+                        .WithMany("RoomImages")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.Schedule", b =>
@@ -943,6 +994,11 @@ namespace Elagy.DAL.Migrations
                     b.Navigation("Doctors");
 
                     b.Navigation("Schedules");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.Room", b =>
+                {
+                    b.Navigation("RoomImages");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.Specialty", b =>

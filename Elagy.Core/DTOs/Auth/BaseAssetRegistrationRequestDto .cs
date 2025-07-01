@@ -17,6 +17,11 @@ namespace Elagy.Core.DTOs.Auth
         public string AssetEmail { get; set; }
         [Required]
         public string LocationDescription { get; set; }
+
+        [Required]
+        public int AssetGovernorateId { get; set; }
+
+
         [Required]
         public float Latitude { get; set; }
         [Required]

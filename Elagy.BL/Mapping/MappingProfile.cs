@@ -17,7 +17,12 @@ namespace Elagy.BL.Mapping
 
             // Base User to BaseProfileDto
             CreateMap<User, BaseProfileDto>()
-                .ForMember(dest => dest.Country, opt => opt.MapFrom(src => src.Governorate.Country.Name))
+                .ForMember(dest => dest.CountryId, opt => opt.MapFrom(src => src.Governorate.CountryId))
+                .ForMember(dest => dest.CountryName, opt => opt.MapFrom(src => src.Governorate.Country.Name))
+                .ForMember(dest => dest.GovernorateId, opt => opt.MapFrom(src => src.GovernorateId))
+                .ForMember(dest => dest.GovernorateName, opt => opt.MapFrom(src => src.Governorate.Name))
+
+
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.UserName)) // IdentityUser.UserName is the Email
                 .IncludeAllDerived(); // Important for TPH inheritance
 
@@ -39,7 +44,9 @@ namespace Elagy.BL.Mapping
                 .ForMember(dest => dest.AssetName, opt => opt.MapFrom(src => src.ServiceAsset.Name))
                 .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.ServiceAsset.Description))
                 .ForMember(dest => dest.CredentialDocURL, opt => opt.MapFrom(src => src.ServiceAsset.CredentialDocURL))
-                .ForMember(dest => dest.AssetEmail, opt => opt.MapFrom(src => src.ServiceAsset.Email));
+                .ForMember(dest => dest.AssetEmail, opt => opt.MapFrom(src => src.ServiceAsset.Email))
+                .ForMember(dest => dest.AssetGovernateId, opt => opt.MapFrom(src => src.ServiceAsset.GovernateId))
+                .ForMember(dest => dest.AssetGovernateName, opt => opt.MapFrom(src => src.ServiceAsset.Governate.Name));
 
 
 
@@ -124,6 +131,7 @@ namespace Elagy.BL.Mapping
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.AssetEmail)) 
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.AssetName))  
                 .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.AssetDescription))  
+                .ForMember(dest => dest.GovernateId, opt => opt.MapFrom(src => src.AssetGovernorateId))  
                 .ForMember(dest => dest.Id, opt => opt.Ignore()) // ID will be set to ServiceProvider's ID
                 .ForMember(dest => dest.ServiceProvider, opt => opt.Ignore()) // Will be set manually
                 .IncludeAllDerived();
