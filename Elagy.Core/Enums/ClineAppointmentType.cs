@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace Elagy.Core.Enums
 {
-    public enum AppointmentStatus
+    public enum ClineAppointmentType
     {
-        Pending,
-        Booked,
-        Cancelled,
-        Completed
+        Online,offline
     }
 }

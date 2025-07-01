@@ -9,17 +9,18 @@ namespace Elagy.Core.Entities
 {
     public abstract class Appointment
     {
-         
         public int Id { get; set; }
 
-        public DateOnly Date { get; set; }
-
         public AppointmentStatus Status { get; set; } = AppointmentStatus.Booked;
-        public string PatientId { get; set; } // Assuming Patient.Id is a string (from IdentityUser)
 
+        //if price changed at the clinic
         public decimal  price { get; set; }
 
         public Patient Patient { get; set; }
+
+
+        //------ Hospital ---- Hotle ----- CarRental
+        public AppointmentType Type { get; set; }
 
 
     }

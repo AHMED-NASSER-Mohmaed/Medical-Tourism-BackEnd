@@ -18,6 +18,7 @@ using System;
 using System.Reflection;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
+using Stripe;
 
 
 
@@ -88,11 +89,24 @@ builder.Services.AddScoped<IScheduleService, ScheduleService>();
 
 
 
+
+
+
 // Register Helper Services
 builder.Services.AddTransient<IEmailService, EmailService>(); // Transient because SmtpClient can have issues with Scoped/Singleton
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IPasswordHasher<object>, PasswordHasher<object>>(); // Identity's default hasher
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>(); // Your custom wrapper if needed
+
+
+
+// stripe secrete key setting 
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+
+
+
+
+
 
 // Configure AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

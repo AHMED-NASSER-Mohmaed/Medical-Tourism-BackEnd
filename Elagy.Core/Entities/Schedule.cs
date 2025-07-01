@@ -11,28 +11,50 @@ namespace Elagy.Core.Entities
   
         public int Id { get; set; }
 
-        public string DoctorId { get; set; }
-
-        public int HospitalSpecialtyId { get; set; }
-        public int DayOfWeekId { get; set; }
-
-        public DateTime Date { get; set; }
-
         public TimeOnly StartTime { get; set; }
 
         public TimeOnly EndTime { get; set; }
+        public int TimeSlotSize {  get; set; }
+
+
 
         public int MaxCapacity { get; set; }
 
         public int BookedSlots { get; set; } = 0;
 
+        //added by nasser ya mahdy
+        public int CancelledSlots { get; set; } = 0;
+
+
+
+
+        public decimal Price { get; set; }
+
+
+
+
         public bool IsActive { get; set; } = true;
 
-        public bool IsRecurring { get; set; }
 
+
+
+
+
+
+        public string DoctorId { get; set; }
         public Doctor Doctor { get; set; }
 
+
+
+
+
+        public int HospitalSpecialtyId { get; set; }
         public HospitalSpecialty HospitalSpecialty { get; set; }
+
+
+
+
+        public int DayOfWeekId { get; set; }
         public DayOfWeek DayOfWeek { get; set; }
 
     }

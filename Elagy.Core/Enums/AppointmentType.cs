@@ -8,6 +8,6 @@ namespace Elagy.Core.Enums
 {
     public enum AppointmentType
     {
-        Online,offline
+        Hospital , Hotel , CarRental
     }
 }

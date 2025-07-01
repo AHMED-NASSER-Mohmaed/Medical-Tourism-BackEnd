@@ -11,7 +11,6 @@ namespace Elagy.Core.Entities
         public int Id { get; set; } // Primary Key for Specialty
         public string Name { get; set; }
         public string? Description { get; set; }
-        public decimal Price { get; set; }
 
         public bool IsActive { get; set; } = true;  
 
