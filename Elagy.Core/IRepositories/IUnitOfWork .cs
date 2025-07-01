@@ -26,7 +26,8 @@ namespace Elagy.Core.IRepositories
         IDoctorRepository Doctors { get; }
         IHospitalRepository Hospitals { get; }
         IHospitalSpecialtyRepository HospitalSpecialties { get; }
-         IScheduleRepository Schedules { get; }
+        IScheduleRepository Schedules { get; }
+        IRoomRepository Rooms { get; }
 
 
         ///////////////////////////

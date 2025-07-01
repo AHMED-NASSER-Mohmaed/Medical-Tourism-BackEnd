@@ -50,10 +50,6 @@ namespace Elagy.DAL.Configurations
                    .HasForeignKey(s => s.DayOfWeekId)
                    .OnDelete(DeleteBehavior.Restrict);
 
-            // Optional: Unique constraint if a doctor can only have one schedule per specific time/date/specialty
-            // builder.HasIndex(s => new { s.DoctorId, s.HospitalSpecialtyId, s.Date, s.StartTime }).IsUnique();
-
-
 
         }
     }

@@ -10,7 +10,8 @@ using Elagy.Core.IServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore; // Crucial for .Include() and .SingleOrDefaultAsync()
 using ServiceProvider = Elagy.Core.Entities.ServiceProvider; // Ensure this is the correct namespace for ServiceProvider
-using Microsoft.Extensions.Logging; // Add this line if it's missing
+using Microsoft.Extensions.Logging;
+using Elagy.Core.DTOs.Pagination; // Add this line if it's missing
 namespace Elagy.BL.Services
 {
     public class HospitalProviderService : IHospitalProviderService
@@ -128,5 +129,9 @@ namespace Elagy.BL.Services
             _logger.LogInformation($"Hospital Provider {serviceProvider.Email} added by admin with asset.");
             return new AuthResultDto { Success = true, Message = "Hospital Provider account and asset created successfully by admin." };
         }
+
+
+
+
     }
 }

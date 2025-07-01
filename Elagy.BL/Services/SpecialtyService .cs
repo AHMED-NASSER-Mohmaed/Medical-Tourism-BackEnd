@@ -29,8 +29,7 @@ namespace Elagy.BL.Services
         {
             try
             {
-                // Start with an IQueryable to apply filters and pagination efficiently at the database level.
-                // Assuming _unitOfWork.Specialties.AsQueryable() provides an IQueryable<Specialty>.
+
                 IQueryable<Specialty> query = _unitOfWork.Specialties.AsQueryable();
 
                 // 1. Apply SearchTerm filter (case-insensitive)
@@ -48,6 +47,12 @@ namespace Elagy.BL.Services
                 {
                     bool targetIsActive = (paginationParameters.UserStatus.Value == Status.Active);
                     query = query.Where(s => s.IsActive == targetIsActive);
+                }
+
+                if (paginationParameters.SpecialtyId.HasValue)
+                {
+                   
+                    query = query.Where(s => s.Id==paginationParameters.SpecialtyId.Value);
                 }
                 // If UserStatus is null, no IsActive filter is applied, returning both active and inactive specialties.
 
@@ -214,12 +219,7 @@ namespace Elagy.BL.Services
 
         #endregion
 
-        /// <summary>
-        /// Links an active specialty to a hospital.
-        /// </summary>
-        /// <param name="specialtyId">The ID of the specialty to link.</param>
-        /// <param name="hospitalId">The ID of the hospital to link to.</param>
-        /// <returns>A SpecialtyLinkToHospitalDto if successful, or null if specialty/hospital not found or link already exists.</returns>
+        
         public async Task<SpecialtyLinkToHospitalDto?> LinkSpecialtyToHospital(int specialtyId, string hospitalId)
         {
             try

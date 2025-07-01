@@ -320,36 +320,47 @@ namespace Elagy.BL.Services
 
         public async Task<PagedResponseDto<HospitalProviderProfileDto>> GetHospitalProvidersForAdminDashboardAsync(PaginationParameters requestParams) 
         {
-            // 1. Start with the base query for ServiceProviders
+
             IQueryable<ServiceProvider> query = _unitOfWork.ServiceProviders
-                .AsQueryable()
-                .OfType<ServiceProvider>(); // Ensures we're working with ServiceProvider entities
+                                                .AsQueryable()
+                                                .OfType<ServiceProvider>();
 
-            // 2. Apply the fixed filter for Hospital assets
-            //    Include ServiceAsset first, as it's needed for this filter (and likely for mapping).
-            query = query
-                .Include(sp => sp.ServiceAsset) // Eager load ServiceAsset if needed for AssetType filter and mapping
-                .Where(sp => sp.ServiceAsset.AssetType == AssetType.Hospital); // Filter for Hospital assets
+            query = query.Include(sp => sp.Governorate)
+                .ThenInclude(g => g.Country);
+
+            query= query.Include(sp => sp.ServiceAsset)
+                .ThenInclude(a => a.Governate)
+                .ThenInclude(g => g.Country)
+                .Where(sp => sp.ServiceAsset != null && sp.ServiceAsset.AssetType == AssetType.Hospital);
 
 
-            // 3. Apply additional dynamic filters (searchQuery, userStatus) using the helper function
-            query = ApplyServiceProviderFilters(query,requestParams.SearchTerm ,requestParams.UserStatus );
+            if (requestParams.SpecialtyId.HasValue)
+            {
+                 query = query.Where(sp =>
+                    ((HospitalAsset)sp.ServiceAsset) 
+                    .HospitalSpecialties.Any(hs => hs.SpecialtyId == requestParams.SpecialtyId.Value)
+                );
+            }
 
-            // --- CRITICAL STEP: Get the total count AFTER all filters are applied ---
-            var totalCount= await query.CountAsync();
+            if (requestParams.FilterGovernorateId.HasValue)
+            {
+                query = query.Where(sp => sp.ServiceAsset.GovernateId == requestParams.FilterGovernorateId.Value);
+            }
 
-            // 4. Apply pagination (Skip and Take)
-            var pagedServiceProviders = await query
+            query = ApplyServiceProviderFilters(query, requestParams.SearchTerm, requestParams.UserStatus);
+
+            var totalCount = await query.CountAsync();
+
+ 
+            var pagedQuery =await query
                 .Skip((requestParams.PageNumber - 1) * requestParams.PageSize)
                 .Take(requestParams.PageSize)
-                .ToListAsync(); // This executes the query for the current page
+                .ToListAsync();
 
-            // 5. Map the results to DTOs
-            // Make sure your AutoMapper configuration maps ServiceProvider to HospitalProviderProfileDto.
-            var MappedResult = _mapper.Map<List<HospitalProviderProfileDto>>(pagedServiceProviders);
 
-            // 6. Return the PagedResponseDto, which calculates TotalPages internally
-            return new PagedResponseDto<HospitalProviderProfileDto>(
+            var MappedResult = _mapper.Map<List<HospitalProviderProfileDto>>(pagedQuery);
+
+             return new PagedResponseDto<HospitalProviderProfileDto>(
                 MappedResult,
                 totalCount ,
                 requestParams.PageNumber,

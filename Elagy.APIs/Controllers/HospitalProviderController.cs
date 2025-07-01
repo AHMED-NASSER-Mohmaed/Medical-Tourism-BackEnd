@@ -1,4 +1,5 @@
-﻿using Elagy.Core.DTOs.Pagination;
+﻿using Elagy.BL.Services;
+using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Schedule;
 using Elagy.Core.DTOs.User;
 using Elagy.Core.IServices;
@@ -61,9 +62,7 @@ namespace Elagy.APIs.Controllers
             return Ok(updatedProfile);
         }
 
-
-        [HttpGet("my-hospital")]
-        [Authorize(Roles = "HospitalServiceProvider")] 
+        [HttpGet("Hospital-Schedules")]
         public async Task<IActionResult> GetMyHospitalSchedules(
             [FromQuery] int PageNumber = 1,
             [FromQuery] int PageSize = 10,
@@ -117,7 +116,6 @@ namespace Elagy.APIs.Controllers
             {
                 _logger.LogInformation($"Received request to create schedule for Doctor {createDto.DoctorId} at HS {createDto.HospitalSpecialtyId}.");
                 var result = await _scheduleService.CreateScheduleAsync(createDto, hospitalId);
-                // CreatedAtAction requires a route name and route values for the new resource.
                 return CreatedAtAction(nameof(GetScheduleById), new { scheduleId = result.Id }, result);
             }
             catch (ArgumentException ex) 
@@ -168,7 +166,7 @@ namespace Elagy.APIs.Controllers
             {
                 return Forbid(ex.Message);
             }
-            catch (InvalidOperationException ex) // Overlapping schedule, MaxCapacity < BookedSlots
+            catch (InvalidOperationException ex) 
             {
                 return Conflict(ex.Message);
             }
@@ -192,7 +190,7 @@ namespace Elagy.APIs.Controllers
             {
                 _logger.LogInformation($"Received request to change status for schedule ID: {scheduleId} to {newIsActiveStatus}.");
                 var result = await _scheduleService.ChangeScheduleStatusAsync(scheduleId, newIsActiveStatus, hospitalId);
-                if (result == null) // Service returns null if not found
+                if (result == null) 
                 {
                     return NotFound($"Schedule with ID {scheduleId} not found.");
                 }
@@ -206,7 +204,7 @@ namespace Elagy.APIs.Controllers
             {
                 return Forbid(ex.Message);
             }
-            catch (InvalidOperationException ex) // If already in target status, etc.
+            catch (InvalidOperationException ex) 
             {
                 return Conflict(ex.Message);
             }

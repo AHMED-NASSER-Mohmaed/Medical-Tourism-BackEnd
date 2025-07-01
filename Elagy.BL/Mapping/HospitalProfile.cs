@@ -55,11 +55,6 @@ namespace Elagy.BL.Mapping
                 .ForMember(dest => dest.MedicalLicenseNumberId, opt => opt.MapFrom(src => src.MedicalLicenseNumber))
                 // Correctly map GovernorateId (Foreign Key property on User/Doctor)
                 .ForMember(dest => dest.GovernorateId, opt => opt.MapFrom(src => src.GovernorateId))
-                // REMOVE THE PROBLEM LINE:
-                // .ForMember(dest => dest.Governorate.CountryId, opt => opt.MapFrom(src => src.CountryId))
-                // AutoMapper will not map CountryId directly to Doctor.CountryId because Doctor does not have that property.
-                // The CountryId from the DTO is used for VALIDATION in the service layer (DoctorService.CreateDoctorAsync)
-                // to ensure consistency between Governorate and Country, not for mapping to the Doctor entity directly.
                 .ForMember(dest => dest.Governorate, opt => opt.Ignore()) // Ignore Governorate navigation property
                 .ForMember(dest => dest.HospitalSpecialty, opt => opt.Ignore()) // Navigation property ignored
                 .ForMember(dest => dest.Schedules, opt => opt.Ignore()) // Navigation property ignored
@@ -103,6 +98,10 @@ namespace Elagy.BL.Mapping
                   .ForMember(dest => dest.CountryId, opt => opt.MapFrom(src => src.Governorate.Country.Id))
                   .ForMember(dest => dest.CountryName, opt => opt.MapFrom(src => src.Governorate.Country.Name))
                   .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email ?? src.UserName));
+
+
+
+
 
 
         }

@@ -1,4 +1,5 @@
 ﻿using Elagy.Core.DTOs.Auth;
+using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Shared;
 using Elagy.Core.DTOs.Specialty;
 using Elagy.Core.DTOs.User;
@@ -11,5 +12,6 @@ namespace Elagy.Core.IServices
         Task<HospitalProviderProfileDto> GetHospitalProviderProfileAsync(string providerId);
         Task<HospitalProviderProfileDto> UpdateHospitalProviderProfileAsync(string providerId, HospitalProviderProfileUpdateDto model);
         Task<AuthResultDto> AddHospitalProviderByAdminAsync(HospitalAssetRegistrationRequestDto model);
+
     }
 }

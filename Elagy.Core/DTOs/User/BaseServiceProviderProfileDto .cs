@@ -20,6 +20,11 @@ namespace Elagy.Core.DTOs.User
 
         //public VerificationStatus VerificationStatus { get; set; } // Asset's verification status
         public string VerificationNotes { get; set; }
+
+
+        public int AssetGovernateId{ get; set; }
+        public string AssetGovernateName { get; set; }
+
         public float Latitude { get; set; }
         public float Longitude { get; set; }
         public string LocationDescription { get; set; }

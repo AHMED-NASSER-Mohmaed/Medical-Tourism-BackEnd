@@ -74,6 +74,18 @@ namespace Elagy.DAL.Configurations
                    .HasForeignKey<Asset>(a => a.Id) // Asset's PK is also its FK to ServiceProvider
                    .IsRequired()
                    .OnDelete(DeleteBehavior.Cascade);
+
+
+            builder.HasOne(a => a.Governate)
+                  .WithMany()
+                  .HasForeignKey(a => a.GovernateId)
+                  .IsRequired(true)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+
+
+
+
         }
     }
 }

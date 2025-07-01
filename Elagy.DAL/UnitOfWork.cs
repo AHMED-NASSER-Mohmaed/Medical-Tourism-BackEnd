@@ -37,6 +37,8 @@ namespace Elagy.DAL
 
         public IGenericRepository<Core.Entities.DayOfWeek> DayOfWeeks { get; private set; }
 
+        public IRoomRepository Rooms { get; private set; }
+
         public UnitOfWork(ApplicationDbContext context)
         {
             //IRepo injection
@@ -59,6 +61,7 @@ namespace Elagy.DAL
             Doctors = new DoctorRepository(_context);
             Hospitals = new HospitalRepository(_context);
             Schedules = new ScheduleRepository(_context);
+            Rooms = new RoomRepository(_context);
         }
 
         public async Task<int> CompleteAsync()

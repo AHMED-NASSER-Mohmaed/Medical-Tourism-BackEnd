@@ -23,8 +23,8 @@ namespace Elagy.APIs.Controllers
 
        
 
-        [HttpGet] 
-        [Authorize(Roles = "SuperAdmin")]
+        [HttpGet("SuperAdmin")] 
+        
         public async Task<IActionResult> GetAllSpecialtiesForSuperAdminDashboard(
              [FromQuery] int PageNumber = 1,
              [FromQuery] int PageSize = 10,
@@ -61,7 +61,7 @@ namespace Elagy.APIs.Controllers
         }
 
 
-        [HttpGet("available-for-linking/my-hospital")] // Changed route to directly use current user's hospital
+        [HttpGet("available-for-linking/my-hospital")] 
         [Authorize(Roles = "HospitalServiceProvider")]
         public async Task<IActionResult> GetAvailableSpecialtiesToLinkToMyHospital() 
         {
@@ -81,11 +81,11 @@ namespace Elagy.APIs.Controllers
             }
         }
 
-        [HttpGet("my-hospital")] 
+        [HttpGet("HospitalAdmin")] 
         [Authorize(Roles = "HospitalServiceProvider")]
-        public async Task<IActionResult> GetMyHospitalSpecialties() // Renamed to reflect 'my-hospital'
+        public async Task<IActionResult> GetMyHospitalSpecialties() 
         {
-            var hospitalId = GetCurrentUserId(); // <<< Using GetCurrentUserId() here
+            var hospitalId = GetCurrentUserId(); 
             if (hospitalId == null)
             {
                 return Unauthorized("Hospital ID could not be determined from your token.");
@@ -125,7 +125,7 @@ namespace Elagy.APIs.Controllers
 
         // --- POST Endpoints ---
 
-        [HttpPost("Add-Specialty")]
+        [HttpPost("SuperAdmin")]
         [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> CreateSpecialty([FromBody] SpecialtyCreateDto createDto)
         {
@@ -153,7 +153,7 @@ namespace Elagy.APIs.Controllers
         }
 
 
-        [HttpPost("link-to-my-hospital/{specialtyId}")]
+        [HttpPost("link-to-hospital-admin/{specialtyId}")]
         [Authorize(Roles = "HospitalServiceProvider")]
 
         public async Task<IActionResult> LinkSpecialtyToMyHospital(int specialtyId) 
@@ -188,7 +188,7 @@ namespace Elagy.APIs.Controllers
 
         // --- PUT Endpoints ---
 
-        [HttpPut("{id}")]
+        [HttpPut("SuperAdmin/{id}")]
         [Authorize(Roles = "SuperAdmin")] 
         public async Task<IActionResult> UpdateSpecialty(int id, [FromBody] SpecialtyUpdateDto updateDto)
         {
@@ -247,7 +247,7 @@ namespace Elagy.APIs.Controllers
         }
 
         // --- DELETE Endpoints ---
-        [HttpDelete("{id}")]
+        [HttpDelete("SuperAdmin{id}")]
         [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> DeleteSpecialty(int id)
         {

@@ -24,8 +24,18 @@ namespace Elagy.Core.DTOs.Pagination
         public DateTime? FilterEndDate { get; set; }
         public string? FilterDoctorId { get; set; }
         public bool? FilterIsRecurring { get; set; }
-        public bool? FilterIsActive { get; set; }
-        
+        public bool? FilterIsActive { get; set; }// general  status filter except users
+
+        public string? HotelAssetId { get; set; } 
+        public RoomCategory? RoomType { get; set; }  //for website filter
+        public RoomStatus? RoomStatus { get; set; } //for admin flter
+
+        public decimal? MinPrice { get; set; }  
+        public decimal? MaxPrice { get; set; } 
+        public int? MinOccupancy { get; set; } 
+        public int? MaxOccupancy { get; set; } 
+        public int? FilterGovernorateId { get; set; } //filter service providers by location for website 
+
 
         // order acs , desc 
 

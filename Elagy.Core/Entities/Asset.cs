@@ -15,6 +15,8 @@ namespace Elagy.Core.Entities
         public string VerificationNotes { get; set; } // Notes regarding verification status
 
         #region //related to location
+        public int GovernateId { get; set; }
+        public Governorate Governate { get; set; }
         public float Latitude { get; set; }
         public float Longitude { get; set; }
         public string LocationDescription { get; set; } // Detailed description of the asset's physical location

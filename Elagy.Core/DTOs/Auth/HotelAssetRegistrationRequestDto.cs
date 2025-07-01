@@ -10,7 +10,7 @@ namespace Elagy.Core.DTOs.Auth
 
         public HotelAssetRegistrationRequestDto()
         {
-            AssetType = Enums.AssetType.Hotel; // Default for this DTO
+            AssetType = Enums.AssetType.Hotel; 
         }
     }
 }

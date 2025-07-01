@@ -30,13 +30,15 @@ namespace Elagy.APIs.Controllers
 
         // --- PUBLIC/WEBSITE ENDPOINTS ---
 
-        [HttpGet("hospital-specialty/{hospitalSpecialtyId}")]
+        [HttpGet("{hospitalSpecialtyId}")]
         [AllowAnonymous] 
         public async Task<IActionResult> GetDoctorsByHospitalSpecialty(
             int hospitalSpecialtyId,
             [FromQuery] int PageNumber = 1,
             [FromQuery] int PageSize = 10,
-            [FromQuery] string? SearchTerm = null)
+            [FromQuery] string? SearchTerm = null,
+            [FromQuery] int? SpecialtyId = null)
+            
         {
             if (hospitalSpecialtyId <= 0 || PageNumber < 1 || PageSize < 1)
             {
@@ -57,7 +59,7 @@ namespace Elagy.APIs.Controllers
 
         // --- HOSPITAL ADMIN DASHBOARD ENDPOINTS ---
 
-        [HttpGet("my-hospital")]
+        [HttpGet("hospital-Doctors")]
         [Authorize(Roles = "HospitalServiceProvider")] 
         public async Task<IActionResult> GetMyHospitalDoctors(
             [FromQuery] int PageNumber = 1,
@@ -84,7 +86,7 @@ namespace Elagy.APIs.Controllers
         }
 
         // POST: api/Doctors
-        [HttpPost]
+        [HttpPost()]
         [Authorize(Roles = "HospitalServiceProvider")]
         public async Task<IActionResult> CreateDoctor([FromBody] DoctorCreateDto createDto)
         {
