@@ -13,8 +13,7 @@ namespace Elagy.Core.DTOs.Schedule
         public string? DoctorId { get; set; } // Can change the doctor for this slot
         public int? HospitalSpecialtyId { get; set; } // Can change the HS for this slot
 
-        [DataType(DataType.Date, ErrorMessage = "Invalid date format.")]
-        public DateTime? Date { get; set; }
+        public int? DayOfWeekId { get; set; } // Can change the day of the week for this slot
 
         [DataType(DataType.Time, ErrorMessage = "Invalid time format.")]
         public TimeOnly? StartTime { get; set; }

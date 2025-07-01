@@ -19,14 +19,12 @@ namespace Elagy.DAL.Configurations
             builder.Property(s => s.DoctorId).IsRequired();
             builder.Property(s => s.HospitalSpecialtyId).IsRequired();
             builder.Property(s => s.DayOfWeekId).IsRequired();
-            builder.Property(s => s.Date).IsRequired();
             builder.Property(s => s.StartTime).IsRequired();
             builder.Property(s => s.EndTime).IsRequired();
             builder.Property(s => s.MaxCapacity).IsRequired();
             builder.Property(s => s.BookedSlots).IsRequired();
             builder.Property(s => s.IsActive).IsRequired();
-            builder.Property(s => s.IsRecurring).IsRequired();
-
+ 
             // Relationships:
 
             // Schedule (Many) to Doctor (One)

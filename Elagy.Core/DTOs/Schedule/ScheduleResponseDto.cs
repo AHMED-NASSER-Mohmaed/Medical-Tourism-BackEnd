@@ -13,13 +13,11 @@ namespace Elagy.Core.DTOs.Schedule
         public string Specialty { get; set; }
         public string Hospital { get; set; }
         public DayOfWeekDto DayOfWeek { get; set; }
-        public DateTime? Date { get; set; }
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
         public int MaxCapacity { get; set; }
         public int AvailableSlots => MaxCapacity - BookedSlots;
         public int BookedSlots { get; set; }
-        public bool IsRecurring { get; set; }
         public bool? IsActive { get; set; } 
 
     }

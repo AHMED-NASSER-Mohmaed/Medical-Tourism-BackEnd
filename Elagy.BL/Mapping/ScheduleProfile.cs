@@ -20,10 +20,9 @@ namespace Elagy.BL.Mapping
             CreateMap<CreateScheduleSlotDto, Schedule>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.BookedSlots, opt => opt.MapFrom(src => 0)) 
+                .ForMember(dest => dest.CancelledSlots, opt => opt.MapFrom(src => 0)) 
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true)) 
-                .ForMember(dest => dest.IsRecurring, opt => opt.MapFrom(src => false)) 
-                                                                                       
-                .ForMember(dest => dest.DayOfWeekId, opt => opt.Ignore())
+                                                                                        
                 // Ignore navigation properties, as FKs are handled or set in service
                 .ForMember(dest => dest.Doctor, opt => opt.Ignore())
                 .ForMember(dest => dest.HospitalSpecialty, opt => opt.Ignore())
@@ -35,8 +34,6 @@ namespace Elagy.BL.Mapping
                 .ForMember(dest => dest.BookedSlots, opt => opt.MapFrom(src => 0)) // New schedule starts with 0 booked slots
                                                                                    // IsActive is present in DTO, maps by convention, or set default if not present
                                                                                    // .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true)) // Set default if DTO.IsActive is missing or if always true
-                .ForMember(dest => dest.IsRecurring, opt => opt.MapFrom(src => true)) // This is a recurring template
-                .ForMember(dest => dest.Date, opt => opt.Ignore()) // Template does not have a specific Date
                                                                    // Ignore navigation properties
                 .ForMember(dest => dest.Doctor, opt => opt.Ignore())
                 .ForMember(dest => dest.HospitalSpecialty, opt => opt.Ignore())
@@ -49,7 +46,6 @@ namespace Elagy.BL.Mapping
                                                                           // REMOVED explicit ignores for DoctorId and HospitalSpecialtyId (now mapped by convention if present in DTO)
                                                                           // NEW: Explicitly ignore DayOfWeekId and IsRecurring as they are no longer in UpdateScheduleDto
                 .ForMember(dest => dest.DayOfWeekId, opt => opt.Ignore())
-                .ForMember(dest => dest.IsRecurring, opt => opt.Ignore())
                 // Ignore navigation properties
                 .ForMember(dest => dest.Doctor, opt => opt.Ignore())
                 .ForMember(dest => dest.HospitalSpecialty, opt => opt.Ignore())

@@ -7,6 +7,7 @@ using Elagy.Core.Entities;
 using Elagy.Core.IRepositories;
 
 using Elagy.Core.IServices.ISpecialtyService;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -52,20 +53,6 @@ namespace Elagy.BL.Services
                     query = query.Where(s => s.DayOfWeekId == paginationParameters.FilterDayOfWeekId.Value);
                 }
 
-                if (paginationParameters.FilterStartDate.HasValue)
-                {
-                    query = query.Where(s => s.Date >= paginationParameters.FilterStartDate.Value);
-                }
-                if (paginationParameters.FilterEndDate.HasValue)
-                {
-                    query = query.Where(s => s.Date <= paginationParameters.FilterEndDate.Value);
-                }
-
-                if (paginationParameters.FilterIsRecurring.HasValue)
-                {
-                    query = query.Where(s => s.IsRecurring == paginationParameters.FilterIsRecurring.Value);
-                }
-
                 if (paginationParameters.FilterIsActive.HasValue)
                 {
                     query = query.Where(s => s.IsActive == paginationParameters.FilterIsActive.Value);
@@ -76,8 +63,6 @@ namespace Elagy.BL.Services
 
                 
                 var pagedSchedules = query
-                    .OrderBy(s => s.Date)
-                    .ThenBy(s => s.StartTime)
                     .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
                     .Take(paginationParameters.PageSize)
                     .ToList();
@@ -106,26 +91,25 @@ namespace Elagy.BL.Services
                 if (!doctor.HospitalSpecialty.IsActive) throw new InvalidOperationException($"Hospital Specialty {createDto.HospitalSpecialtyId} is not active.");
 
                 // 2. Validate DayOfWeek based on the Date
-                var dayOfWeekEntity = await _unitOfWork.DayOfWeeks.GetByIdAsync((int)createDto.Date.DayOfWeek + 1);
-                if (dayOfWeekEntity == null) throw new ArgumentException("Invalid DayOfWeek mapping based on provided date.");
+                if (createDto.DayOfWeekId < 1 && createDto.DayOfWeekId>7) 
+                    throw new ArgumentException("Invalid DayOfWeekId provided.");
 
                 // 3. Check for overlapping schedules for the same doctor on the same day (for active schedules)
                 var existingSchedules = await _unitOfWork.Schedules.GetSchedulesByDoctorIdAsync(createDto.DoctorId, isActive: true);
+
+
                 bool isOverlap = existingSchedules.Any(s =>
-                    s.Date.Date == createDto.Date.Date && 
-                    (
+                        s.DayOfWeekId == createDto.DayOfWeekId && // Same day of week
                         (createDto.StartTime < s.EndTime && createDto.EndTime > s.StartTime) || // Overlaps
                         (createDto.StartTime == s.StartTime && createDto.EndTime == s.EndTime) // Exact match
-                    )
                 );
-                if (isOverlap) throw new InvalidOperationException("Doctor already has an overlapping schedule for the specified date and time.");
+                 
+                
 
                 // 4. Map DTO to Schedule entity
                 var schedule = _mapper.Map<Schedule>(createDto);
                 schedule.IsActive = true; 
-                schedule.IsRecurring = false;
-                schedule.BookedSlots = 0; 
-                schedule.DayOfWeekId = dayOfWeekEntity.Id; 
+
 
                 // 5. Add to repository and persist
                 await _unitOfWork.Schedules.AddAsync(schedule);
@@ -152,10 +136,12 @@ namespace Elagy.BL.Services
             {
                 // 1. Retrieve the existing schedule with details
                 var schedule = await _unitOfWork.Schedules.GetScheduleByIdWithDetailsAsync(scheduleId);
+
                 if (schedule == null) throw new KeyNotFoundException($"Schedule with ID {scheduleId} not found for update.");
 
                 // 2. Validate schedule's affiliation to the requesting hospital admin
-                if (schedule.HospitalSpecialty.HospitalAssetId != hospitalId) throw new UnauthorizedAccessException($"Schedule with ID {scheduleId} is not affiliated with your hospital.");
+                if (schedule.HospitalSpecialty.HospitalAssetId != hospitalId) 
+                    throw new UnauthorizedAccessException($"Schedule with ID {scheduleId} is not affiliated with your hospital.");
 
                 // 3. Handle specific updates based on DTO fields validation
                 // MaxCapacity: Cannot be less than BookedSlots
@@ -164,26 +150,27 @@ namespace Elagy.BL.Services
                     throw new InvalidOperationException($"Max capacity ({updateDto.MaxCapacity.Value}) cannot be less than booked slots ({schedule.BookedSlots}).");
                 }
 
+                // 2. Validate DayOfWeek based on the Date
+                if (updateDto.DayOfWeekId < 1 && updateDto.DayOfWeekId > 7)
+                    throw new ArgumentException("Invalid DayOfWeekId provided.");
 
-                // If Date changes, DayOfWeekId must be re-calculated
-                if (updateDto.Date.HasValue && schedule.Date.DayOfWeek != updateDto.Date.Value.DayOfWeek)
-                {
-                    // Assuming DayOfWeekId in DB is 1-7 (Sun-Sat) vs enum 0-6
-                    schedule.DayOfWeekId = (int)updateDto.Date.Value.DayOfWeek + 1;
-                }
+
+
 
                 // Overlap check if time/date/doctor changes
-                if ((updateDto.Date.HasValue || updateDto.StartTime.HasValue || updateDto.EndTime.HasValue))
+                if (( updateDto.StartTime.HasValue || updateDto.EndTime.HasValue))
                 {
-                    var proposedDate = updateDto.Date ?? schedule.Date;
                     var proposedStartTime = updateDto.StartTime ?? schedule.StartTime;
                     var proposedEndTime = updateDto.EndTime ?? schedule.EndTime;
+                    var proposedDayOfWeedId = updateDto.DayOfWeekId ?? schedule.DayOfWeekId;
+
+
 
                     // Check for overlaps with other active schedules of the same doctor
                     var existingSchedules = await _unitOfWork.Schedules.GetSchedulesByDoctorIdAsync(schedule.DoctorId, isActive: true);
                     bool isOverlap = existingSchedules.Any(s =>
                         s.Id != schedule.Id && // Exclude current schedule itself
-                        s.Date.Date == proposedDate.Date && // Same date
+                        s.DayOfWeekId == proposedDayOfWeedId && // Same day of week
                         (
                             (proposedStartTime < s.EndTime && proposedEndTime > s.StartTime) || // Overlaps
                             (proposedStartTime == s.StartTime && proposedEndTime == s.EndTime) // Exact match
@@ -279,16 +266,7 @@ namespace Elagy.BL.Services
                 {
                     query = query.Where(s => s.DayOfWeekId == paginationParameters.FilterDayOfWeekId.Value);
                 }
-                // Filter by Date range
-                if (paginationParameters.FilterStartDate.HasValue)
-                {
-                    query = query.Where(s => s.Date >= paginationParameters.FilterStartDate.Value);
-                }
-                if (paginationParameters.FilterEndDate.HasValue)
-                {
-                    query = query.Where(s => s.Date <= paginationParameters.FilterEndDate.Value);
-                }
-
+                 
                 // 4. Get total count AFTER applying filters
                 var totalCount = await query.CountAsync();
 
@@ -300,8 +278,7 @@ namespace Elagy.BL.Services
                     .Include(s => s.HospitalSpecialty)
                         .ThenInclude(hs => hs.Specialty)
                     .Include(s => s.DayOfWeek) // Needed for DayOfWeekName, ShortCode
-                    .OrderBy(s => s.Date) // Order by date then start time
-                    .ThenBy(s => s.StartTime)
+                    .OrderBy(s => s.StartTime)
                     .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
                     .Take(paginationParameters.PageSize)
                     .ToListAsync();
