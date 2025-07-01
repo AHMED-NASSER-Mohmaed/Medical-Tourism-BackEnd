@@ -13,6 +13,5 @@ namespace Elagy.Core.IServices
         Task<HospitalProviderProfileDto> UpdateHospitalProviderProfileAsync(string providerId, HospitalProviderProfileUpdateDto model);
         Task<AuthResultDto> AddHospitalProviderByAdminAsync(HospitalAssetRegistrationRequestDto model);
 
-        Task<PagedResponseDto<HospitalProviderProfileDto>> GetHospitalsForWebsiteAsync(PaginationParameters paginationParameters);
     }
 }

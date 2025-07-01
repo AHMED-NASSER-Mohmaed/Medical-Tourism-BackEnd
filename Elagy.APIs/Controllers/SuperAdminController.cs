@@ -181,13 +181,15 @@ namespace Elagy.APIs.Controllers
         [HttpGet("hospital-providers")]
         public async Task<ActionResult<IEnumerable<HotelProviderProfileDto>>> GetHospitalProviders(
         [FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10,
-        [FromQuery] string SearchTerm = null, [FromQuery] Status? UserStatus = null)
+        [FromQuery] string SearchTerm = null, [FromQuery] Status? UserStatus = null,
+        [FromQuery] int? specialtyId=null)
         {
             var Filter = new PaginationParameters();
             Filter.PageNumber = PageNumber;
             Filter.PageSize = PageSize;
             Filter.SearchTerm = SearchTerm;
             Filter.UserStatus = UserStatus;
+            Filter.SpecialtyId= specialtyId;
 
             var providers = await _superAdminService.GetHospitalProvidersForAdminDashboardAsync(Filter);
             return Ok(providers);

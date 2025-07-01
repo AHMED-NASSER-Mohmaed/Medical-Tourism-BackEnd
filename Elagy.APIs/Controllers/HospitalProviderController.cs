@@ -62,41 +62,6 @@ namespace Elagy.APIs.Controllers
             return Ok(updatedProfile);
         }
 
-        [HttpGet("Hospitals/Website")] 
-        [AllowAnonymous]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResponseDto<HospitalProviderProfileDto>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetHospitalsForWebsite(
-            [FromQuery] int PageNumber = 1,
-            [FromQuery] int PageSize = 10,
-            [FromQuery] string? SearchTerm = null,
-            [FromQuery] int? SpecialtyId = null,
-            [FromQuery] int? FilterGovernorateId = null)
-        {
-            if (PageNumber < 1 || PageSize < 1) return BadRequest("PageNumber and PageSize must be greater than 0.");
-
-            try
-            {
-                var paginationParams = new PaginationParameters
-                {
-                    PageNumber = PageNumber,
-                    PageSize = PageSize,
-                    SearchTerm = SearchTerm,
-                    SpecialtyId = SpecialtyId,
-                    FilterGovernorateId = FilterGovernorateId
-                };
-
-                _logger.LogInformation($"Received public request for hospitals. Page: {PageNumber}, Size: {PageSize}.");
-                var result = await _hospitalProviderService.GetHospitalsForWebsiteAsync(paginationParams);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting hospitals for website.");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving hospitals.");
-            }
-        }
         [HttpGet("my-hospital")]
         public async Task<IActionResult> GetMyHospitalSchedules(
             [FromQuery] int PageNumber = 1,
