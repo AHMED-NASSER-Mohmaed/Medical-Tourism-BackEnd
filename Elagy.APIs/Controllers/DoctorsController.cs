@@ -36,7 +36,9 @@ namespace Elagy.APIs.Controllers
             int hospitalSpecialtyId,
             [FromQuery] int PageNumber = 1,
             [FromQuery] int PageSize = 10,
-            [FromQuery] string? SearchTerm = null)
+            [FromQuery] string? SearchTerm = null,
+            [FromQuery] int? SpecialtyId = null)
+            
         {
             if (hospitalSpecialtyId <= 0 || PageNumber < 1 || PageSize < 1)
             {

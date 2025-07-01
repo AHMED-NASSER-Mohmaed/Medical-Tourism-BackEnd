@@ -10,7 +10,8 @@ using Elagy.Core.IServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore; // Crucial for .Include() and .SingleOrDefaultAsync()
 using ServiceProvider = Elagy.Core.Entities.ServiceProvider; // Ensure this is the correct namespace for ServiceProvider
-using Microsoft.Extensions.Logging; // Add this line if it's missing
+using Microsoft.Extensions.Logging;
+using Elagy.Core.DTOs.Pagination; // Add this line if it's missing
 namespace Elagy.BL.Services
 {
     public class HospitalProviderService : IHospitalProviderService
@@ -127,6 +128,70 @@ namespace Elagy.BL.Services
 
             _logger.LogInformation($"Hospital Provider {serviceProvider.Email} added by admin with asset.");
             return new AuthResultDto { Success = true, Message = "Hospital Provider account and asset created successfully by admin." };
+        }
+
+        public async Task<PagedResponseDto<HospitalProviderProfileDto>> GetHospitalsForWebsiteAsync(PaginationParameters paginationParameters)
+        {
+              try
+            {
+                //Start with an IQueryable of ServiceProviders and eager load necessary details.
+                IQueryable<HospitalAsset> query = _unitOfWork.HospitalAssets.AsQueryable()
+                    .Include(ha => ha.HospitalSpecialties) 
+                        .ThenInclude(hs => hs.Specialty) 
+                    .Include(ha => ha.ServiceProvider) 
+                        .ThenInclude(sp => sp.Governorate) 
+                            .ThenInclude(g => g.Country);
+
+                if (paginationParameters.SpecialtyId.HasValue)
+                {
+                    // Filter based on HospitalSpecialties collection
+                    query = query.Where(ha =>
+                        ha.HospitalSpecialties != null &&
+                        ha.HospitalSpecialties.Any(hs => hs.SpecialtyId == paginationParameters.SpecialtyId.Value)
+                    );
+                }
+
+                if (paginationParameters.FilterGovernorateId.HasValue)
+                {
+                    // Access GovernorateId through the ServiceProvider navigation property
+                    query = query.Where(ha => ha.ServiceProvider.GovernorateId == paginationParameters.FilterGovernorateId.Value);
+                }
+
+                // Search by hospital name, city, address
+                if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
+                {
+                    string term = paginationParameters.SearchTerm.Trim().ToLower();
+                    query = query.Where(ha =>
+                        ha.Name.ToLower().Contains(term) || 
+                        (ha.ServiceProvider.City != null && ha.ServiceProvider.City.ToLower().Contains(term)) // City is on User base (ServiceProvider)
+                    );
+                }
+
+                // 5. Get total count AFTER all filters are applied
+                var totalCount = await query.CountAsync();
+
+                // 6. Apply pagination (Skip and Take)
+                var pagedHospitals = await query
+                    .OrderBy(ha => ha.Name) 
+                    .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+                    .Take(paginationParameters.PageSize)
+                    .ToListAsync();
+
+                // 7. Map entities to DTOs
+                var hospitalDtos = _mapper.Map<IEnumerable<HospitalProviderProfileDto>>(pagedHospitals);
+
+                return new PagedResponseDto<HospitalProviderProfileDto>(
+                    hospitalDtos,
+                    totalCount,
+                    paginationParameters.PageNumber,
+                    paginationParameters.PageSize
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting hospital providers for website.");
+                return new PagedResponseDto<HospitalProviderProfileDto>(Enumerable.Empty<HospitalProviderProfileDto>(), 0, paginationParameters.PageNumber, paginationParameters.PageSize);
+            }
         }
     }
 }

@@ -6,6 +6,7 @@ using Elagy.Core.Entities;
 using Elagy.Core.Enums; 
 using Elagy.Core.IRepositories; 
 using Elagy.Core.IServices;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore; 
 using Microsoft.Extensions.Logging;
@@ -76,9 +77,10 @@ namespace Elagy.BL.Services
                     query = query.Where(d => d.Status == paginationParameters.UserStatus.Value);
                 }
 
-                // 4. Get total count AFTER applying all filters.
-                // .Count() here operates on the IQueryable in memory (if 'doctors' was already ToListAsync)
-                // or against the database if 'doctors' was kept as an IQueryable from the repo.
+                if(paginationParameters.SpecialtyId.HasValue)
+                {
+                    query = query.Where(s => s.HospitalSpecialty.SpecialtyId == paginationParameters.SpecialtyId);
+                }
                 var totalCount = query.Count();
 
                 // 5. Apply pagination (Skip and Take) for the current page.
@@ -192,14 +194,11 @@ namespace Elagy.BL.Services
         }
 
 
-        /// Updates an existing doctor's profile and/or assigned hospital specialty.
-        /// Ensures the doctor belongs to the specified hospital and performs comprehensive validation.
         public async Task<DoctorProfileDto> UpdateDoctorAsync(string doctorId, DoctorUpdateDto updateDto, string hospitalId)
         {
             try
             {
-                // 1. Retrieve the doctor by ID with all necessary details.
-                // Using GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync ensures all related data is loaded for validation and mapping.
+              
                 var doctor = await _unitOfWork.Doctors.GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync(doctorId);
                 if (doctor == null)
                 {
@@ -235,17 +234,16 @@ namespace Elagy.BL.Services
                     }
                     doctor.HospitalSpecialtyId = updateDto.HospitalSpecialtyId; // Update FK on the doctor entity.
                 }
-                // wait for the governerate repo
-                // 4. Validate Governorate and Country IDs if they're being changed.
-                // Assuming _unitOfWork.Governorates.GetByIdAsync exists.
-                // Validate if the new GovernorateId and CountryId are valid and consistent.
-                //if (doctor.GovernorateId != updateDto.GovernorateId || doctor.Governorate.CountryId != updateDto.CountryId)
-                //{
-                //    //var governorate = await _unitOfWork.Governorates.GetByIdAsync(updateDto.GovernorateId);
-                //    if (governorate == null) throw new ArgumentException($"Governorate with ID {updateDto.GovernorateId} does not exist.");
-                //    // Ensure the selected CountryId is consistent with the Governorate's CountryId.
-                //    if (governorate.CountryId != updateDto.CountryId) throw new ArgumentException($"Country with ID {updateDto.CountryId} does not match the selected Governorate.");
-                //}
+
+            
+                var governorate = await _unitOfWork.Governates.GetByIdAsync(updateDto.GovernorateId);
+                if (doctor.GovernorateId != updateDto.GovernorateId || doctor.Governorate.CountryId != updateDto.CountryId)
+                {
+                    //var governorate = await _unitOfWork.Governorates.GetByIdAsync(updateDto.GovernorateId);
+                    if (governorate == null) throw new ArgumentException($"Governorate with ID {updateDto.GovernorateId} does not exist.");
+                    // Ensure the selected CountryId is consistent with the Governorate's CountryId.
+                    if (governorate.CountryId != updateDto.CountryId) throw new ArgumentException($"Country with ID {updateDto.CountryId} does not match the selected Governorate.");
+                }
                 // Update GovernorateId and CountryId on the doctor entity.
                 doctor.GovernorateId = updateDto.GovernorateId;
                 doctor.Governorate.CountryId = updateDto.CountryId; // Update CountryId directly on the doctor entity (User base).
@@ -278,12 +276,11 @@ namespace Elagy.BL.Services
                 // This maps FirstName, LastName, Gender, Address, City, DateOfBirth, MedicalLicenseNumber, YearsOfExperience, Bio, Qualification.
                 _mapper.Map(updateDto, doctor);
 
-                // 7. Commit all pending changes to the database.
+ 
                 _unitOfWork.Doctors.Update(doctor); 
                 await _unitOfWork.CompleteAsync(); 
 
-                // 8. Re-fetch the updated doctor with all details to return a complete DoctorProfileDto.
-                // This ensures all navigation properties are correctly populated for the DTO response.
+
                 var updatedDoctorWithDetails = await _unitOfWork.Doctors.GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync(doctorId);
                 if (updatedDoctorWithDetails == null) throw new Exception("Updated doctor not found after save and detail fetch."); 
 
@@ -297,10 +294,6 @@ namespace Elagy.BL.Services
             }
         }
 
-        /// <summary>
-        /// Soft deletes a doctor account (sets Status to Deactivated).
-        /// Ensures the doctor belongs to the specified hospital.
-        /// </summary>
         public async Task<DoctorProfileDto> DeleteDoctorAsync(string doctorId, string hospitalId)
         {
             try

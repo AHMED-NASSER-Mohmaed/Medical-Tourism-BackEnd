@@ -330,7 +330,15 @@ namespace Elagy.BL.Services
             query = query
                 .Include(sp => sp.ServiceAsset) // Eager load ServiceAsset if needed for AssetType filter and mapping
                 .Where(sp => sp.ServiceAsset.AssetType == AssetType.Hospital); // Filter for Hospital assets
-
+            // filter with specialty for the hospital in the super admin dashboard
+            if (requestParams.SpecialtyId.HasValue)
+            {
+                // Assuming ServiceAsset can be cast to HospitalAsset
+                query = query.Where(sp =>
+                    ((HospitalAsset)sp.ServiceAsset).HospitalSpecialties != null &&
+                    ((HospitalAsset)sp.ServiceAsset).HospitalSpecialties.Any(hs => hs.SpecialtyId == requestParams.SpecialtyId.Value)
+                );
+            }
 
             // 3. Apply additional dynamic filters (searchQuery, userStatus) using the helper function
             query = ApplyServiceProviderFilters(query,requestParams.SearchTerm ,requestParams.UserStatus );

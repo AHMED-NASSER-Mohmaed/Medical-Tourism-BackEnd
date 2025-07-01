@@ -105,6 +105,46 @@ namespace Elagy.BL.Mapping
                   .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email ?? src.UserName));
 
 
+
+            CreateMap<HospitalAsset, HospitalProviderProfileDto>()
+                .IncludeBase<Asset, BaseServiceProviderProfileDto>() // Map common Asset properties (and implicitly User properties via ServiceProvider)
+                                                                     // IMPORTANT: This means you need a mapping from Asset to BaseServiceProviderProfileDto
+                                                                     // or ServiceProvider to BaseServiceProviderProfileDto to correctly chain.
+
+                // Explicitly map properties that are specific to HospitalAsset
+                .ForMember(dest => dest.NumberOfDepartments, opt => opt.MapFrom(src => src.NumberOfDepartments))
+                .ForMember(dest => dest.EmergencyServices, opt => opt.MapFrom(src => src.EmergencyServices))
+
+                // Manually map inherited properties that don't directly come from HospitalAsset
+                // These properties are actually on the ServiceProvider (User base) side, and Asset base.
+                // IncludeBase will attempt to map them, but sometimes explicit ForMember is clearer or necessary.
+                // Ensure your query eager loads ServiceProvider for these.
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id)) // Asset.Id -> BaseProfileDto.Id
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description)) // Asset.Description -> BaseServiceProviderProfileDto.Description
+                                                                                                 // ... map other properties that are on Asset base
+
+                // And from ServiceProvider:
+                // For properties like City, Address, Phone, Email, FirstName, LastName, Status (from BaseProfileDto / User)
+                // Need to map from ServiceProvider.
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.ServiceProvider.Email ?? src.ServiceProvider.UserName))
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.ServiceProvider.FirstName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.ServiceProvider.LastName))
+                .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.ServiceProvider.PhoneNumber)) // Correctly maps from User.PhoneNumber
+                .ForMember(dest => dest.ImageURL, opt => opt.MapFrom(src => src.ServiceProvider.ImageURL))
+                .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.ServiceProvider.Gender))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.ServiceProvider.Address))
+                .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.ServiceProvider.City))
+                .ForMember(dest => dest.EmailConfirmed, opt => opt.MapFrom(src => src.ServiceProvider.EmailConfirmed))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.ServiceProvider.Status))
+                .ForMember(dest => dest.UserType, opt => opt.MapFrom(src => src.ServiceProvider.UserType))
+                .ForMember(dest => dest.DateOfBirth, opt => opt.MapFrom(src => src.ServiceProvider.DateOfBirth))
+
+                // Flattened Governorate and Country (from BaseProfileDto via ServiceProvider)
+                // This requires navigating through ServiceProvider.Governorate
+                .ForMember(dest => dest.Governorate, opt => opt.MapFrom(src => src.ServiceProvider.Governorate.Name))
+                .ForMember(dest => dest.Country, opt => opt.MapFrom(src => src.ServiceProvider.Governorate.Country.Name));
+
+
         }
     }
 }

@@ -24,7 +24,7 @@ namespace Elagy.APIs.Controllers
        
 
         [HttpGet] 
-        [Authorize(Roles = "SuperAdmin")]
+        
         public async Task<IActionResult> GetAllSpecialtiesForSuperAdminDashboard(
              [FromQuery] int PageNumber = 1,
              [FromQuery] int PageSize = 10,
@@ -61,7 +61,7 @@ namespace Elagy.APIs.Controllers
         }
 
 
-        [HttpGet("available-for-linking/my-hospital")] // Changed route to directly use current user's hospital
+        [HttpGet("available-for-linking/my-hospital")] 
         [Authorize(Roles = "HospitalServiceProvider")]
         public async Task<IActionResult> GetAvailableSpecialtiesToLinkToMyHospital() 
         {
@@ -83,9 +83,9 @@ namespace Elagy.APIs.Controllers
 
         [HttpGet("my-hospital")] 
         [Authorize(Roles = "HospitalServiceProvider")]
-        public async Task<IActionResult> GetMyHospitalSpecialties() // Renamed to reflect 'my-hospital'
+        public async Task<IActionResult> GetMyHospitalSpecialties() 
         {
-            var hospitalId = GetCurrentUserId(); // <<< Using GetCurrentUserId() here
+            var hospitalId = GetCurrentUserId(); 
             if (hospitalId == null)
             {
                 return Unauthorized("Hospital ID could not be determined from your token.");

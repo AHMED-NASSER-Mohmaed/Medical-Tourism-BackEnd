@@ -27,6 +27,9 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
     public DbSet<Elagy.Core.Entities.DayOfWeek> DayOfWeeks { get; set; }
     public DbSet<Country> Countries { get; set; }
     public DbSet<Governorate> Governaties { get; set; }
+    public DbSet<Room> Rooms { get; set; }
+    public DbSet<RoomImage> RoomImages {get; set;}
+
 
 
 
@@ -51,6 +54,8 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
         builder.ApplyConfiguration(new DoctorConfiguration());
         builder.ApplyConfiguration(new DayOfWeekConfiguration());
         builder.ApplyConfiguration(new ScheduleConfiguration());
+        builder.ApplyConfiguration(new RoomConfiguration());
+        builder.ApplyConfiguration(new RoomImageConfiguration());
 
         // builder.ApplyConfiguration(new ImageKitTempFileConfiguration()); // If you still have this entity
     }

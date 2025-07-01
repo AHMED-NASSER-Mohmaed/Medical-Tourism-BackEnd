@@ -1,4 +1,5 @@
-﻿using Elagy.Core.DTOs.Pagination;
+﻿using Elagy.BL.Services;
+using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Schedule;
 using Elagy.Core.DTOs.User;
 using Elagy.Core.IServices;
@@ -61,9 +62,42 @@ namespace Elagy.APIs.Controllers
             return Ok(updatedProfile);
         }
 
+        [HttpGet("Hospitals/Website")] 
+        [AllowAnonymous]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResponseDto<HospitalProviderProfileDto>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetHospitalsForWebsite(
+            [FromQuery] int PageNumber = 1,
+            [FromQuery] int PageSize = 10,
+            [FromQuery] string? SearchTerm = null,
+            [FromQuery] int? SpecialtyId = null,
+            [FromQuery] int? FilterGovernorateId = null)
+        {
+            if (PageNumber < 1 || PageSize < 1) return BadRequest("PageNumber and PageSize must be greater than 0.");
 
+            try
+            {
+                var paginationParams = new PaginationParameters
+                {
+                    PageNumber = PageNumber,
+                    PageSize = PageSize,
+                    SearchTerm = SearchTerm,
+                    SpecialtyId = SpecialtyId,
+                    FilterGovernorateId = FilterGovernorateId
+                };
+
+                _logger.LogInformation($"Received public request for hospitals. Page: {PageNumber}, Size: {PageSize}.");
+                var result = await _hospitalProviderService.GetHospitalsForWebsiteAsync(paginationParams);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting hospitals for website.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving hospitals.");
+            }
+        }
         [HttpGet("my-hospital")]
-        [Authorize(Roles = "HospitalServiceProvider")] 
         public async Task<IActionResult> GetMyHospitalSchedules(
             [FromQuery] int PageNumber = 1,
             [FromQuery] int PageSize = 10,
@@ -104,7 +138,6 @@ namespace Elagy.APIs.Controllers
             }
         }
 
-        // POST: api/Schedules
         [HttpPost("AddSchedule")]
         public async Task<IActionResult> CreateSchedule([FromBody] CreateScheduleSlotDto createDto)
         {
@@ -117,7 +150,6 @@ namespace Elagy.APIs.Controllers
             {
                 _logger.LogInformation($"Received request to create schedule for Doctor {createDto.DoctorId} at HS {createDto.HospitalSpecialtyId}.");
                 var result = await _scheduleService.CreateScheduleAsync(createDto, hospitalId);
-                // CreatedAtAction requires a route name and route values for the new resource.
                 return CreatedAtAction(nameof(GetScheduleById), new { scheduleId = result.Id }, result);
             }
             catch (ArgumentException ex) 
@@ -139,7 +171,7 @@ namespace Elagy.APIs.Controllers
             }
         }
 
-        // PUT: api/Schedules/{scheduleId}
+ 
         [HttpPut("{scheduleId}")]
         [Authorize(Roles = "HospitalServiceProvider")]
         public async Task<IActionResult> UpdateSchedule(int scheduleId, [FromBody] UpdateScheduleDto updateDto)
@@ -168,7 +200,7 @@ namespace Elagy.APIs.Controllers
             {
                 return Forbid(ex.Message);
             }
-            catch (InvalidOperationException ex) // Overlapping schedule, MaxCapacity < BookedSlots
+            catch (InvalidOperationException ex) 
             {
                 return Conflict(ex.Message);
             }
@@ -179,7 +211,7 @@ namespace Elagy.APIs.Controllers
             }
         }
 
-        // PUT: api/Schedules/{scheduleId}/status
+     
         [HttpPut("changestatus/{scheduleId}")]
         public async Task<IActionResult> ChangeScheduleStatus(int scheduleId, [FromBody] bool newIsActiveStatus)
         {
@@ -192,7 +224,7 @@ namespace Elagy.APIs.Controllers
             {
                 _logger.LogInformation($"Received request to change status for schedule ID: {scheduleId} to {newIsActiveStatus}.");
                 var result = await _scheduleService.ChangeScheduleStatusAsync(scheduleId, newIsActiveStatus, hospitalId);
-                if (result == null) // Service returns null if not found
+                if (result == null) 
                 {
                     return NotFound($"Schedule with ID {scheduleId} not found.");
                 }
@@ -206,7 +238,7 @@ namespace Elagy.APIs.Controllers
             {
                 return Forbid(ex.Message);
             }
-            catch (InvalidOperationException ex) // If already in target status, etc.
+            catch (InvalidOperationException ex) 
             {
                 return Conflict(ex.Message);
             }
@@ -218,9 +250,9 @@ namespace Elagy.APIs.Controllers
         }
 
 
-        // --- PUBLIC/WEBSITE SCHEDULE DISPLAY ENDPOINTS ---
+       
         [HttpGet("available-slots")]
-        [AllowAnonymous] // Publicly accessible
+        [AllowAnonymous] 
         public async Task<IActionResult> GetAvailablePatientSlots(
             [FromQuery] int PageNumber = 1,
             [FromQuery] int PageSize = 10,
@@ -259,7 +291,6 @@ namespace Elagy.APIs.Controllers
         }
 
 
-        // GET: api/Schedules/{scheduleId}
         [HttpGet("{scheduleId}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetScheduleById(int scheduleId)
