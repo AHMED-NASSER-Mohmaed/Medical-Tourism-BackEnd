@@ -1,9 +1,6 @@
 ﻿using Elagy.Core.DTOs.Locations;
-using Elagy.Core.Entities;
 using Elagy.Core.IServices;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics.Metrics;
 
 namespace Elagy.APIs.Controllers
 {

@@ -68,9 +68,6 @@ namespace Elagy.APIs.Controllers
             [FromQuery] int PageSize = 10,
             [FromQuery] string? SearchTerm = null,
             [FromQuery] int? FilterDayOfWeekId = null,
-            [FromQuery] DateTime? FilterStartDate = null,
-            [FromQuery] DateTime? FilterEndDate = null,
-            [FromQuery] bool? FilterIsRecurring = null,
             [FromQuery] bool? FilterIsActive = null) 
         {
             var hospitalId = GetCurrentUserId();
@@ -86,9 +83,6 @@ namespace Elagy.APIs.Controllers
                     PageSize = PageSize,
                     SearchTerm = SearchTerm,
                     FilterDayOfWeekId = FilterDayOfWeekId,
-                    FilterStartDate = FilterStartDate,
-                    FilterEndDate = FilterEndDate,
-                    FilterIsRecurring = FilterIsRecurring,
                     FilterIsActive = FilterIsActive // Pass to service
                 };
 
@@ -225,8 +219,6 @@ namespace Elagy.APIs.Controllers
             [FromQuery] string? SearchTerm = null,
             [FromQuery] int? SpecialtyId = null,
             [FromQuery] int? FilterDayOfWeekId = null,
-            [FromQuery] DateTime? FilterStartDate = null,
-            [FromQuery] DateTime? FilterEndDate = null,
             [FromQuery] string? FilterDoctorId = null)
         {
             if (PageNumber < 1 || PageSize < 1) return BadRequest("PageNumber and PageSize must be greater than 0.");
@@ -240,8 +232,6 @@ namespace Elagy.APIs.Controllers
                     SearchTerm = SearchTerm,
                     SpecialtyId = SpecialtyId,
                     FilterDayOfWeekId = FilterDayOfWeekId,
-                    FilterStartDate = FilterStartDate,
-                    FilterEndDate = FilterEndDate,
                     FilterDoctorId = FilterDoctorId
                 };
 

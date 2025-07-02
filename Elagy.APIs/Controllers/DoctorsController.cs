@@ -30,7 +30,7 @@ namespace Elagy.APIs.Controllers
 
         // --- PUBLIC/WEBSITE ENDPOINTS ---
 
-        [HttpGet("{hospitalSpecialtyId}")]
+        [HttpGet("Website/{hospitalSpecialtyId}")]
         [AllowAnonymous] 
         public async Task<IActionResult> GetDoctorsByHospitalSpecialty(
             int hospitalSpecialtyId,

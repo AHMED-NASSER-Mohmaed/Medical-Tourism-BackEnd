@@ -10,20 +10,17 @@ namespace Elagy.Core.DTOs.Schedule
 {
     public class UpdateScheduleDto
     {
-        public string? DoctorId { get; set; } // Can change the doctor for this slot
-        public int? HospitalSpecialtyId { get; set; } // Can change the HS for this slot
+        public string? DoctorId { get; set; } 
+        public int? HospitalSpecialtyId { get; set; } 
+        public decimal? Price { get; set; } 
 
-        public int? DayOfWeekId { get; set; } // Can change the day of the week for this slot
+        public int? DayOfWeekId { get; set; } 
 
-        [DataType(DataType.Time, ErrorMessage = "Invalid time format.")]
         public TimeOnly? StartTime { get; set; }
-
-        [DataType(DataType.Time, ErrorMessage = "Invalid time format.")]
         public TimeOnly? EndTime { get; set; }
+        public int? TimeSlotSize { get; set; } 
 
-        [Range(1, int.MaxValue, ErrorMessage = "Max capacity must be at least 1.")]
-        public int? MaxCapacity { get; set; }
-
-        public bool? IsActive { get; set; } // Allows activating/deactivating a schedule
+        [Range(1, int.MaxValue)] public int? MaxCapacity { get; set; }
+        public bool? IsActive { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,11 +9,19 @@ namespace Elagy.Core.DTOs.Schedule
 {
     public class CreateScheduleSlotDto
     {
-        public string DoctorId { get; set; }
-        public int DayOfWeekId { get; set; } // Assuming DayOfWeekId corresponds to an enum or a specific ID in your database
-        public int HospitalSpecialtyId { get; set; }
-        public TimeOnly StartTime { get; set; }
-        public TimeOnly EndTime { get; set; }
-        public int MaxCapacity { get; set; } = 1;
+        [Required] public string DoctorId { get; set; }
+        [Required] public int HospitalSpecialtyId { get; set; }
+
+        [Required]
+        [Range(1, 7, ErrorMessage = "Day of Week ID must be between 1 and 7.")]
+        public int DayOfWeekId { get; set; }
+
+        [Required] public TimeOnly StartTime { get; set; }
+        [Required] public TimeOnly EndTime { get; set; }
+        [Required] public int TimeSlotSize { get; set; }
+
+        [Required][Range(1, int.MaxValue)] public int MaxCapacity { get; set; } = 1;
+        [Required][Range(0.01, (double)decimal.MaxValue)] public decimal Price { get; set; }
+
     }
 }

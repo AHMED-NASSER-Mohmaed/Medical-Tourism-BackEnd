@@ -12,7 +12,8 @@ namespace Elagy.APIs.Initializers
 {
     public static class DbInitializer
     {
- 
+
+
         public static async Task SeedRoles(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ILogger logger)
         {
             logger.LogInformation("Starting role seeding...");

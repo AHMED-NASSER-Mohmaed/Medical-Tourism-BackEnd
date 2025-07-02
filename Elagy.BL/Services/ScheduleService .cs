@@ -2,8 +2,8 @@
 using AutoMapper;
 using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Schedule;
-using Elagy.Core.Entities; 
-
+using Elagy.Core.Entities;
+using Elagy.Core.Enums;
 using Elagy.Core.IRepositories;
 
 using Elagy.Core.IServices.ISpecialtyService;
@@ -58,11 +58,22 @@ namespace Elagy.BL.Services
                     query = query.Where(s => s.IsActive == paginationParameters.FilterIsActive.Value);
                 }
 
+                // added for filtering by doctors schedule price
+                if (paginationParameters.MinPrice.HasValue)
+                {
+                    query = query.Where(s => s.Price >= paginationParameters.MinPrice.Value);
+                }
+                if (paginationParameters.MaxPrice.HasValue)
+                {
+                    query = query.Where(s => s.Price <= paginationParameters.MaxPrice.Value);
+                }
 
                 var totalCount = query.Count();
 
                 
                 var pagedSchedules = query
+                    .OrderBy(s => s.DayOfWeekId)
+                    .ThenBy(s => s.StartTime)
                     .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
                     .Take(paginationParameters.PageSize)
                     .ToList();
@@ -78,37 +89,52 @@ namespace Elagy.BL.Services
             }
         }
 
-        /// Creates a new schedule slot for a doctor within a specific hospital specialty.
         public async Task<ScheduleResponseDto> CreateScheduleAsync(CreateScheduleSlotDto createDto, string hospitalId)
         {
             try
             {
             
                 var doctor = await _unitOfWork.Doctors.GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync(createDto.DoctorId);
-                if (doctor == null) throw new ArgumentException($"Doctor with ID {createDto.DoctorId} not found.");
-                if (doctor.HospitalSpecialty?.HospitalAssetId != hospitalId) throw new UnauthorizedAccessException($"Doctor {createDto.DoctorId} is not affiliated with your hospital.");
-                if (doctor.HospitalSpecialtyId != createDto.HospitalSpecialtyId) throw new InvalidOperationException($"Doctor {createDto.DoctorId} is assigned to HS {doctor.HospitalSpecialtyId}, not {createDto.HospitalSpecialtyId}.");
-                if (!doctor.HospitalSpecialty.IsActive) throw new InvalidOperationException($"Hospital Specialty {createDto.HospitalSpecialtyId} is not active.");
 
+                if (doctor == null) 
+                    throw new ArgumentException($"Doctor with ID {createDto.DoctorId} not found.");
+                if (doctor.HospitalSpecialty?.HospitalAssetId != hospitalId)
+                    throw new UnauthorizedAccessException($"Doctor {createDto.DoctorId} is not affiliated with your hospital.");
+                if (doctor.HospitalSpecialtyId != createDto.HospitalSpecialtyId)
+                    throw new InvalidOperationException($"Doctor {createDto.DoctorId} is assigned to HS {doctor.HospitalSpecialtyId}, not {createDto.HospitalSpecialtyId}.");
+                if (!doctor.HospitalSpecialty.IsActive) 
+                    throw new InvalidOperationException($"Hospital Specialty {createDto.HospitalSpecialtyId} is not active.");
+                if (doctor.Status != Status.Active) 
+                    throw new InvalidOperationException($"Doctor {createDto.DoctorId} is not active and cannot have schedules created.");
                 // 2. Validate DayOfWeek based on the Date
-                if (createDto.DayOfWeekId < 1 && createDto.DayOfWeekId>7) 
+                if (createDto.DayOfWeekId < 1 || createDto.DayOfWeekId>7) 
                     throw new ArgumentException("Invalid DayOfWeekId provided.");
 
+                // validate the start and end time and the estimated time for one patient
+                if (createDto.EndTime <= createDto.StartTime) 
+                    throw new ArgumentException("End time must be after start time.");
+                if (createDto.TimeSlotSize <= 0) 
+                    throw new ArgumentException("Time slot size must be a positive integer.");
+
+                // convert to total minutes to calc the maxcapacity in the period
+                var slotDurationMinutes = (createDto.EndTime - createDto.StartTime).TotalMinutes;
                 // 3. Check for overlapping schedules for the same doctor on the same day (for active schedules)
+
                 var existingSchedules = await _unitOfWork.Schedules.GetSchedulesByDoctorIdAsync(createDto.DoctorId, isActive: true);
 
 
                 bool isOverlap = existingSchedules.Any(s =>
-                        s.DayOfWeekId == createDto.DayOfWeekId && // Same day of week
+                        s.DayOfWeekId == createDto.DayOfWeekId && 
+                        (// Same day of week
                         (createDto.StartTime < s.EndTime && createDto.EndTime > s.StartTime) || // Overlaps
                         (createDto.StartTime == s.StartTime && createDto.EndTime == s.EndTime) // Exact match
-                );
-                 
-                
+                ));
+
+                if (isOverlap) 
+                throw new InvalidOperationException("Doctor already has an overlapping schedule for the specified day and time.");
 
                 // 4. Map DTO to Schedule entity
                 var schedule = _mapper.Map<Schedule>(createDto);
-                schedule.IsActive = true; 
 
 
                 // 5. Add to repository and persist
