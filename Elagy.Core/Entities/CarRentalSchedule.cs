@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elagy.Core.Enums
+namespace Elagy.Core.Entities
 {
-    public enum ClineAppointmentType
+    public class CarRentalSchedule
     {
-        Online,offline
     }
 }
