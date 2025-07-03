@@ -317,8 +317,54 @@ namespace Elagy.BL.Services
             catch (Exception ex) { _logger.LogError(ex, $"Error retrieving specialties for Hospital ID: {hospitalId} with filters."); throw; }
         }
 
+        public async Task<PagedResponseDto<SpecialtyLinkToHospitalDto>> GetHospitalSpecialtiesWithLinks(
+    string hospitalId,
+    PaginationParameters paginationParameters)
+        {
+            var hospitalSpecialties = await _unitOfWork.HospitalSpecialties
+                .GetByHospitalIdAsync(hospitalId);
 
-       
+            IQueryable<HospitalSpecialty> query = hospitalSpecialties.AsQueryable();
+
+            // Apply filters
+            if (paginationParameters.SpecialtyId.HasValue)
+            {
+                query = query.Where(hs => hs.SpecialtyId == paginationParameters.SpecialtyId.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
+            {
+                string term = paginationParameters.SearchTerm.Trim().ToLower();
+                query = query.Where(hs =>
+                    hs.Specialty.Name.ToLower().Contains(term) ||
+                    (hs.Specialty.Description != null &&
+                     hs.Specialty.Description.ToLower().Contains(term))
+                );
+            }
+
+            if (paginationParameters.FilterIsActive.HasValue)
+            {
+                query = query.Where(hs => hs.IsActive == paginationParameters.FilterIsActive.Value);
+            }
+
+            var totalCount = query.Count();
+
+            var pagedResults = query
+                .OrderBy(hs => hs.Specialty.Name)
+                .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+                .Take(paginationParameters.PageSize)
+                .ToList();
+
+            var dtos = _mapper.Map<IEnumerable<SpecialtyLinkToHospitalDto>>(pagedResults);
+
+            return new PagedResponseDto<SpecialtyLinkToHospitalDto>(
+                dtos,
+                totalCount,
+                paginationParameters.PageNumber,
+                paginationParameters.PageSize
+            );
+        }
+
 
         /// Retrieves active global specialties that are not yet linked to a specific hospital.
         /// The description field is explicitly omitted in the response DTO.
@@ -338,6 +384,8 @@ namespace Elagy.BL.Services
                     Id = s.Id,
                     Name = s.Name,
                     Description = null // Explicitly set to null as per the service method's comment
+                   ,status=s.IsActive
+                    
                 }).ToList();
 
                 _logger.LogInformation($"Successfully retrieved {specialtyDtos.Count} available active global specialties to link for Hospital ID: {hospitalId}.");

@@ -30,6 +30,13 @@ namespace Elagy.DAL.Repositories
 
             return await query.FirstOrDefaultAsync();
         }
+        public async Task<IEnumerable<HospitalSpecialty>> GetByHospitalIdAsync(string hospitalId)
+        {
+            return await _context.HospitalSpecialties
+                .Include(hs => hs.Specialty)
+                .Where(hs => hs.HospitalAssetId == hospitalId)
+                .ToListAsync();
+        }
 
         public async Task<HospitalSpecialty?> GetByIdWithDetailsAsync(int hospitalspecialtyid)
         {

@@ -1,6 +1,7 @@
 ﻿using Elagy.Core.DTOs.Doctor;
 using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Specialty;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,10 +21,10 @@ namespace Elagy.Core.IServices
         Task<PagedResponseDto<DoctorProfileDto>> GetAllDoctorsPerHospitalSpecialty(int hospitalSpecialtyId, PaginationParameters paginationParameters);
 
         // hospital id is token from [jwt token]
-        Task<DoctorProfileDto> CreateDoctorAsync(DoctorCreateDto createDto, string hospitalId);
+        Task<DoctorProfileDto> CreateDoctorAsync(DoctorCreateDto createDto, string hospitalId, IFormFile? licenseDocumentFile);
 
         // MODIFIED: Added doctorId as a separate parameter, hospitalId from token
-        Task<DoctorProfileDto> UpdateDoctorAsync(string doctorId, DoctorUpdateDto updateDto, string hospitalId);
+        Task<DoctorProfileDto> UpdateDoctorAsync(string doctorId, DoctorUpdateDto updateDto, string hospitalId, IFormFile? newLicenseDocumentFile = null);
 
         // hospital id is token from [jwt token], doctor id from params
         Task<DoctorProfileDto> DeleteDoctorAsync(string doctorId, string hospitalId);

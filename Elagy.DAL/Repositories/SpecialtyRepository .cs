@@ -17,10 +17,10 @@ namespace Elagy.DAL.Repositories
 
         private IQueryable<Specialty> GetSpecialtiesWithAllDetails()
         {
-            return _dbSet 
+            return _dbSet
                 .Include(s => s.HospitalSpecialties)
                     .ThenInclude(hs => hs.HospitalAsset);
-    
+
         }
 
 

@@ -31,5 +31,10 @@ namespace Elagy.Core.IServices.ISpecialtyService
         // do not return description
         Task<IEnumerable<SpecialtyResponseDto>> GetAvailableGlobalSpecialtiesToLinkAsync(string hospitalId);
 
+
+        Task<PagedResponseDto<SpecialtyLinkToHospitalDto>> GetHospitalSpecialtiesWithLinks(
+    string hospitalId,
+    PaginationParameters paginationParameters);
+
     }
 }

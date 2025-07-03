@@ -111,7 +111,7 @@ namespace Elagy.APIs.Controllers
 
 
                 };
-                var result = await _specialtyService.GetAllSpecialtiesForHospital(hospitalId, paginationParameters);
+                var result = await _specialtyService.GetHospitalSpecialtiesWithLinks(hospitalId, paginationParameters);
                 return Ok(result);
             }
             catch (Exception ex)

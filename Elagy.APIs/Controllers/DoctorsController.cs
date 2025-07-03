@@ -6,11 +6,6 @@ using Elagy.Core.IServices; // For IDoctorService
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http; // For StatusCodes
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Elagy.APIs.Controllers
 {
@@ -88,7 +83,7 @@ namespace Elagy.APIs.Controllers
         // POST: api/Doctors
         [HttpPost()]
         [Authorize(Roles = "HospitalServiceProvider")]
-        public async Task<IActionResult> CreateDoctor([FromBody] DoctorCreateDto createDto)
+        public async Task<IActionResult> CreateDoctor([FromForm] DoctorCreateDto createDto,IFormFile document)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -97,7 +92,7 @@ namespace Elagy.APIs.Controllers
 
             try
             {
-                var result = await _doctorService.CreateDoctorAsync(createDto, hospitalId);
+                var result = await _doctorService.CreateDoctorAsync(createDto, hospitalId, document);
      
                 return CreatedAtAction(nameof(GetDoctorById), new { doctorId = result.Id }, result);
             }
@@ -139,7 +134,7 @@ namespace Elagy.APIs.Controllers
 
         [HttpPut("{doctorId}")]
         [Authorize(Roles = "HospitalServiceProvider")]
-        public async Task<IActionResult> UpdateDoctor(string doctorId, [FromBody] DoctorUpdateDto updateDto)
+        public async Task<IActionResult> UpdateDoctor(string doctorId, [FromForm] DoctorUpdateDto updateDto,IFormFile document)
         {
             // Validate route ID matches DTO ID (if DTO had ID) or simply ensures route ID is valid
             if (string.IsNullOrWhiteSpace(doctorId)) return BadRequest("Doctor ID cannot be empty.");
@@ -151,7 +146,7 @@ namespace Elagy.APIs.Controllers
             try
             {
                 // Call service method with doctorId from route, DTO from body, and hospitalId from token
-                var result = await _doctorService.UpdateDoctorAsync(doctorId, updateDto, hospitalId);
+                var result = await _doctorService.UpdateDoctorAsync(doctorId, updateDto, hospitalId, document);
                 return Ok(result);
             }
             catch (KeyNotFoundException ex) // Doctor not found
@@ -188,8 +183,7 @@ namespace Elagy.APIs.Controllers
             if (hospitalId == null) return Unauthorized("Hospital ID could not be determined from your token.");
 
             try
-            {
-                
+            { 
                 var result = await _doctorService.DeleteDoctorAsync(doctorId, hospitalId);
                 return Ok(result); 
             }
