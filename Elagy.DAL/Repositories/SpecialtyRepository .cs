@@ -15,58 +15,52 @@ namespace Elagy.DAL.Repositories
      
         public SpecialtyRepository(ApplicationDbContext _context) : base(_context) { }
 
-        public async Task<Specialty> GetSpecialtyIdAsync(int id)
+        private IQueryable<Specialty> GetSpecialtiesWithAllDetails()
         {
-            return await _context.Specialties
-                .Where(s => s.Id == id)
+            return _dbSet
                 .Include(s => s.HospitalSpecialties)
-                .ThenInclude(hs => hs.HospitalAsset)
-                .FirstOrDefaultAsync();
+                    .ThenInclude(hs => hs.HospitalAsset);
+
+        }
+
+
+
+        public async Task<Specialty?> GetSpecialtyIdAsync(int id)
+        {
+           return await GetSpecialtiesWithAllDetails()
+                .FirstOrDefaultAsync(s => s.Id == id ); 
         }
         // for admin and website (true in case of website)
-        public async Task<IEnumerable<Specialty>> GetSpecialtiesByHospitalIdAsync(string hospitalId, bool isActive = true)
+        public async Task<IEnumerable<Specialty>> GetSpecialtiesByHospitalIdAsync(string hospitalId)
         {
-            var query = _context.Specialties
-                .Include(s => s.HospitalSpecialties)
-                .Where(s => s.HospitalSpecialties.Any(hs => hs.HospitalAssetId == hospitalId));
-
-            if (isActive)
-            {
-                query = query.Where(s => s.IsActive);
-            }
+            var query = GetSpecialtiesWithAllDetails()
+                     .Where(s => s.HospitalSpecialties.Any(hs => hs.HospitalAssetId == hospitalId));
 
             return await query.ToListAsync();
+
+
+
+
         }
         // for super admin dashboard
-        public async Task<IEnumerable<Specialty>> GetAllSpecialtiesAsync(bool isActive = true)
+        public async Task<IEnumerable<Specialty>> GetAllSpecialtiesAsync()
         {
-            var query = _context.Specialties.AsQueryable();
-
-            if (isActive)
-            {
-                query = query.Where(s => s.IsActive);
-            }
-
-            return await query.ToListAsync();
+            return await GetSpecialtiesWithAllDetails()
+                .OrderBy(s => s.Name) // Added default order for consistency
+                .ToListAsync();
         }
         //for hospital admin to link specilities
         public async Task<IEnumerable<Specialty>> GetUnlinkedSpecialtiesForHospitalAsync(string hospitalId)
         {
             var linkedSpecialtyIds = await _context.HospitalSpecialties
-                    .Where(hs => hs.HospitalAssetId == hospitalId)
-                    .Select(hs => hs.SpecialtyId)
-                    .ToListAsync();
+              .Where(hs => hs.HospitalAssetId == hospitalId)
+              .Select(hs => hs.SpecialtyId)
+              .ToListAsync();
 
-            var query = _context.Specialties
-                .Where(s => !linkedSpecialtyIds.Contains(s.Id));
-
-           
-            query = query.Where(s => s.IsActive);
-
-            return await query.ToListAsync();
+            return await GetSpecialtiesWithAllDetails()
+                .Where(s => !linkedSpecialtyIds.Contains(s.Id) && s.IsActive)
+                .ToListAsync();
         }
-
- 
     
     }
 }

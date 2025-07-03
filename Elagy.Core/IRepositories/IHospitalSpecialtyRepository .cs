@@ -16,6 +16,7 @@ namespace Elagy.Core.IRepositories
     int specialtyId,
     Func<IQueryable<HospitalSpecialty>, IQueryable<HospitalSpecialty>>? includes = null);
         Task<bool> UpdateHospitalSpecialtyLinkStatusAsync(string hospitalId, int specialtyId, bool newIsActiveStatus);
+        Task<IEnumerable<HospitalSpecialty>> GetByHospitalIdAsync(string hospitalId);
 
     }
 }

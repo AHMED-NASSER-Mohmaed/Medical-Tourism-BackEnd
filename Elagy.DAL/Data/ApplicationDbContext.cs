@@ -31,6 +31,13 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
     public DbSet<RoomImage> RoomImages {get; set;}
 
 
+    public DbSet<Car> Cars { get; set; }
+    public DbSet<CarImage> CarImages { get; set; }
+    public DbSet<Driver> Drivers { get; set; }
+    public DbSet<CarDriver> CarDrivers { get; set; }
+    public DbSet<CarRentalAssetImage> CarRentalAssetImages { get; set; }
+
+
 
 
     // public DbSet<ImageKitTempFile> ImageKitTempFiles { get; set; } // If you still have this entity
@@ -56,6 +63,13 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
         builder.ApplyConfiguration(new ScheduleConfiguration());
         builder.ApplyConfiguration(new RoomConfiguration());
         builder.ApplyConfiguration(new RoomImageConfiguration());
+        builder.ApplyConfiguration(new CarConfiguration());
+        builder.ApplyConfiguration(new CarImageConfiguration());
+        builder.ApplyConfiguration(new CarDriverConfiguration());
+        builder.ApplyConfiguration(new RoomImageConfiguration());
+        builder.ApplyConfiguration(new DriverConfiguration());
+
+
 
         // builder.ApplyConfiguration(new ImageKitTempFileConfiguration()); // If you still have this entity
     }

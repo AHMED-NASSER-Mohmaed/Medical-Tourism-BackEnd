@@ -25,6 +25,7 @@ namespace Elagy.Core.Entities
         public ICollection<RoomImage>? RoomImages { get; set; } 
         public string HotelAssetId { get; set; }
         public HotelAsset HotelAsset { get; set; } 
+        public ICollection<HotelSchedule>? HotelSchedules { get; set; }
 
     }
 }

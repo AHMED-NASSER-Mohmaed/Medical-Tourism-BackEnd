@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace Elagy.Core.Enums
 {
-    public enum ClineAppointmentType
+    public enum DriverStatus 
     {
-        Online,offline
+        Available = 0,       
+        OnDrive = 1,                
+        Unavailable = 2
     }
 }

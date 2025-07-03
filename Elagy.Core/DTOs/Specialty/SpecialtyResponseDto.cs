@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Elagy.Core.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,5 +12,6 @@ namespace Elagy.Core.DTOs.Specialty
         public int Id { get; set; }
         public string Name { get; set; }
         public string? Description { get; set; }
+        public bool status { get; set; }
     }
 }

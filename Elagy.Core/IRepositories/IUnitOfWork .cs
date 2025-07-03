@@ -29,7 +29,9 @@ namespace Elagy.Core.IRepositories
         IScheduleRepository Schedules { get; }
         IRoomRepository Rooms { get; }
 
-
+        ICarRepository Cars { get; }
+        IDriverRepository Drivers { get; }
+        ICarDriverRepository CarDrivers { get; }
         ///////////////////////////
         Task<int> CompleteAsync();
     }

@@ -11,10 +11,10 @@ namespace Elagy.Core.IRepositories
 {
     public interface ISpecialtyRepository : IGenericRepository<Specialty>
     {
-    
-       Task<Specialty> GetSpecialtyIdAsync(int id);
-        Task<IEnumerable<Specialty>> GetSpecialtiesByHospitalIdAsync(string hospitalId, bool isActive = true);
-        Task<IEnumerable<Specialty>> GetAllSpecialtiesAsync(bool isActive = true);
+
+        Task<Specialty?> GetSpecialtyIdAsync(int id);
+        Task<IEnumerable<Specialty>> GetSpecialtiesByHospitalIdAsync(string hospitalId);
+        Task<IEnumerable<Specialty>> GetAllSpecialtiesAsync();
         Task<IEnumerable<Specialty>> GetUnlinkedSpecialtiesForHospitalAsync(string hospitalId);
       
 

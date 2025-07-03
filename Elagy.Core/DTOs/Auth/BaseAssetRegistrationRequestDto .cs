@@ -32,9 +32,9 @@ namespace Elagy.Core.DTOs.Auth
         public string VerificationNotes { get; set; } 
 
         [Required]
-        TimeOnly OpeningTime { get; set; }
+        public TimeOnly OpeningTime { get; set; }
         [Required]
-        TimeOnly ClosingTime { get; set; }
+        public TimeOnly ClosingTime { get; set; }
 
 
         [Required]

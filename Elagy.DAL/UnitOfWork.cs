@@ -39,6 +39,12 @@ namespace Elagy.DAL
 
         public IRoomRepository Rooms { get; private set; }
 
+        public ICarRepository Cars  { get; private set; }
+
+        public IDriverRepository Drivers { get; private set; }
+
+        public ICarDriverRepository CarDrivers { get; private set; }
+
         public UnitOfWork(ApplicationDbContext context)
         {
             //IRepo injection
@@ -62,6 +68,10 @@ namespace Elagy.DAL
             Hospitals = new HospitalRepository(_context);
             Schedules = new ScheduleRepository(_context);
             Rooms = new RoomRepository(_context);
+            Cars = new CarRepository(_context);
+            Drivers =new DriverRepository(_context);
+            CarDrivers = new CarDriverRepository(_context);
+
         }
 
         public async Task<int> CompleteAsync()

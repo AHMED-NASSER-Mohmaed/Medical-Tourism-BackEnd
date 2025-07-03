@@ -3,9 +3,11 @@ using AutoMapper;
 using Elagy.Core.DTOs.Doctor;
 using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.Entities; 
-using Elagy.Core.Enums; 
+using Elagy.Core.Enums;
+using Elagy.Core.Helpers;
 using Elagy.Core.IRepositories; 
 using Elagy.Core.IServices;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore; 
@@ -17,15 +19,18 @@ namespace Elagy.BL.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IFileStorageService _fileStorageService;
         private readonly ILogger<DoctorService> _logger;
         private readonly UserManager<User> _userManager;
 
-        public DoctorService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<DoctorService> logger, UserManager<User> userManager)
+        public DoctorService(IFileStorageService fileStorageService, IUnitOfWork unitOfWork, IMapper mapper, ILogger<DoctorService> logger, UserManager<User> userManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _userManager = userManager;
+            _fileStorageService = fileStorageService;
+
         }
 
         /// Retrieves a paginated list of doctors for the Hospital Admin Dashboard,
@@ -105,7 +110,7 @@ namespace Elagy.BL.Services
 
         /// Creates a new doctor account, assigning them to a specific hospital specialty.
       
-        public async Task<DoctorProfileDto> CreateDoctorAsync(DoctorCreateDto createDto, string hospitalId)
+        public async Task<DoctorProfileDto> CreateDoctorAsync(DoctorCreateDto createDto, string hospitalId, IFormFile? licenseDocumentFile )
         {
             try
             {
@@ -133,8 +138,19 @@ namespace Elagy.BL.Services
                 //2.Validate Governorate and Country IDs for the doctor's address.
 
                 //Assuming _unitOfWork.Governorates.GetByIdAsync exists.
+                string licenseUrl = null;
+                string licenseId = null;
+                if (licenseDocumentFile != null)
+                {
+                    var uploadResult = await _fileStorageService.UploadSingleFileAsync(licenseDocumentFile, $"doctors/licenses/{createDto.Email.Replace("@", "_").Replace(".", "_")}");
+                    if (uploadResult.Success) { licenseUrl = uploadResult.Url; licenseId = uploadResult.Id; }
+                    else { throw new InvalidOperationException($"Failed to upload doctor license document: {uploadResult.Message}"); }
+                }
 
-               var governorate = await _unitOfWork.Governates.GetByIdAsync( createDto.GovernorateId);
+                else { throw new ArgumentException("Doctor license document is required."); } // License must be provided
+
+
+                var governorate = await _unitOfWork.Governates.GetByIdAsync( createDto.GovernorateId);
                 if (governorate == null)
                     {
                         _logger.LogWarning($"Doctor creation failed: Governorate with ID {createDto.GovernorateId} not found.");
@@ -194,7 +210,7 @@ namespace Elagy.BL.Services
         }
 
 
-        public async Task<DoctorProfileDto> UpdateDoctorAsync(string doctorId, DoctorUpdateDto updateDto, string hospitalId)
+        public async Task<DoctorProfileDto> UpdateDoctorAsync(string doctorId, DoctorUpdateDto updateDto, string hospitalId, IFormFile? newLicenseDocumentFile = null)
         {
             try
             {
@@ -261,6 +277,19 @@ namespace Elagy.BL.Services
                     doctor.Email = updateDto.Email;
                     doctor.UserName = updateDto.Email; // Keep UserName consistent with Email.
                 }
+
+                if (newLicenseDocumentFile != null)
+                {
+                    if (!string.IsNullOrEmpty(doctor.MedicalLicenseNumberId)) // Delete old file from storage if exists
+                    {
+                        var deleteResult = await _fileStorageService.DeleteFileAsync(doctor.MedicalLicenseNumberId);
+                        if (!deleteResult) _logger.LogWarning($"Failed to delete old license document {doctor.MedicalLicenseNumberId} for doctor {doctorId}.");
+                    }
+                    var uploadResult = await _fileStorageService.UploadSingleFileAsync(newLicenseDocumentFile, $"doctors/licenses/{doctor.Email.Replace("@", "_").Replace(".", "_")}");
+                    if (uploadResult.Success) { doctor.MedicalLicenseNumberURL = uploadResult.Url; doctor.MedicalLicenseNumberId = uploadResult.Id; }
+                    else { throw new InvalidOperationException($"Failed to upload new license document: {uploadResult.Message}"); }
+                }
+               
                 doctor.PhoneNumber = updateDto.PhoneNumber; // Update phone number.
                 doctor.Status = updateDto.Status; // Update doctor's overall status (e.g., Active, Deactivated).
 
@@ -352,7 +381,7 @@ namespace Elagy.BL.Services
             {
                 // 1. Get doctors for the specific HospitalSpecialty.
 
-                var doctors = await _unitOfWork.Doctors.GetDoctorsByHospitalSpecialtyIdAsync(hospitalSpecialtyId, isActive: true);
+                var doctors = await _unitOfWork.Doctors.GetDoctorsByHospitalSpecialtyIdAsync(hospitalSpecialtyId);
 
                 // 2. Apply search term filter in service (if needed for website search on displayed doctor fields)
                 var query = doctors.AsQueryable();

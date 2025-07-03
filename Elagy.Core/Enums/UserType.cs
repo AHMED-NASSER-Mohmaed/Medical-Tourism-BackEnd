@@ -5,7 +5,8 @@
         Patient = 0,
         ServiceProvider = 1,
         SuperAdmin = 2,
-        Doctor=3
+        Doctor=3,
+        Driver=4
 
     }
 

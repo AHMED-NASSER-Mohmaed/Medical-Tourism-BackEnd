@@ -93,6 +93,168 @@ namespace Elagy.DAL.Migrations
                     b.UseTptMappingStrategy();
                 });
 
+            modelBuilder.Entity("Elagy.Core.Entities.Car", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Capacity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CarRentalAssetId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("FactoryMake")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("FuelType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ModelName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("ModelYear")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PricePerDay")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Transmission")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CarRentalAssetId");
+
+                    b.ToTable("Cars");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.CarDriver", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("AssignmentDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("CarId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CarRentalAssetId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("DriverId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsAssignedCurrent")
+                        .HasColumnType("bit");
+
+                    b.Property<DateOnly?>("ReleaseDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CarRentalAssetId");
+
+                    b.HasIndex("DriverId");
+
+                    b.HasIndex("CarId", "DriverId")
+                        .IsUnique();
+
+                    b.ToTable("CarDrivers");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.CarImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CarId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ImageId")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("ImageURL")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CarId");
+
+                    b.ToTable("CarImages");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.CarRentalAssetImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CarRentalAssetId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ImageId")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("ImageURL")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CarRentalAssetId");
+
+                    b.ToTable("CarRentalAssetImages");
+                });
+
             modelBuilder.Entity("Elagy.Core.Entities.Country", b =>
                 {
                     b.Property<int>("Id")
@@ -225,6 +387,36 @@ namespace Elagy.DAL.Migrations
                         .IsUnique();
 
                     b.ToTable("HospitalSpecialties", (string)null);
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.HotelSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("HotelSchedule");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.Room", b =>
@@ -732,7 +924,39 @@ namespace Elagy.DAL.Migrations
 
                     b.HasIndex("HospitalSpecialtyId");
 
+                    b.ToTable("AspNetUsers", t =>
+                        {
+                            t.Property("YearsOfExperience")
+                                .HasColumnName("Doctor_YearsOfExperience");
+                        });
+
                     b.HasDiscriminator().HasValue(3);
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.Driver", b =>
+                {
+                    b.HasBaseType("Elagy.Core.Entities.User");
+
+                    b.Property<string>("CarRentalAssetId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("DriveLicenseLicenseNumberId")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("DriveLicenseLicenseNumberURL")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("YearsOfExperience")
+                        .HasColumnType("int");
+
+                    b.HasIndex("CarRentalAssetId");
+
+                    b.HasDiscriminator().HasValue(4);
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.Patient", b =>
@@ -801,6 +1025,66 @@ namespace Elagy.DAL.Migrations
                     b.Navigation("ServiceProvider");
                 });
 
+            modelBuilder.Entity("Elagy.Core.Entities.Car", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.CarRentalAsset", "CarRentalAsset")
+                        .WithMany("Cars")
+                        .HasForeignKey("CarRentalAssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CarRentalAsset");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.CarDriver", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.Car", "Car")
+                        .WithMany("CarDrivers")
+                        .HasForeignKey("CarId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Elagy.Core.Entities.CarRentalAsset", "CarRentalAsset")
+                        .WithMany()
+                        .HasForeignKey("CarRentalAssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Elagy.Core.Entities.Driver", "Driver")
+                        .WithMany("CarDrivers")
+                        .HasForeignKey("DriverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Car");
+
+                    b.Navigation("CarRentalAsset");
+
+                    b.Navigation("Driver");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.CarImage", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.Car", "Car")
+                        .WithMany("CarImages")
+                        .HasForeignKey("CarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Car");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.CarRentalAssetImage", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.CarRentalAsset", "CarRentalAsset")
+                        .WithMany("CarRentalAssetImages")
+                        .HasForeignKey("CarRentalAssetId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CarRentalAsset");
+                });
+
             modelBuilder.Entity("Elagy.Core.Entities.Governorate", b =>
                 {
                     b.HasOne("Elagy.Core.Entities.Country", "Country")
@@ -829,6 +1113,17 @@ namespace Elagy.DAL.Migrations
                     b.Navigation("HospitalAsset");
 
                     b.Navigation("Specialty");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.HotelSchedule", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.Room", "Room")
+                        .WithMany("HotelSchedules")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.Room", b =>
@@ -979,6 +1274,24 @@ namespace Elagy.DAL.Migrations
                     b.Navigation("HospitalSpecialty");
                 });
 
+            modelBuilder.Entity("Elagy.Core.Entities.Driver", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.CarRentalAsset", "CarRentalAsset")
+                        .WithMany("Drivers")
+                        .HasForeignKey("CarRentalAssetId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CarRentalAsset");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.Car", b =>
+                {
+                    b.Navigation("CarDrivers");
+
+                    b.Navigation("CarImages");
+                });
+
             modelBuilder.Entity("Elagy.Core.Entities.Country", b =>
                 {
                     b.Navigation("Governorates");
@@ -998,12 +1311,23 @@ namespace Elagy.DAL.Migrations
 
             modelBuilder.Entity("Elagy.Core.Entities.Room", b =>
                 {
+                    b.Navigation("HotelSchedules");
+
                     b.Navigation("RoomImages");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.Specialty", b =>
                 {
                     b.Navigation("HospitalSpecialties");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.CarRentalAsset", b =>
+                {
+                    b.Navigation("CarRentalAssetImages");
+
+                    b.Navigation("Cars");
+
+                    b.Navigation("Drivers");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.HospitalAsset", b =>
@@ -1019,6 +1343,11 @@ namespace Elagy.DAL.Migrations
             modelBuilder.Entity("Elagy.Core.Entities.Doctor", b =>
                 {
                     b.Navigation("Schedules");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.Driver", b =>
+                {
+                    b.Navigation("CarDrivers");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.ServiceProvider", b =>

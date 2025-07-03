@@ -11,17 +11,13 @@ namespace Elagy.Core.Entities
     {
         public int Id { get; set; }
 
-        public AppointmentStatus Status { get; set; } = AppointmentStatus.Booked;
-
         //if price changed at the clinic
         public decimal  price { get; set; }
-
-        public Patient Patient { get; set; }
-
 
         //------ Hospital ---- Hotle ----- CarRental
         public AppointmentType Type { get; set; }
 
+        public AppointmentStatus Status { get; set; } = AppointmentStatus.Pending;
 
     }
 }
