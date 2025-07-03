@@ -10,9 +10,7 @@ namespace Elagy.Core.Entities
 {
     public  class Car
     {
- public int Id { get; set; } // Primary Key for Car
-
-        // Basic Info
+        public int Id { get; set; } // Primary Key for Car
         [Required] public string FactoryMake { get; set; } // e.g., "Toyota"
         [Required] public string ModelName { get; set; } // e.g., "Camry"
         [Required] public int ModelYear { get; set; } // e.g., 2022

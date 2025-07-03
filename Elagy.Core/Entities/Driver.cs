@@ -13,10 +13,9 @@ namespace Elagy.Core.Entities
         public string DriveLicenseLicenseNumberURL { get; set; }
         public string DriveLicenseLicenseNumberId { get; set; }
         [Required] public int YearsOfExperience { get; set; }
-
-        public string CarRentalAssetId { get; set; } 
+        public string CarRentalAssetId { get; set; }
+        public DriverStatus DriverStatus { get; set; } 
         public CarRentalAsset CarRentalAsset { get; set; } 
-
         public ICollection<CarDriver>? CarDrivers { get; set; }
     }
 }

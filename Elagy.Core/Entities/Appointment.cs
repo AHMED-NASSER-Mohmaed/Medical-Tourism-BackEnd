@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Elagy.Core.Entities
 {
-    public abstract class Appointment
+    public  class Appointment
     {
         public int Id { get; set; }
 

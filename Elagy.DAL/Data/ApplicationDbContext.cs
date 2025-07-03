@@ -51,7 +51,6 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
         builder.ApplyConfiguration(new CarRentalAssetConfiguration());
         builder.ApplyConfiguration(new HospitalAssetConfiguration());
         builder.ApplyConfiguration(new HotelAssetConfiguration());
-
         builder.ApplyConfiguration(new UserConfiguration());
         builder.ApplyConfiguration(new PatientConfiguration());
         builder.ApplyConfiguration(new ServiceProviderConfiguration());
