@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace Elagy.Core.Enums
 {
-    public enum AppointmentStatus
+    public enum TransactionType
     {
-        Pending,
-        Booked,
-        Cancelled,
-        Completed 
+        Payment,
+        Refund,
+        //Fee
     }
 }

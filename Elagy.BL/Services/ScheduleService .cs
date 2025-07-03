@@ -5,8 +5,7 @@ using Elagy.Core.DTOs.Schedule;
 using Elagy.Core.Entities;
 using Elagy.Core.Enums;
 using Elagy.Core.IRepositories;
-
-using Elagy.Core.IServices.ISpecialtyService;
+using Elagy.Core.IServices;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

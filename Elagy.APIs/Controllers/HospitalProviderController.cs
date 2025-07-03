@@ -3,8 +3,7 @@ using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Schedule;
 using Elagy.Core.DTOs.User;
 using Elagy.Core.IServices;
-using Elagy.Core.IServices.ISpecialtyService;
-using Microsoft.AspNetCore.Authorization;  
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 

@@ -9,23 +9,14 @@ namespace Elagy.Core.Entities
 {
     public class CarRentalAppointment:Appointment
     {
-        DateTime StartingDateTime { get; set; }
-        DateTime EndingDateTime { get; set; }
+        public DateTime StartingDateTime { get; set; }
+        public DateTime EndingDateTime { get; set; }
 
         //pickup location
         public float Latitude { get; set; }
         public float Longitude { get; set; }
         public string LocationDescription { get; set; } // Detailed description of the pickup location
-
-
-        //other attributes for hotel appointment : i done know about the CarRental bussiness
-
-
         public fuel_policy FuelPolicy { get; set; } // Enum for fuel policy
-
-
-
-
         //forgien key
         int CarRentalScheduleId { get; set; }
         // Navigation property
