@@ -26,7 +26,7 @@ namespace Elagy.Core.IServices.ISpecialtyService
         //<summary>
         //for supper admin dashboard and external site 
         //<summary>
-        Task<PagedResponseDto<SpecialtyResponseDto>> GetAllSpecialtiesForHospital(string hospitalId);
+        Task<PagedResponseDto<SpecialtyResponseDto>> GetAllSpecialtiesForHospital(string hospitalId, PaginationParameters paginationParameters);
         Task<SpecialtyLinkToHospitalDto?> ChangeSpecificHospitalSpecialtyStatusAsync(string hospitalId, int specialtyId, Status newStatus);
         // do not return description
         Task<IEnumerable<SpecialtyResponseDto>> GetAvailableGlobalSpecialtiesToLinkAsync(string hospitalId);

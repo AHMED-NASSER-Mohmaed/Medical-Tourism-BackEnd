@@ -144,6 +144,7 @@ namespace Elagy.BL.Services
                         _logger.LogError($"Some or all images failed to upload for new room '{createDto.RoomNumber}'. Details: {uploadResult.Message}");
                         room.RoomImages = new List<RoomImage>();
                     }
+
                 }
                 else
                 {
@@ -382,8 +383,9 @@ namespace Elagy.BL.Services
                             {
                                 ImageId = uploadedFile.Id,
                                 ImageURL = uploadedFile.Url,
+                                RoomId = room.Id
 
-  
+
                             }).ToList();
                         _logger.LogInformation($"Successfully uploaded {room.RoomImages.Count} new images for room {room.RoomNumber}.");
                     }

@@ -7,6 +7,7 @@ using Elagy.Core.IRepositories;
 using Elagy.Core.IServices.ISpecialtyService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 
 namespace Elagy.BL.Services
@@ -29,10 +30,13 @@ namespace Elagy.BL.Services
         {
             try
             {
+                // Retrieve all specialties from the repository (materialized here as IEnumerable)
+                var allSpecialties = await _unitOfWork.Specialties.GetAllSpecialtiesAsync(); // Returns IEnumerable
 
-                IQueryable<Specialty> query = _unitOfWork.Specialties.AsQueryable();
+                // Convert to IQueryable for convenient filtering and pagination in memory
+                IQueryable<Specialty> query = allSpecialties.AsQueryable();
 
-                // 1. Apply SearchTerm filter (case-insensitive)
+                // Apply SearchTerm filter (case-insensitive)
                 if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
                     string searchTermLower = paginationParameters.SearchTerm.Trim().ToLower();
@@ -42,51 +46,35 @@ namespace Elagy.BL.Services
                     );
                 }
 
-                // 2. Apply UserStatus filter (maps to Specialty.IsActive)
-                if (paginationParameters.UserStatus.HasValue)
+                // Apply UserStatus filter (maps to Specialty.IsActive)
+                if (paginationParameters.FilterIsActive.HasValue)
                 {
-                    bool targetIsActive = (paginationParameters.UserStatus.Value == Status.Active);
-                    query = query.Where(s => s.IsActive == targetIsActive);
+                 
+                    query = query.Where(s => s.IsActive ==paginationParameters.FilterIsActive.Value);
                 }
 
+                // Apply SpecialtyId filter (if provided)
                 if (paginationParameters.SpecialtyId.HasValue)
                 {
-                   
-                    query = query.Where(s => s.Id==paginationParameters.SpecialtyId.Value);
+                    query = query.Where(s => s.Id == paginationParameters.SpecialtyId.Value);
                 }
-                // If UserStatus is null, no IsActive filter is applied, returning both active and inactive specialties.
 
-                // 3. Get total count AFTER applying filters but BEFORE pagination
-                var totalCount = await query.CountAsync();
+                // Get total count AFTER applying filters (in-memory Count())
+                var totalCount = query.Count();
 
-                // 4. Apply Pagination (Skip and Take)
-                var specialties = await query
-                    .OrderBy(s => s.Name) // Add a default sorting order for consistent pagination
+                // Apply Pagination (Skip and Take) (in-memory)
+                var pagedSpecialties = query
+                    .OrderBy(s => s.Name)
                     .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
                     .Take(paginationParameters.PageSize)
-                    .ToListAsync();
+                    .ToList(); // Materialize the paginated set
 
-                // 5. Map entities to DTOs
-                var specialtyDtos = _mapper.Map<IEnumerable<SpecialtyResponseDto>>(specialties);
-
-                // 6. Create and return PagedResponseDto
-                var pagedResponse = new PagedResponseDto<SpecialtyResponseDto>(
-                    specialtyDtos,
-                    totalCount,
-                    paginationParameters.PageNumber,
-                    paginationParameters.PageSize
-                );
-
-                _logger.LogInformation($"Successfully retrieved paginated specialties for Super Admin Dashboard. Page: {paginationParameters.PageNumber}, Size: {paginationParameters.PageSize}, Total: {totalCount}");
-                return pagedResponse;
+                var specialtyDtos = _mapper.Map<IEnumerable<SpecialtyResponseDto>>(pagedSpecialties);
+                return new PagedResponseDto<SpecialtyResponseDto>(specialtyDtos, totalCount, paginationParameters.PageNumber, paginationParameters.PageSize);
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving paginated specialties for Super Admin Dashboard.");
-                // Return an empty paginated response on error
-                return new PagedResponseDto<SpecialtyResponseDto>(Enumerable.Empty<SpecialtyResponseDto>(), 0, paginationParameters.PageNumber, paginationParameters.PageSize);
-            }
+            catch (Exception ex) { _logger.LogError(ex, "Error retrieving paginated specialties for Super Admin Dashboard."); throw; }
         }
+        
 
         public async Task<SpecialtyResponseDto> CreateSpecialty(SpecialtyCreateDto createDto)
         {
@@ -286,32 +274,47 @@ namespace Elagy.BL.Services
      
         /// Retrieves all active specialties linked to a specific hospital.
        
-        public async Task<PagedResponseDto<SpecialtyResponseDto>> GetAllSpecialtiesForHospital(string hospitalId)
+        public async Task<PagedResponseDto<SpecialtyResponseDto>> GetAllSpecialtiesForHospital(string hospitalId, PaginationParameters paginationParameters)
         {
             try
             {
-                _logger.LogInformation($"Retrieving specialties for Hospital ID: {hospitalId}.");
+                // Retrieve all specialties linked to this hospital (materialized here as IEnumerable)
+                var allSpecialtiesForHospital = await _unitOfWork.Specialties.GetSpecialtiesByHospitalIdAsync(hospitalId); // Returns IEnumerable
 
-                // Calls repository method GetSpecialtiesByHospitalIdAsync(isActive: true),
-                // which means it returns only active specialties linked to the hospital.
-                var specialties = await _unitOfWork.Specialties.GetSpecialtiesByHospitalIdAsync(hospitalId, isActive: true);
+                // Convert to IQueryable for convenient filtering and pagination in memory
+                IQueryable<Specialty> query = allSpecialtiesForHospital.AsQueryable();
 
-                var totalCount = specialties.Count();
-                var pagedResponse = new PagedResponseDto<SpecialtyResponseDto>(
-                    _mapper.Map<IEnumerable<SpecialtyResponseDto>>(specialties),
-                    totalCount,
-                    1,
-                    totalCount > 0 ? totalCount : 1
-                );
+                // Apply SpecialtyId filter
+                if (paginationParameters.SpecialtyId.HasValue)
+                {
+                    query = query.Where(s => s.Id == paginationParameters.SpecialtyId.Value);
+                }
 
-                _logger.LogInformation($"Successfully retrieved {totalCount} active specialties for Hospital ID: {hospitalId}.");
-                return pagedResponse;
+                // Apply SearchTerm filter
+                if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
+                {
+                    string term = paginationParameters.SearchTerm.Trim().ToLower();
+                    query = query.Where(s => s.Name.ToLower().Contains(term) || (s.Description != null && s.Description.ToLower().Contains(term)));
+                }
+
+                // Apply FilterIsActive (for the Specialty entity itself, not the link status)
+                if (paginationParameters.FilterIsActive.HasValue)
+                {
+                    query = query.Where(s => s.IsActive == paginationParameters.FilterIsActive.Value);
+                }
+
+                var totalCount = query.Count(); // In-memory Count()
+
+                var pagedSpecialties = query
+                    .OrderBy(s => s.Name)
+                    .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+                    .Take(paginationParameters.PageSize)
+                    .ToList(); // Materialize the paginated set
+
+                var specialtyDtos = _mapper.Map<IEnumerable<SpecialtyResponseDto>>(pagedSpecialties);
+                return new PagedResponseDto<SpecialtyResponseDto>(specialtyDtos, totalCount, paginationParameters.PageNumber, paginationParameters.PageSize);
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error retrieving specialties for Hospital ID: {hospitalId}.");
-                return new PagedResponseDto<SpecialtyResponseDto>(Enumerable.Empty<SpecialtyResponseDto>(), 0, 1, 10);
-            }
+            catch (Exception ex) { _logger.LogError(ex, $"Error retrieving specialties for Hospital ID: {hospitalId} with filters."); throw; }
         }
 
 
@@ -447,6 +450,10 @@ namespace Elagy.BL.Services
                 throw;
             }
         }
+
+    
+
+  
     }
  }
 

@@ -17,7 +17,9 @@ namespace Elagy.BL.Mapping
             CreateMap<Specialty, SpecialtyResponseDto>()
                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
-               .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description));
+               .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
+               .ForMember(dest => dest.status, opt => opt.MapFrom(src => src.IsActive));
+
 
             // Map SpecialtyCreateDto to Specialty entity
             CreateMap<SpecialtyCreateDto, Specialty>()

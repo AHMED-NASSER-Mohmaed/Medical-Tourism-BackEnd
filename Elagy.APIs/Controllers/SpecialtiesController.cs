@@ -7,7 +7,6 @@ using Elagy.Core.IServices.ISpecialtyService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-
 namespace Elagy.APIs.Controllers
 {
     [ApiController]
@@ -72,6 +71,7 @@ namespace Elagy.APIs.Controllers
             }
             try
             {
+
                 var result = await _specialtyService.GetAvailableGlobalSpecialtiesToLinkAsync(hospitalId);
                 return Ok(result);
             }
@@ -83,8 +83,17 @@ namespace Elagy.APIs.Controllers
 
         [HttpGet("HospitalAdmin")] 
         [Authorize(Roles = "HospitalServiceProvider")]
-        public async Task<IActionResult> GetMyHospitalSpecialties() 
+        public async Task<IActionResult> GetMyHospitalSpecialties([FromQuery] int PageNumber = 1,
+             [FromQuery] int PageSize = 10,
+             [FromQuery] string? SearchTerm = null,
+             [FromQuery] bool? ISActive = null,
+             [FromQuery] int? specialtyId = null) 
         {
+            if (PageNumber < 1 || PageSize < 1)
+            {
+                return BadRequest("PageNumber and PageSize must be greater than 0.");
+            }
+
             var hospitalId = GetCurrentUserId(); 
             if (hospitalId == null)
             {
@@ -92,7 +101,17 @@ namespace Elagy.APIs.Controllers
             }
             try
             {
-                var result = await _specialtyService.GetAllSpecialtiesForHospital(hospitalId);
+                var paginationParameters = new PaginationParameters
+                {
+                    PageNumber = PageNumber,
+                    PageSize = PageSize,
+                    SearchTerm = SearchTerm,
+                    FilterIsActive = ISActive,
+                    SpecialtyId = specialtyId
+
+
+                };
+                var result = await _specialtyService.GetAllSpecialtiesForHospital(hospitalId, paginationParameters);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -279,7 +298,7 @@ namespace Elagy.APIs.Controllers
             try
             {
            
-                var result = await _specialtyService.ChangeSpecialtyStatusAsync(id, true); // Call with true for active
+                var result = await _specialtyService.ChangeSpecialtyStatusAsync(id, true);
 
                 if (result == null)
                 {

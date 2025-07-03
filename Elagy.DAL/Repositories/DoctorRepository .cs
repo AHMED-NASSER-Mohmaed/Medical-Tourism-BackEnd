@@ -26,27 +26,18 @@ namespace Elagy.DAL.Repositories
                     .ThenInclude(hs => hs.Specialty);
         }
      
-        public async Task<IEnumerable<Doctor>> GetDoctorsByHospitalIdAsync(string hospitalId, bool isActive = true)
+        public async Task<IEnumerable<Doctor>> GetDoctorsByHospitalIdAsync(string hospitalId)
         {
             var query = GetDoctorsWithAllDetails()
                 .Where(d => d.HospitalSpecialty.HospitalAssetId == hospitalId);
-
-            if (isActive)
-            {
-                query = query.Where(d => d.Status == Status.Active);
-            }
             return await query.ToListAsync();
         }
 
-        public async Task<IEnumerable<Doctor>> GetDoctorsByHospitalSpecialtyIdAsync(int hospitalSpecialtyId, bool isActive = true)
+        public async Task<IEnumerable<Doctor>> GetDoctorsByHospitalSpecialtyIdAsync(int hospitalSpecialtyId)
         {
             var query = GetDoctorsWithAllDetails()
                 .Where(d => d.HospitalSpecialtyId == hospitalSpecialtyId);
 
-            if (isActive)
-            {
-                query = query.Where(d => d.Status == Status.Active);
-            }
             return await query.ToListAsync();
         }
 

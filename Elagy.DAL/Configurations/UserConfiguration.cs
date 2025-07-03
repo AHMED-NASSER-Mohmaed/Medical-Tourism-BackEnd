@@ -16,7 +16,8 @@ namespace Elagy.DAL.Configurations
                 .HasValue<Patient>(UserType.Patient)
                 .HasValue<ServiceProvider>(UserType.ServiceProvider)
                 .HasValue<SuperAdmin>(UserType.SuperAdmin)
-                .HasValue<Doctor>(UserType.Doctor);
+                .HasValue<Doctor>(UserType.Doctor)
+                .HasValue<Driver>(UserType.Driver);
 
 
 

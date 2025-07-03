@@ -37,7 +37,5 @@ namespace Elagy.Core.DTOs.Pagination
         public int? FilterGovernorateId { get; set; } //filter service providers by location for website 
 
 
-        // order acs , desc 
-
     }
 }

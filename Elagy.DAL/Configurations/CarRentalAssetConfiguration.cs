@@ -56,6 +56,31 @@ namespace Elagy.DAL.Configurations
             builder.Property(cra => cra.Transmission)
                    .HasConversion<string>()
                    .HasMaxLength(50);
+
+
+
+            // CarRentalAsset (One) to Car (Many)
+            builder.HasMany(cra => cra.Cars)
+                   .WithOne(c => c.CarRentalAsset)
+                   .HasForeignKey(c => c.CarRentalAssetId)
+                   .OnDelete(DeleteBehavior.Cascade); // If rental asset is deleted, its cars are deleted
+
+            // CarRentalAsset (One) to CarRentalAssetImage (Many)
+            builder.HasMany(cra => cra.CarRentalAssetImages)
+                   .WithOne(crai => crai.CarRentalAsset)
+                   .HasForeignKey(crai => crai.CarRentalAssetId)
+                   .OnDelete(DeleteBehavior.Cascade); // If rental asset is deleted, its images are deleted
+
+            // CarRentalAsset (One) to Driver (Many)
+            builder.HasMany(cra => cra.Drivers)
+                   .WithOne(d => d.CarRentalAsset)
+                   .HasForeignKey(d => d.CarRentalAssetId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(cra => cra.CarRentalAssetImages)
+                  .WithOne(cd => cd.CarRentalAsset)
+                  .HasForeignKey(cd => cd.CarRentalAssetId)
+                  .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

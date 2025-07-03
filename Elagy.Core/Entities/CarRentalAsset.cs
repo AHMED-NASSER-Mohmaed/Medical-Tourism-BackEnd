@@ -6,17 +6,16 @@ namespace Elagy.Core.Entities
 {
     public class CarRentalAsset : Asset
     {
-        // governates
-        //public ICollection<Governorate> OperationalAreas { get; set; } // Geographic areas where car rental operates
 
         public FuelType[] FuelTypes { get; set; } 
-
-        //Ai generated
-        public string[] Models { get; set; }  // Specific models available for rent (e.g., Toyota Camry, Ford Explorer)
+        public string[] Models { get; set; } 
 
         public TransmissionType Transmission { get; set; }   // "Automatic", "Manual"
         public string[] RentalPolicies { get; set; } // (e.g., age restrictions, insurance requirements, mileage limits)
+        public ICollection<CarRentalAssetImage>? CarRentalAssetImages { get; set; }
+        public ICollection<Car>? Cars { get; set; } 
+        public ICollection<Driver>? Drivers { get; set; } 
 
-        
+
     }
 }
