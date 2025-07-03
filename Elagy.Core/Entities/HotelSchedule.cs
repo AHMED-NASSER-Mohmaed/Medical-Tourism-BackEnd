@@ -14,7 +14,7 @@ namespace Elagy.Core.Entities
         public decimal TotalPrice { get; set;}
         public  DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
-        public PayStatus RoomscheduleStatus { get; set; } = PayStatus.Confirmed;
+        public ScheduleStatus RoomscheduleStatus { get; set; } = ScheduleStatus.Confirmed;
         public int RoomId { get; set; }
         public Room Room { get; set; }
     }

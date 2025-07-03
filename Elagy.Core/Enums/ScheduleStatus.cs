@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Elagy.Core.Enums
 {
  
-    public enum PayStatus
+    public enum ScheduleStatus
     {
         Pending=0, Confirmed=1, Cancelled=2,
     }
