@@ -54,7 +54,7 @@ namespace Elagy.BL.Services
             try
             {
                 // 1. Get all doctors affiliated with the specific hospital.
-                var doctors = await _unitOfWork.Doctors.GetDoctorsByHospitalIdAsync(hospitalId, isActive: true);
+                var doctors = await _unitOfWork.Doctors.GetDoctorsByHospitalIdAsync(hospitalId);
 
                 // 2. Apply search term filter in service (on the in-memory or already-queried set).
 

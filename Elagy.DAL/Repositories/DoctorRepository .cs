@@ -31,10 +31,10 @@ namespace Elagy.DAL.Repositories
             var query = GetDoctorsWithAllDetails()
                 .Where(d => d.HospitalSpecialty.HospitalAssetId == hospitalId);
 
-            if (isActive)
-            {
-                query = query.Where(d => d.Status == Status.Active);
-            }
+            //if (isActive)
+            //{
+            //    query = query.Where(d => d.Status == Status.Active);
+            //}
             return await query.ToListAsync();
         }
 
