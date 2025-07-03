@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Elagy.Core.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,7 @@ namespace Elagy.Core.Entities
         public decimal TotalPrice { get; set;}
         public  DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
+        public PayStatus RoomscheduleStatus { get; set; } = PayStatus.Confirmed;
         public int RoomId { get; set; }
         public Room Room { get; set; }
     }
