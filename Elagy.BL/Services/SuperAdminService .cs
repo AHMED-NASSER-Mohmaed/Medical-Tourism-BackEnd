@@ -290,10 +290,20 @@ namespace Elagy.BL.Services
              
             query = query.Include(sp => sp.ServiceAsset);
 
-        
+            query = query.Include(sp => sp.Governorate)
+             .ThenInclude(g => g.Country);
+
+            query = query.Include(sp => sp.ServiceAsset)
+            .ThenInclude(a => a.Governate)
+            .ThenInclude(g => g.Country);
+
+
             query = query.Where(sp => sp.ServiceAsset.AssetType == AssetType.Hotel);
 
-
+            if(requestParams.FilterGovernorateId.HasValue)
+            {
+                query=query.Where(s=>s.ServiceAsset.GovernateId==requestParams.FilterGovernorateId.Value);
+            }
             query = ApplyServiceProviderFilters(query,requestParams.SearchTerm ,requestParams.UserStatus);
 
             // --- CRITICAL STEP: Get the total count AFTER all filters are applied ---

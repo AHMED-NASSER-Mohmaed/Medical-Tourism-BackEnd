@@ -108,9 +108,9 @@ namespace Elagy.APIs.Controllers
             }
         }
 
-        [HttpGet("Rooms-Website")]
+        [HttpGet("Rooms-Website/{hotellId}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAvailableRoomsForWebsite(
+        public async Task<IActionResult> GetAvailableRoomsForWebsite(string hotellId,
            [FromQuery] int PageNumber = 1,
            [FromQuery] int PageSize = 10,
            [FromQuery] string? SearchTerm = null,
@@ -121,7 +121,8 @@ namespace Elagy.APIs.Controllers
            [FromQuery] decimal? MaxPrice = null,
            [FromQuery] int? MinOccupancy = null,
            [FromQuery] int? MaxOccupancy = null,
-           [FromQuery] int? FilterGovernorateId = null)
+           [FromQuery] int? FilterGovernorateId = null
+          )
         {
             if (PageNumber < 1 || PageSize < 1) return BadRequest("PageNumber and PageSize must be greater than 0.");
 
@@ -143,7 +144,7 @@ namespace Elagy.APIs.Controllers
                 };
 
                 _logger.LogInformation($"Received request for available rooms for website. Page: {PageNumber}, Size: {PageSize}.");
-                var result = await _roomService.GetAvailableRoomsForWebsiteAsync(paginationParams);
+                var result = await _roomService.GetAvailableRoomsForWebsiteAsync(paginationParams,  hotellId);
                 return Ok(result);
             }
             catch (Exception ex)
