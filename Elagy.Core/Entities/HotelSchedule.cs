@@ -10,7 +10,7 @@ namespace Elagy.Core.Entities
     {
         public int Id { get; set; } 
         public decimal Price { get; set; }
-        public decimal TotalPrice { get; set; }
+        public decimal TotalPrice { get; set;}
         public  DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
         public int RoomId { get; set; }

@@ -21,7 +21,7 @@ namespace Elagy.Core.IServices
         Task<RoomResponseDto> ChangeRoomAvailabilityStatusAsync(int roomId, bool newIsAvailableStatus, string hotelAssetId);
         // Changes the internal status of a specific room.
         Task<RoomResponseDto> ChangeRoomInternalStatusAsync(int roomId, RoomStatus newInternalStatus, string hotelAssetId);
-        Task<PagedResponseDto<RoomResponseDto>> GetAvailableRoomsForWebsiteAsync(PaginationParameters paginationParameters);
+        Task<PagedResponseDto<RoomResponseDto>> GetAvailableRoomsForWebsiteAsync(PaginationParameters paginationParameters, string hotellId);
         Task<RoomResponseDto?> GetRoomByIdAsync(int roomId);
     }
 }

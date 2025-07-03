@@ -2,11 +2,6 @@
 using Elagy.Core.Enums;
 using Elagy.Core.IRepositories;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elagy.DAL.Repositories
 {
@@ -21,22 +16,11 @@ namespace Elagy.DAL.Repositories
                 .Include(s => s.RoomImages);
         }
 
-        public async Task<IEnumerable<Room>> GetRoomsByHotelIdAsync(string hotelAssetId, bool? isAvailable = null, RoomStatus? status = null)
+        public IQueryable<Room> GetRoomsByHotelId(string hotelAssetId)
         {
             var query = GetRoomsWithAllDetails()
                 .Where(r => r.HotelAssetId == hotelAssetId);
-
-            if (isAvailable.HasValue)
-            {
-                query = query.Where(r => r.IsAvailable == isAvailable.Value);
-            }
-
-            if (status.HasValue)
-            {
-                query = query.Where(r => r.Status == status.Value);
-            }
-
-            return await query.ToListAsync();
+            return query;
         }
 
         public async Task<Room?> GetRoomByIdWithDetailsAsync(int roomId)
