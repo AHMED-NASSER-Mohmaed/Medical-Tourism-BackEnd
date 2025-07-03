@@ -19,5 +19,10 @@ namespace Elagy.Core.Entities
 
         public AppointmentStatus Status { get; set; } = AppointmentStatus.Pending;
 
+
+
+        public int PackageId { get; set; } 
+        public Package Package { get; set; } 
+
     }
 }

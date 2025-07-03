@@ -4,13 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elagy.Core.Enums
+namespace Elagy.Core.DTOs.Booking
 {
-    public enum AppointmentStatus
+    public abstract class BaseAppointmentDTO
     {
-        Pending,
-        Booked,
-        Cancelled,
-        Completed 
+
     }
 }

@@ -4,15 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elagy.Core.Entities
+namespace Elagy.Core.DTOs.Booking
 {
-    public class HotelAppointment:Appointment
+    public class HospitalAppointmentDTO
     {
-        public DateOnly CheckInDate {  get; set; }
+        public DateOnly CheckInDate { get; set; }
         public DateOnly CheckOutDate { get; set; }
         //forgien key
         public int HotelScheduleId { get; set; }
-        // Navigation property
-        public HotelSchedule HotelSchedule { get; set; }
     }
+
 }

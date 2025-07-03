@@ -1,9 +1,9 @@
 ﻿
 
-using Elagy.Core.DTOs.Pagination; 
+using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Specialty;
 using Elagy.Core.Enums; // Needed for Status enum
-using Elagy.Core.IServices.ISpecialtyService;
+using Elagy.Core.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

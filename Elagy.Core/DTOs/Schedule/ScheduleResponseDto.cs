@@ -18,7 +18,7 @@ namespace Elagy.Core.DTOs.Schedule
         public int MaxCapacity { get; set; }
         public int AvailableSlots => MaxCapacity - BookedSlots;
         public int BookedSlots { get; set; }
-        public bool? IsActive { get; set; } 
+        public bool IsActive { get; set; } 
 
     }
 }

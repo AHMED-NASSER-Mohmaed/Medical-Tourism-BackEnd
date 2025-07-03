@@ -1,11 +1,10 @@
 using Elagy.APIs.Initializers; // Add this namespace for DbInitializer
 using Elagy.BL.Helpers; // for services like AuthService, PatientService, etc.
-using Elagy.BL.Services; 
+using Elagy.BL.Services;
 using Elagy.Core.Entities;
 using Elagy.Core.Helpers; // for intefaceses like IEmailService, IJwtTokenGenerator, etc.
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
-using Elagy.Core.IServices.ISpecialtyService;
 using Elagy.Core.Temps;
 using Elagy.DAL;
 using Microsoft.AspNetCore.Identity;
