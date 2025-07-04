@@ -40,9 +40,7 @@ namespace Elagy.APIs.Controllers
             _superAdminService = superAdminService;
         }
 
-      
-
-
+     
 
         [HttpGet("hotels")]
         [AllowAnonymous]
@@ -176,31 +174,31 @@ namespace Elagy.APIs.Controllers
         }
 
 
-        //[HttpGet("Doctors-in-Specialty/{hospitalSpecialtyId}")]
-        //[AllowAnonymous]
-        //public async Task<IActionResult> GetDoctorsByHospitalSpecialty(
-        //   int hospitalSpecialtyId,
-        //   [FromQuery] int PageNumber = 1,
-        //   [FromQuery] int PageSize = 10,
-        //   [FromQuery] string? SearchTerm = null,
-        //   [FromQuery] int? SpecialtyId = null)
+        [HttpGet("Doctors-in-Specialty/{hospitalSpecialtyId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetDoctorsByHospitalSpecialty(
+           int hospitalSpecialtyId,
+           [FromQuery] int PageNumber = 1,
+           [FromQuery] int PageSize = 10,
+           [FromQuery] string? SearchTerm = null,
+           [FromQuery] int? SpecialtyId = null)
 
-        //{
-        //    if (hospitalSpecialtyId <= 0 || PageNumber < 1 || PageSize < 1)
-        //    {
-        //        return BadRequest("Invalid pagination parameters or HospitalSpecialtyId.");
-        //    }
-        //    try
-        //    {
-        //        var paginationParams = new PaginationParameters { PageNumber = PageNumber, PageSize = PageSize, SearchTerm = SearchTerm };
-        //        var result = await _doctorService.GetAllDoctorsPerHospitalSpecialty(hospitalSpecialtyId, paginationParams);
-        //        return Ok(result);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving doctors for the specialty.");
-        //    }
-        //}
+        {
+            if (hospitalSpecialtyId <= 0 || PageNumber < 1 || PageSize < 1)
+            {
+                return BadRequest("Invalid pagination parameters or HospitalSpecialtyId.");
+            }
+            try
+            {
+                var paginationParams = new PaginationParameters { PageNumber = PageNumber, PageSize = PageSize, SearchTerm = SearchTerm };
+                var result = await _doctorService.GetAllDoctorsPerHospitalSpecialty(hospitalSpecialtyId, paginationParams);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving doctors for the specialty.");
+            }
+        }
 
         [HttpGet("specialty/doctors/{specialtyId}")]
         public async Task<IActionResult> GetDoctorsBySpecialtyIdForAdmin(

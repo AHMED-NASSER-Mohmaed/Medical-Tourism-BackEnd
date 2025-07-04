@@ -51,7 +51,6 @@ namespace Elagy.Core.DTOs.Doctor
 
         [Required]
         public DateTime DateOfBirth { get; set; }
-        [StringLength(50)]
 
         public int YearsOfExperience { get; set; }
         [StringLength(1000)]
