@@ -215,12 +215,29 @@ namespace Elagy.BL.Services
 
 
 
-        public Task<DriverResponseDto?> GetDriverByIdAsync(string driverId)
+        public async Task<DriverResponseDto?> GetDriverByIdAsync(string driverId)
         {
-            throw new NotImplementedException();
-        }
+            try
+            {
+               
+                var driver = await _unitOfWork.Drivers.GetDriverByIdWithDetailsAsync(driverId);
 
-     
+                if (driver == null)
+                {
+                    _logger.LogInformation($"Driver with ID {driverId} not found.");
+                    return null;
+                }
+
+
+                return _mapper.Map<DriverResponseDto>(driver);
+            }
+            catch (Exception ex)
+            {
+                // Logs any errors that occur during the retrieval process.
+                _logger.LogError(ex, $"Error getting driver by ID: {driverId}.");
+                throw; // Re-throw the exception for handling by the caller (e.g., controller).
+            }
+        }
 
         public async Task<DriverResponseDto> UpdateDriverAsync(string driverId, DriverUpdateDto updateDto, string carRentalAssetId, IFormFile? newLicenseDocument = null, IFormFile? newProfileImage = null)
         {
@@ -255,15 +272,7 @@ namespace Elagy.BL.Services
                     if (uploadResult.Success) { driver.DriveLicenseLicenseNumberURL = uploadResult.Url; driver.DriveLicenseLicenseNumberId = uploadResult.Id; }
                     else { throw new InvalidOperationException($"Failed to upload new license document: {uploadResult.Message}"); }
                 }
-                //else if (updateDto.ClearExistingLicenseDocument) // If DTO explicitly requests clearing (from DriverUpdateDto)
-                //{
-                //    if (!string.IsNullOrEmpty(driver.DriveLicenseLicenseNumberId))
-                //    {
-                //        var deleteResult = await _fileStorageService.DeleteFileAsync(driver.DriveLicenseLicenseNumberId);
-                //        if (!deleteResult) _logger.LogWarning($"Failed to delete old license document {driver.DriveLicenseLicenseNumberId} for driver {driverId} during clear request.");
-                //    }
-                //    driver.DriveLicenseLicenseNumberURL = null; driver.DriveLicenseLicenseNumberId = null;
-                //}
+
 
                 // 5. Handle Profile Image Update
                 if (newProfileImage != null)
@@ -277,15 +286,7 @@ namespace Elagy.BL.Services
                     if (uploadResult.Success) { driver.ImageURL = uploadResult.Url; driver.ImageId = uploadResult.Id; }
                     else { _logger.LogWarning($"Failed to upload new profile image for driver {driverId}. Proceeding without image. Details: {uploadResult.Message}"); }
                 }
-                //else if (updateDto.ClearExistingProfileImage) // If DTO explicitly requests clearing
-                //{
-                //    if (!string.IsNullOrEmpty(driver.ImageId))
-                //    {
-                //        var deleteResult = await _fileStorageService.DeleteFileAsync(driver.ImageId);
-                //        if (!deleteResult) _logger.LogWarning($"Failed to delete old profile image {driver.ImageId} for driver {driverId} during clear request.");
-                //    }
-                //    driver.ImageURL = null; driver.ImageId = null;
-                //}
+
 
                 // 6. Map remaining DTO properties (YearsOfExperience, Rating, DriverStatus, etc.)
                 _mapper.Map(updateDto, driver);

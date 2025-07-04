@@ -29,20 +29,10 @@ namespace Elagy.DAL.Repositories
                     .ThenInclude(cd => cd.Driver);
         }
 
-        public async Task<IEnumerable<Car>> GetCarsByCarRentalAssetIdAsync(string carRentalAssetId, bool? isAvailable = null, CarStatus? status = null)
+        public async Task<IEnumerable<Car>> GetCarsByCarRentalAssetIdAsync(string carRentalAssetId)
         {
             var query = GetCarsWithAllDetails()
                 .Where(c => c.CarRentalAssetId == carRentalAssetId);
-
-            if (isAvailable.HasValue)
-            {
-                query = query.Where(c => c.IsAvailable == isAvailable.Value);
-            }
-
-            if (status.HasValue)
-            {
-                query = query.Where(c => c.Status == status.Value);
-            }
 
             return await query.ToListAsync();
         }

@@ -21,7 +21,7 @@ namespace Elagy.Core.IServices
 
 
         // --- Public/Website Car Display & Details ---
-        Task<PagedResponseDto<CarResponseDto>> GetAvailableCarsForWebsiteAsync(PaginationParameters paginationParameters);
+        Task<PagedResponseDto<CarResponseDto>> GetAvailableCarsForWebsiteAsync(PaginationParameters paginationParameters, string CarRentalAssetId);
         Task<CarResponseDto?> GetCarByIdAsync(int carId);
     }
 }

@@ -30,6 +30,10 @@ namespace Elagy.Core.DTOs.Pagination
         public RoomCategory? RoomType { get; set; }  //for website filter
         public RoomStatus? RoomStatus { get; set; } //for admin flter
         public DriverStatus? DriverStatus {  get; set; }
+
+        public CarType? CarType { get; set; }
+        public CarStatus? CarStatus { get; set; }
+
         public decimal? MinPrice { get; set; }  
         public decimal? MaxPrice { get; set; } 
         public int? MinOccupancy { get; set; } 

@@ -24,11 +24,10 @@ namespace Elagy.Core.Entities
         public bool IncludesBreakfast { get; set; }
         public ICollection<RoomImage>? RoomImages { get; set; } 
 
-
         public string HotelAssetId { get; set; }
         public HotelAsset HotelAsset { get; set; } 
         
-        public ICollection<RoomSchedule> RoomSchedules { get; set; }
+        public ICollection<RoomSchedule>? RoomSchedules { get; set; }
 
     }
 }

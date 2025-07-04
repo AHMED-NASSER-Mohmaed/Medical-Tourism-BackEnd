@@ -16,11 +16,11 @@ namespace Elagy.DAL.Repositories
                 .Include(s => s.RoomImages);
         }
 
-        public IQueryable<Room> GetRoomsByHotelId(string hotelAssetId)
+        public async Task< IEnumerable<Room>> GetRoomsByHotelId(string hotelAssetId)
         {
-            var query = GetRoomsWithAllDetails()
-                .Where(r => r.HotelAssetId == hotelAssetId);
-            return query;
+             return await GetRoomsWithAllDetails()
+                .Where(r => r.HotelAssetId == hotelAssetId).ToListAsync();
+           
         }
 
         public async Task<Room?> GetRoomByIdWithDetailsAsync(int roomId)

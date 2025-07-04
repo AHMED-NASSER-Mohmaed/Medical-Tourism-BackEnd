@@ -47,18 +47,76 @@ namespace Elagy.APIs.Controllers
 
         public async Task<ActionResult<IEnumerable<HotelProviderProfileDto>>> GetHotelProviders(
          [FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10,
-         [FromQuery] string SearchTerm = null, [FromQuery] Status? UserStatus = null
+         [FromQuery] string SearchTerm = null
         , [FromQuery] int? GovernerateId = null)
         {
             var Filter = new PaginationParameters();
             Filter.PageNumber = PageNumber;
             Filter.PageSize = PageSize;
             Filter.SearchTerm = SearchTerm;
-            Filter.UserStatus = UserStatus;
             Filter.FilterGovernorateId = GovernerateId;
 
             var providers = await _superAdminService.GetHotelProvidersForAdminDashboardAsync(Filter);
             return Ok(providers);
+        }
+
+        [HttpGet("Rooms-Website/{hotellId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAvailableRoomsForWebsite(string hotellId,
+           [FromQuery] int PageNumber = 1,
+           [FromQuery] int PageSize = 10,
+           [FromQuery] string? SearchTerm = null,
+           [FromQuery] RoomCategory? RoomType = null,
+           [FromQuery] decimal? MinPrice = null,
+           [FromQuery] decimal? MaxPrice = null,
+           [FromQuery] int? MinOccupancy = null,
+           [FromQuery] int? MaxOccupancy = null,
+           [FromQuery] int? FilterGovernorateId = null
+          )
+        {
+            if (PageNumber < 1 || PageSize < 1) return BadRequest("PageNumber and PageSize must be greater than 0.");
+
+            try
+            {
+                var paginationParams = new PaginationParameters
+                {
+                    PageNumber = PageNumber,
+                    PageSize = PageSize,
+                    SearchTerm = SearchTerm,
+                    RoomType = RoomType,
+                    MinPrice = MinPrice,
+                    MaxPrice = MaxPrice,
+                    MinOccupancy = MinOccupancy,
+                    MaxOccupancy = MaxOccupancy,
+                    FilterGovernorateId = FilterGovernorateId
+                };
+
+                var result = await _roomService.GetAvailableRoomsForWebsiteAsync(paginationParams, hotellId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving available rooms.");
+            }
+        }
+
+
+        [HttpGet("Room/{roomId}")]
+        [AllowAnonymous]
+
+        public async Task<IActionResult> GetRoomById(int roomId)
+        {
+            if (roomId <= 0) return BadRequest("Room ID must be a positive integer.");
+            try
+            {
+                var result = await _roomService.GetRoomByIdAsync(roomId);
+                if (result == null) return NotFound($"Room with ID {roomId} not found.");
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving the room.");
+            }
         }
 
         // still needd to maintain
@@ -139,8 +197,8 @@ namespace Elagy.APIs.Controllers
         }
 
 
-        [HttpGet("Specilties-in-Hospital/{hospitalId}")]
-        public async Task<IActionResult> GetSpecialtiesByHospitalId(
+    [HttpGet("Specilties-in-Hospital/{hospitalId}")]
+    public async Task<IActionResult> GetSpecialtiesByHospitalId(
     string hospitalId,
     [FromQuery] int pageNumber = 1,
     [FromQuery] int pageSize = 10,
