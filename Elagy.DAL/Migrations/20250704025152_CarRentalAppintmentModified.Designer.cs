@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Elagy.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250704025152_CarRentalAppintmentModified")]
+    partial class CarRentalAppintmentModified
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -176,9 +179,6 @@ namespace Elagy.DAL.Migrations
                     b.Property<int>("ModelYear")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<decimal>("PricePerDay")
                         .HasColumnType("decimal(18,2)");
 
@@ -301,7 +301,7 @@ namespace Elagy.DAL.Migrations
                     b.ToTable("CarRentalAssetImages");
                 });
 
-            modelBuilder.Entity("Elagy.Core.Entities.CarSchedule", b =>
+            modelBuilder.Entity("Elagy.Core.Entities.CarRentalSchedule", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -317,12 +317,6 @@ namespace Elagy.DAL.Migrations
 
                     b.Property<DateOnly>("StartingDate")
                         .HasColumnType("date");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -765,6 +759,9 @@ namespace Elagy.DAL.Migrations
                     b.Property<DateOnly>("EndDate")
                         .HasColumnType("date");
 
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("RoomId")
                         .HasColumnType("int");
 
@@ -773,9 +770,6 @@ namespace Elagy.DAL.Migrations
 
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -1457,7 +1451,7 @@ namespace Elagy.DAL.Migrations
                     b.Navigation("CarRentalAsset");
                 });
 
-            modelBuilder.Entity("Elagy.Core.Entities.CarSchedule", b =>
+            modelBuilder.Entity("Elagy.Core.Entities.CarRentalSchedule", b =>
                 {
                     b.HasOne("Elagy.Core.Entities.Car", "Car")
                         .WithMany("carRentalSchedules")
@@ -1665,7 +1659,7 @@ namespace Elagy.DAL.Migrations
 
             modelBuilder.Entity("Elagy.Core.Entities.CarRentalAppointment", b =>
                 {
-                    b.HasOne("Elagy.Core.Entities.CarSchedule", "CarRentalSchedule")
+                    b.HasOne("Elagy.Core.Entities.CarRentalSchedule", "CarRentalSchedule")
                         .WithMany("CarRentalAppointments")
                         .HasForeignKey("CarRentalScheduleId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1767,7 +1761,7 @@ namespace Elagy.DAL.Migrations
                     b.Navigation("carRentalSchedules");
                 });
 
-            modelBuilder.Entity("Elagy.Core.Entities.CarSchedule", b =>
+            modelBuilder.Entity("Elagy.Core.Entities.CarRentalSchedule", b =>
                 {
                     b.Navigation("CarRentalAppointments");
                 });

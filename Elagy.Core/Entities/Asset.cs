@@ -33,6 +33,9 @@ namespace Elagy.Core.Entities
         public ServiceProvider ServiceProvider { get; set; }
 
 
-    }
+
+        //payment information
+        public ICollection<Disbursement> Disbursements { get; set; } // Payment information related to the service provider
+     }
 }
 

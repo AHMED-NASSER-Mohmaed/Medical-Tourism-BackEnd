@@ -18,11 +18,12 @@ namespace Elagy.Core.Entities
         public AppointmentType Type { get; set; }
 
         public AppointmentStatus Status { get; set; } = AppointmentStatus.Pending;
-
-
-
         public int PackageId { get; set; } 
         public Package Package { get; set; } 
+
+        public DisbursementItem DisbursementItem { get; set; } // Foreign key to DisbursementItem
+        public int DisbursementItemId { get; set; } // Foreign key to DisbursementItem
+
 
     }
 }

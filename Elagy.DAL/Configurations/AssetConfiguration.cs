@@ -83,6 +83,10 @@ namespace Elagy.DAL.Configurations
                   .OnDelete(DeleteBehavior.Restrict);
 
 
+            builder.HasMany(a => a.Disbursements)
+           .WithOne(d => d.Asset)
+           .HasForeignKey(d => d.AssetId) // you must add this FK in `Disbursement`
+           .OnDelete(DeleteBehavior.Restrict);
 
 
 

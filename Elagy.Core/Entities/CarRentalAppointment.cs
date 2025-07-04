@@ -18,8 +18,8 @@ namespace Elagy.Core.Entities
         public string LocationDescription { get; set; } // Detailed description of the pickup location
         public fuel_policy FuelPolicy { get; set; } // Enum for fuel policy
         //forgien key
-        int CarRentalScheduleId { get; set; }
+        public int CarRentalScheduleId { get; set; }
         // Navigation property
-        public CarRentalSchedule CarRentalSchedule { get; set; }
+        public CarSchedule CarRentalSchedule { get; set; }
     }
 }

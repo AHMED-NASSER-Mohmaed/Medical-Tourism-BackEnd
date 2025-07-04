@@ -17,6 +17,8 @@ namespace Elagy.Core.Entities
         [Required] public CarType Type { get; set; } // e.g., Sedan, SUV
         [Required] public int Capacity { get; set; } // Max passengers
 
+        public decimal Price { get; set; } // Base price of the car, can be used for purchase or rental
+
         // Rental Specifics
         [Required] public decimal PricePerDay { get; set; } // Daily rental price
         [Required] public TransmissionType Transmission { get; set; }
@@ -33,6 +35,6 @@ namespace Elagy.Core.Entities
 
 
         public ICollection<CarDriver>? CarDrivers { get; set; }
-
+        public ICollection<CarSchedule> carRentalSchedules { get; set; } = new List<CarSchedule>(); // Appointments for this car
     }
 }

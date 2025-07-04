@@ -17,7 +17,7 @@ namespace Elagy.BL.Mapping
                .ForMember(dest => dest.Code, opt => opt.MapFrom(src => src.ShortCode));
 
 
-            CreateMap<CreateScheduleSlotDto, Schedule>()
+            CreateMap<CreateScheduleSlotDto, SpecialtySchedule>()
                     .ForMember(dest => dest.Id, opt => opt.Ignore())
                     .ForMember(dest => dest.BookedSlots, opt => opt.MapFrom(src => 0))
                     .ForMember(dest => dest.CancelledSlots, opt => opt.MapFrom(src => 0))
@@ -33,7 +33,7 @@ namespace Elagy.BL.Mapping
 
 
 
-            CreateMap<UpdateScheduleDto, Schedule>()
+            CreateMap<UpdateScheduleDto, SpecialtySchedule>()
               .ForMember(dest => dest.Id, opt => opt.Ignore())
               .ForMember(dest => dest.BookedSlots, opt => opt.Ignore()) 
               .ForMember(dest => dest.CancelledSlots, opt => opt.Ignore()) 
@@ -43,7 +43,7 @@ namespace Elagy.BL.Mapping
               .ForMember(dest => dest.HospitalSpecialty, opt => opt.Ignore())
               .ForMember(dest => dest.DayOfWeek, opt => opt.Ignore());
 
-            CreateMap<Schedule, ScheduleResponseDto>()
+            CreateMap<SpecialtySchedule, ScheduleResponseDto>()
                .ForMember(dest => dest.DoctorId, opt => opt.MapFrom(src => src.Doctor.Id))
                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
                .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.StartTime))

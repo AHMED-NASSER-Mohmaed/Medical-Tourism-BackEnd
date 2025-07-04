@@ -15,11 +15,11 @@ namespace Elagy.APIs.Controllers
     public class HospitalProviderController : ProfileImageBaseController
     {
         private readonly IHospitalProviderService _hospitalProviderService;
-        private readonly IScheduleService _scheduleService;
+        private readonly ISpecialtyScheduleService _scheduleService;
 
         public HospitalProviderController(
             IImageProfile profileImageService,
-             IScheduleService scheduleService,
+             ISpecialtyScheduleService scheduleService,
             IHospitalProviderService hospitalProviderService,  
             ILogger<HospitalProviderController> logger)   
             : base(profileImageService, logger)                                       

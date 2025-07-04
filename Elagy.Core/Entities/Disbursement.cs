@@ -17,6 +17,11 @@ namespace Elagy.Core.Entities
 
         public Asset Asset { get; set; }
 
+        public string AssetId { get; set; } // FK to Asset
+        public Asset Asset { get; set; }
+
+
+
         public List<DisbursementItem> DisbursementItems { get; set; } = new List<DisbursementItem>(); // List of disbursement items
     
     }

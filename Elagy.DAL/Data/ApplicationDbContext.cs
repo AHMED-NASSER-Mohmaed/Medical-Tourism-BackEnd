@@ -1,7 +1,9 @@
 ﻿using Elagy.Core.Entities;
 using Elagy.DAL.Configurations; // Assuming your configurations are here
+using Elagy.Infrastructure.Configurations;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 public class ApplicationDbContext : IdentityDbContext<User> // Assuming your User entity is the primary Identity user
 {
@@ -22,7 +24,7 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
     public DbSet<Doctor> Doctors { get; set; }
     public DbSet<Specialty> Specialties { get; set; }
     public DbSet<HospitalSpecialty> HospitalSpecialties { get; set; }
-    public DbSet<Schedule> Schedules { get; set; }
+    public DbSet<SpecialtySchedule> Schedules { get; set; }
 
     public DbSet<Elagy.Core.Entities.DayOfWeek> DayOfWeeks { get; set; }
     public DbSet<Country> Countries { get; set; }
@@ -67,7 +69,17 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
         builder.ApplyConfiguration(new CarDriverConfiguration());
         builder.ApplyConfiguration(new RoomImageConfiguration());
         builder.ApplyConfiguration(new DriverConfiguration());
+        builder.ApplyConfiguration(new DisbursementConfiguration());
+        builder.ApplyConfiguration(new DisbursementItemConfiguration());
 
+        builder.ApplyConfiguration(new AppointmentConfiguration());
+        builder.ApplyConfiguration(new CarRentalAppointmentConfiguration());
+        builder.ApplyConfiguration(new RoomAppointmentConfiguration());
+        builder.ApplyConfiguration(new SpecialtyAppointmentConfiguration());
+
+        builder.ApplyConfiguration(new PackageConfiguration());
+        builder.ApplyConfiguration(new PaymentIntentConfiguration());
+        builder.ApplyConfiguration(new CarRentalScheduleConfiguration());
 
 
         // builder.ApplyConfiguration(new ImageKitTempFileConfiguration()); // If you still have this entity

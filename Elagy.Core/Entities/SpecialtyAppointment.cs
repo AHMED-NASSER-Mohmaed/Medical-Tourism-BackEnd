@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Elagy.Core.Entities
 {
-    public class ClinicAppointment: Appointment
+    public class SpecialtyAppointment: Appointment
     {
         public SpecialtyAppointmentDeliveryType IsOffile { get; set; } = SpecialtyAppointmentDeliveryType.Onsite;
 
@@ -20,7 +20,7 @@ namespace Elagy.Core.Entities
         public int ScheduleId { get; set; }
         //Navigation properties
 
-        public Schedule Schedule { get; set; }
+        public SpecialtySchedule Schedule { get; set; }
 
     }
 }
