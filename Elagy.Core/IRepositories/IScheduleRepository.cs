@@ -21,6 +21,6 @@ namespace Elagy.Core.IRepositories
         Task<SpecialtySchedule?> GetScheduleByIdWithDetailsAsync(int scheduleId);
         Task<bool> UpdateScheduleStatusAsync(int scheduleId, bool newIsActiveStatus);
 
-        Task<IEnumerable<Schedule>> GetAvailableSchedulesByDoctorIdAsync(string doctorId);
+        Task<IEnumerable<SpecialtySchedule>> GetAvailableSchedulesByDoctorIdAsync(string doctorId);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Elagy.Core.Entities;
 using Elagy.Core.IRepositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -82,12 +83,14 @@ namespace Elagy.DAL.Repositories
             return true;
         }
 
-        public async Task<IEnumerable<Schedule>> GetAvailableSchedulesByDoctorIdAsync(string doctorId)
+        public async Task<IEnumerable<SpecialtySchedule>> GetAvailableSchedulesByDoctorIdAsync(string doctorId)
         {
             var query = GetSchedulesWithAllDetails()
                 .Where(s => s.DoctorId == doctorId && s.IsActive == true);
 
             return await query.ToListAsync();
         }
+
+     
     }
 }

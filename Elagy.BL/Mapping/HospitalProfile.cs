@@ -56,7 +56,6 @@ namespace Elagy.BL.Mapping
                 .ForMember(dest => dest.ImageId, opt => opt.Ignore()) // Image is uploaded separately
                 .ForMember(dest => dest.ImageURL, opt => opt.Ignore())
                 // MedicalLicenseNumberId is mapped from MedicalLicenseNumber
-                .ForMember(dest => dest.MedicalLicenseNumberId, opt => opt.MapFrom(src => src.MedicalLicenseNumber))
                 // Correctly map GovernorateId (Foreign Key property on User/Doctor)
                 .ForMember(dest => dest.GovernorateId, opt => opt.MapFrom(src => src.GovernorateId))
                 .ForMember(dest => dest.Governorate, opt => opt.Ignore()) // Ignore Governorate navigation property

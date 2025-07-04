@@ -17,7 +17,7 @@ namespace Elagy.APIs.Controllers
         private readonly IRoomService _roomService;
         private readonly ISpecialtyService _specialtyService;
         private readonly IDoctorService _doctorService;
-        private readonly IScheduleService _scheduleService;
+        private readonly ISpecialtyScheduleService _scheduleService;
         private readonly ISuperAdminService _superAdminService;
 
         public WebsiteController(
@@ -27,7 +27,7 @@ namespace Elagy.APIs.Controllers
             IRoomService roomService,
             ISpecialtyService specialtyService,
             IDoctorService doctorService,
-            IScheduleService scheduleService,
+            ISpecialtyScheduleService scheduleService,
             ISuperAdminService superAdminService)
         {
             _hospitalProviderService = hospitalProviderService;

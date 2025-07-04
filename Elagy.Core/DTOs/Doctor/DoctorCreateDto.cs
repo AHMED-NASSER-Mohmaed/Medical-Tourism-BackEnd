@@ -52,8 +52,7 @@ namespace Elagy.Core.DTOs.Doctor
         [Required]
         public DateTime DateOfBirth { get; set; }
         [StringLength(50)]
-        public string MedicalLicenseNumber { get; set; }
-        [Range(0, 70, ErrorMessage = "Years of experience must be between 0 and 70.")]
+
         public int YearsOfExperience { get; set; }
         [StringLength(1000)]
         public string? Bio { get; set; }

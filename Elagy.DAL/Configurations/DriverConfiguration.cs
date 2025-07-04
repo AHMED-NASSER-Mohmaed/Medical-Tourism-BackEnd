@@ -27,6 +27,9 @@ namespace Elagy.DAL.Configurations
                    .WithMany(cra => cra.Drivers) // Make sure CarRentalAsset has ICollection<Driver>? Drivers
                    .HasForeignKey(d => d.CarRentalAssetId)
                    .OnDelete(DeleteBehavior.Restrict); // Prevent deleting CarRentalAsset if drivers are associated
+            builder.Property(d => d.DriverStatus)
+       .HasConversion<string>() // stores as string (e.g., "Available")
+       .IsRequired();
 
         }
     }
