@@ -1,4 +1,5 @@
-﻿using Elagy.Core.DTOs.Pagination;
+﻿using Elagy.Core.DTOs.Doctor;
+using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.Enums;
 using Elagy.Core.IServices;
 using Microsoft.AspNetCore.Authorization;
@@ -258,60 +259,67 @@ namespace Elagy.APIs.Controllers
             }
         }
 
-        [HttpGet("specialty/doctors/{specialtyId}")]
-        public async Task<IActionResult> GetDoctorsBySpecialtyIdForAdmin(
-    int specialtyId,
-    [FromQuery] int pageNumber = 1,
-    [FromQuery] int pageSize = 10,
-    [FromQuery] string? searchTerm = null)
+        [HttpGet("Doctors-in-Specialty/{specialtyId}/{hospitalId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetDoctorsByHospitalAndSpecialty(
+                    string hospitalId,
+                    int specialtyId,
+                   [FromQuery] int PageNumber = 1,
+                   [FromQuery] int PageSize = 10,
+                   [FromQuery] string? SearchTerm = null)
         {
-            var paginationParameters = new PaginationParameters
+            if (string.IsNullOrWhiteSpace(hospitalId) || specialtyId <= 0 || PageNumber < 1 || PageSize < 1)
             {
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                SearchTerm = searchTerm,
-            };
-
-            var result = await _doctorService.GetDoctorsBySpecialtyIdForAdminDashboardAsync(specialtyId, paginationParameters);
-            return Ok(result);
+                return BadRequest("Invalid parameters. Hospital ID, Specialty ID, PageNumber, and PageSize are required.");
+            }
+            try
+            {
+                var paginationParams = new PaginationParameters { PageNumber = PageNumber, PageSize = PageSize, SearchTerm = SearchTerm };
+                var result = await _doctorService.GetAllDoctorsPerHospitalSpecialty(hospitalId, specialtyId, paginationParams);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving doctors.");
+            }
         }
 
-   
 
 
 
-     //[HttpGet("schedule/available-slots")]
-     //   [AllowAnonymous] 
-     //   public async Task<IActionResult> GetAvailablePatientSlots(
-     //       [FromQuery] int PageNumber = 1,
-     //       [FromQuery] int PageSize = 10,
-     //       [FromQuery] string? SearchTerm = null,
-     //       [FromQuery] int? SpecialtyId = null,
-     //       [FromQuery] int? FilterDayOfWeekId = null,
-     //       [FromQuery] string? FilterDoctorId = null)
-     //   {
-     //       if (PageNumber < 1 || PageSize < 1) return BadRequest("PageNumber and PageSize must be greater than 0.");
 
-     //       try
-     //       {
-     //           var paginationParams = new PaginationParameters
-     //           {
-     //               PageNumber = PageNumber,
-     //               PageSize = PageSize,
-     //               SearchTerm = SearchTerm,
-     //               SpecialtyId = SpecialtyId,
-     //               FilterDayOfWeekId = FilterDayOfWeekId,
-     //               FilterDoctorId = FilterDoctorId
-     //           };
+        //[HttpGet("schedule/available-slots")]
+        //   [AllowAnonymous] 
+        //   public async Task<IActionResult> GetAvailablePatientSlots(
+        //       [FromQuery] int PageNumber = 1,
+        //       [FromQuery] int PageSize = 10,
+        //       [FromQuery] string? SearchTerm = null,
+        //       [FromQuery] int? SpecialtyId = null,
+        //       [FromQuery] int? FilterDayOfWeekId = null,
+        //       [FromQuery] string? FilterDoctorId = null)
+        //   {
+        //       if (PageNumber < 1 || PageSize < 1) return BadRequest("PageNumber and PageSize must be greater than 0.");
 
-     //           var result = await _scheduleService.GetAvailablePatientSlotsAsync(paginationParams);
-     //           return Ok(result);
-     //       }
-     //       catch (Exception ex)
-     //       {
-     //           return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving available slots.");
-     //       }
-     //   }
+        //       try
+        //       {
+        //           var paginationParams = new PaginationParameters
+        //           {
+        //               PageNumber = PageNumber,
+        //               PageSize = PageSize,
+        //               SearchTerm = SearchTerm,
+        //               SpecialtyId = SpecialtyId,
+        //               FilterDayOfWeekId = FilterDayOfWeekId,
+        //               FilterDoctorId = FilterDoctorId
+        //           };
+
+        //           var result = await _scheduleService.GetAvailablePatientSlotsAsync(paginationParams);
+        //           return Ok(result);
+        //       }
+        //       catch (Exception ex)
+        //       {
+        //           return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving available slots.");
+        //       }
+        //   }
 
 
         [HttpGet("doctors/available-schedules/{doctorId}")]

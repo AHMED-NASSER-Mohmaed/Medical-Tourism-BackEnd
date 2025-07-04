@@ -18,13 +18,13 @@
 //        private readonly ILogger<DriverController> _logger;
 
 //        public DriverController(IDriverService driverService, IImageProfile _imageProfile, ILogger<DriverController> logger)
-       
+
 //        {
 //            _driverService = driverService;
 //            _logger = logger;
 //        }
 
-//        [HttpGet("my-car-rental")]
+//        [HttpGet("my-driver-car-rental")]
 //        [Authorize(Roles = "CarRentalServiceProvider")]
 
 //        public async Task<IActionResult> GetMyCarRentalDrivers(
