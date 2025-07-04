@@ -101,12 +101,9 @@ namespace Elagy.BL.Mapping
                   .ForMember(dest => dest.GovernorateName, opt => opt.MapFrom(src => src.Governorate.Name))
                   .ForMember(dest => dest.CountryId, opt => opt.MapFrom(src => src.Governorate.Country.Id))
                   .ForMember(dest => dest.CountryName, opt => opt.MapFrom(src => src.Governorate.Country.Name))
-                  .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email ?? src.UserName));
-
-
-
-
-
+                  .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email ?? src.UserName))
+                  .ForMember(dest => dest.MedicalLicenseNumber, opt => opt.MapFrom(src => src.MedicalLicenseNumberURL));
+                    
 
         }
     }
