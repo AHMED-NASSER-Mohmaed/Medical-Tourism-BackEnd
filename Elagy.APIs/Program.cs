@@ -231,39 +231,39 @@ builder.Services.AddRateLimiter(rateLimiterOptions =>
 var app = builder.Build();
 
 
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        // Resolve required services from the created scope
-        var appContext = services.GetRequiredService<ApplicationDbContext>();
-        var userManager = services.GetRequiredService<UserManager<User>>();
-        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        var logger = services.GetRequiredService<ILogger<Program>>(); // Logger for Program.cs scope
+//using (var scope = app.Services.CreateScope())
+//{
+//    var services = scope.ServiceProvider;
+//    try
+//    {
+//        // Resolve required services from the created scope
+//        var appContext = services.GetRequiredService<ApplicationDbContext>();
+//        var userManager = services.GetRequiredService<UserManager<User>>();
+//        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+//        var logger = services.GetRequiredService<ILogger<Program>>(); // Logger for Program.cs scope
 
-        logger.LogInformation("Starting database seeding process...");
+//        logger.LogInformation("Starting database seeding process...");
 
-        // Ensure database is created/migrated. This is a common practice before seeding.
-        // If you handle migrations separately (e.g., via CLI or deployment scripts),
-        // you might remove this line.
-        await appContext.Database.MigrateAsync();
-        logger.LogInformation("Database migrations applied.");
+//        // Ensure database is created/migrated. This is a common practice before seeding.
+//        // If you handle migrations separately (e.g., via CLI or deployment scripts),
+//        // you might remove this line.
+//        await appContext.Database.MigrateAsync();
+//        logger.LogInformation("Database migrations applied.");
 
-        // Execute seeding methods in a logical order
-        await DbInitializer.SeedRoles(userManager, roleManager, logger);
-        await DbInitializer.SeedSuperAdminAsync(userManager, roleManager, logger);
-        await DbInitializer.SeedStaticDataAsync(appContext, logger);
+//        // Execute seeding methods in a logical order
+//        await DbInitializer.SeedRoles(userManager, roleManager, logger);
+//        await DbInitializer.SeedSuperAdminAsync(userManager, roleManager, logger);
+//        await DbInitializer.SeedStaticDataAsync(appContext, logger);
 
-        logger.LogInformation("Database seeding completed successfully.");
-    }
-    catch (Exception ex)
-    {
-        // Catch any exceptions during seeding and log them
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
-    }
-}
+//        logger.LogInformation("Database seeding completed successfully.");
+//    }
+//    catch (Exception ex)
+//    {
+//        // Catch any exceptions during seeding and log them
+//        var logger = services.GetRequiredService<ILogger<Program>>();
+//        logger.LogError(ex, "An error occurred while seeding the database.");
+//    }
+//}
 
 
 

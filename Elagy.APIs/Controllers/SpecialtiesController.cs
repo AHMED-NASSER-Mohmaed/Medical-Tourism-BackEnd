@@ -60,6 +60,44 @@ namespace Elagy.APIs.Controllers
         }
 
 
+        [HttpGet("Website")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAllSpecialtiesForWebsite(
+            [FromQuery] int PageNumber = 1,
+            [FromQuery] int PageSize = 10,
+            [FromQuery] string? SearchTerm = null,
+            [FromQuery] Status UserStatus = Status.Active,
+            [FromQuery] int? specialtyId = null)
+
+        {
+            if (PageNumber < 1 || PageSize < 1)
+            {
+                return BadRequest("PageNumber and PageSize must be greater than 0.");
+            }
+
+            try
+            {
+                var paginationParameters = new PaginationParameters
+                {
+                    PageNumber = PageNumber,
+                    PageSize = PageSize,
+                    SearchTerm = SearchTerm,
+                    UserStatus = UserStatus,
+                    SpecialtyId = specialtyId
+
+                };
+
+                var result = await _specialtyService.GetAllSpecialties(paginationParameters);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
+            }
+        }
+
+
         [HttpGet("available-for-linking/my-hospital")] 
         [Authorize(Roles = "HospitalServiceProvider")]
         public async Task<IActionResult> GetAvailableSpecialtiesToLinkToMyHospital() 

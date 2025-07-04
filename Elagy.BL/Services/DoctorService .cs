@@ -54,6 +54,60 @@ namespace Elagy.BL.Services
                 throw; 
             }
         }
+
+
+        public async Task<PagedResponseDto<DoctorProfileDto>> GetDoctorsBySpecialtyIdForAdminDashboardAsync(
+    int specialtyId, PaginationParameters paginationParameters)
+        {
+            try
+            {
+                // 1. Get all doctors for this SpecialtyId (includes full navigation via .Include())
+                var doctors = await _unitOfWork.Doctors.GetDoctorsBySpecialtyIdAsync(specialtyId);
+
+                // 2. Convert to queryable for in-memory filtering
+                var query = doctors.AsQueryable();
+
+                // 3. Apply SearchTerm filter
+                if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
+                {
+                    string term = paginationParameters.SearchTerm.Trim().ToLower();
+                    query = query.Where(d =>
+                        d.FirstName.ToLower().Contains(term) ||
+                        d.LastName.ToLower().Contains(term) ||
+                        d.Email.ToLower().Contains(term)
+                    );
+                }
+
+
+                // 6. Pagination
+                var totalCount = query.Count();
+                var pagedDoctors = query
+                    .OrderBy(d => d.FirstName)
+                    .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+                    .Take(paginationParameters.PageSize)
+                    .ToList();
+
+                // 7. Mapping
+                var doctorDtos = _mapper.Map<IEnumerable<DoctorProfileDto>>(pagedDoctors);
+
+                return new PagedResponseDto<DoctorProfileDto>(
+                    doctorDtos,
+                    totalCount,
+                    paginationParameters.PageNumber,
+                    paginationParameters.PageSize
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving doctors for Specialty ID: {specialtyId}");
+                return new PagedResponseDto<DoctorProfileDto>(
+                    Enumerable.Empty<DoctorProfileDto>(),
+                    0,
+                    paginationParameters.PageNumber,
+                    paginationParameters.PageSize
+                );
+            }
+        }
         public async Task<PagedResponseDto<DoctorProfileDto>> GetAllDoctorsForAdminDashboardAsync(string hospitalId, PaginationParameters paginationParameters)
         {
             try

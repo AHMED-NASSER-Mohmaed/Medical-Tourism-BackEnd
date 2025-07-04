@@ -81,5 +81,13 @@ namespace Elagy.DAL.Repositories
           
             return true;
         }
+
+        public async Task<IEnumerable<Schedule>> GetAvailableSchedulesByDoctorIdAsync(string doctorId)
+        {
+            var query = GetSchedulesWithAllDetails()
+                .Where(s => s.DoctorId == doctorId && s.IsActive == true);
+
+            return await query.ToListAsync();
+        }
     }
 }
