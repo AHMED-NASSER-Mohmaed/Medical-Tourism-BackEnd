@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace Elagy.DAL.Repositories
 {
-    public class ScheduleRepository : GenericRepository<Schedule>, IScheduleRepository
+    public class ScheduleRepository : GenericRepository<SpecialtySchedule>, IScheduleRepository
     {
        
         public ScheduleRepository(ApplicationDbContext _context):base(_context) { }
 
-        private IQueryable<Schedule> GetSchedulesWithAllDetails()
+        private IQueryable<SpecialtySchedule> GetSchedulesWithAllDetails()
         {
             return _dbSet
                 .Include(s => s.Doctor)
@@ -24,12 +24,12 @@ namespace Elagy.DAL.Repositories
                     .ThenInclude(hs => hs.Specialty)
                 .Include(s => s.DayOfWeek);
         }
-        public async Task<Schedule?> GetScheduleByIdWithDetailsAsync(int scheduleId)
+        public async Task<SpecialtySchedule?> GetScheduleByIdWithDetailsAsync(int scheduleId)
         {
             return await GetSchedulesWithAllDetails().FirstOrDefaultAsync(s => s.Id == scheduleId);
         }
 
-        public async Task<IEnumerable<Schedule>> GetSchedulesByDoctorIdAsync(string doctorId, bool? isActive = null)
+        public async Task<IEnumerable<SpecialtySchedule>> GetSchedulesByDoctorIdAsync(string doctorId, bool? isActive = null)
         {
             var query = GetSchedulesWithAllDetails().Where(s => s.DoctorId == doctorId);
 
@@ -39,7 +39,7 @@ namespace Elagy.DAL.Repositories
             }
             return await query.ToListAsync();
         }
-        public async Task<IEnumerable<Schedule>> GetSchedulesByHospitalIdAsync(string hospitalId, bool? isActive = null)
+        public async Task<IEnumerable<SpecialtySchedule>> GetSchedulesByHospitalIdAsync(string hospitalId, bool? isActive = null)
         {
             var query = GetSchedulesWithAllDetails() 
                 .Where(s => s.HospitalSpecialty.HospitalAssetId == hospitalId); 
@@ -51,7 +51,7 @@ namespace Elagy.DAL.Repositories
 
             return await query.ToListAsync();
         }
-        public async Task<IEnumerable<Schedule>> GetSchedulesByHospitalSpecialtyIdAsync(int hospitalSpecialtyId, bool? isActive = null)
+        public async Task<IEnumerable<SpecialtySchedule>> GetSchedulesByHospitalSpecialtyIdAsync(int hospitalSpecialtyId, bool? isActive = null)
         {
             var query = GetSchedulesWithAllDetails()
                 .Where(s => s.HospitalSpecialtyId == hospitalSpecialtyId);

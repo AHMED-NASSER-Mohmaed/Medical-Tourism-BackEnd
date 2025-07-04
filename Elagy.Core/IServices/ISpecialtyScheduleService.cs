@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Elagy.Core.IServices
 {
-    public interface IScheduleService
+    public interface ISpecialtyScheduleService
     {
         //Retrieves list of all schedules hospital's admin dashboard
         Task<PagedResponseDto<ScheduleResponseDto>> GetAllSchedulesForHospitalAdminAsync(string hospitalId, PaginationParameters paginationParameters);

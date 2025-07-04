@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Elagy.Core.Entities
 {
-    public class Schedule
+    public class SpecialtySchedule
     {
   
         public int Id { get; set; }
@@ -24,10 +24,12 @@ namespace Elagy.Core.Entities
         public bool IsActive { get; set; } = true;
         public string DoctorId { get; set; }
         public Doctor Doctor { get; set; }
-        public int HospitalSpecialtyId { get; set; }
-        public HospitalSpecialty HospitalSpecialty { get; set; }
         public int DayOfWeekId { get; set; }
         public DayOfWeek DayOfWeek { get; set; }
 
+        public int HospitalSpecialtyId { get; set; }
+        public HospitalSpecialty HospitalSpecialty { get; set; }
+
+        public ICollection<SpecialtyAppointment> Appointments { get; set; } = new List<SpecialtyAppointment>();
     }
 }

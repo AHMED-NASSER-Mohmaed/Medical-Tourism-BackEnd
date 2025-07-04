@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Elagy.BL.Services
 {
-    public class ScheduleService : IScheduleService
+    public class ScheduleService : ISpecialtyScheduleService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -133,7 +133,7 @@ namespace Elagy.BL.Services
                 throw new InvalidOperationException("Doctor already has an overlapping schedule for the specified day and time.");
 
                 // 4. Map DTO to Schedule entity
-                var schedule = _mapper.Map<Schedule>(createDto);
+                var schedule = _mapper.Map<SpecialtySchedule>(createDto);
 
 
                 // 5. Add to repository and persist

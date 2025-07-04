@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Elagy.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -25,6 +25,18 @@ namespace Elagy.DAL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetRoles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CarRentalSchedules",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CarRentalSchedules", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -111,6 +123,45 @@ namespace Elagy.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Appointments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    PackageId = table.Column<int>(type: "int", nullable: false),
+                    DisbursementItemId = table.Column<int>(type: "int", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false),
+                    StartingDateTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    EndingDateTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Latitude = table.Column<float>(type: "real", nullable: true),
+                    Longitude = table.Column<float>(type: "real", nullable: true),
+                    LocationDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FuelPolicy = table.Column<int>(type: "int", nullable: true),
+                    CarRentalScheduleId = table.Column<int>(type: "int", nullable: true),
+                    CheckInDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    CheckOutDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    HotelScheduleId = table.Column<int>(type: "int", nullable: true),
+                    RoomId = table.Column<int>(type: "int", nullable: true),
+                    IsOffile = table.Column<int>(type: "int", nullable: true),
+                    MeetingUrl = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true),
+                    ExistingTime = table.Column<TimeOnly>(type: "time", nullable: true),
+                    ScheduleId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Appointments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Appointments_CarRentalSchedules_CarRentalScheduleId",
+                        column: x => x.CarRentalScheduleId,
+                        principalTable: "CarRentalSchedules",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetUserClaims",
                 columns: table => new
                 {
@@ -176,16 +227,21 @@ namespace Elagy.DAL.Migrations
                     UserType = table.Column<int>(type: "int", nullable: false),
                     MedicalLicenseNumberURL = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     MedicalLicenseNumberId = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    YearsOfExperience = table.Column<int>(type: "int", nullable: true),
+                    Doctor_YearsOfExperience = table.Column<int>(type: "int", nullable: true),
                     Bio = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     Qualification = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     HospitalSpecialtyId = table.Column<int>(type: "int", nullable: true),
+                    DriveLicenseLicenseNumberURL = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    DriveLicenseLicenseNumberId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    YearsOfExperience = table.Column<int>(type: "int", nullable: true),
+                    CarRentalAssetId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     BloodGroup = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
                     Height = table.Column<float>(type: "real", nullable: true),
                     Weight = table.Column<float>(type: "real", nullable: true),
                     AcquisitionDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     NationalURL = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true),
                     NationalFeildId = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
+                    AssetId = table.Column<int>(type: "int", nullable: true),
                     Docs = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -268,7 +324,29 @@ namespace Elagy.DAL.Migrations
                         column: x => x.GovernateId,
                         principalTable: "Governaties",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Packages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
+                    PaymentConfirmedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    PatientId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Packages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Packages_AspNetUsers_PatientId",
+                        column: x => x.PatientId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -290,6 +368,29 @@ namespace Elagy.DAL.Migrations
                         principalTable: "Assets",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Disbursements",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DisbursementDateMonth = table.Column<DateOnly>(type: "date", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    GeneratedAt = table.Column<DateTime>(type: "datetime", nullable: false),
+                    PaymentMethod = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    AssetId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Disbursements", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Disbursements_Assets_AssetId",
+                        column: x => x.AssetId,
+                        principalTable: "Assets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -332,6 +433,121 @@ namespace Elagy.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PaymentIntents",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StripePaymentIntentId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    StripeChargeId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    StripeCustomerId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    StripeInvoiceId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    StripePaymentMethodId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Amount = table.Column<long>(type: "bigint", nullable: false),
+                    Currency = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    PaymentStatus = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ReceiptUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    PaymentMethodType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    CardBrand = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    CardLast4 = table.Column<string>(type: "nvarchar(4)", maxLength: 4, nullable: false),
+                    CardExpMonth = table.Column<int>(type: "int", nullable: true),
+                    CardExpYear = table.Column<int>(type: "int", nullable: true),
+                    IsCaptured = table.Column<bool>(type: "bit", nullable: false),
+                    CapturedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    Refunded = table.Column<bool>(type: "bit", nullable: false),
+                    RefundedAmount = table.Column<long>(type: "bigint", nullable: false),
+                    FailureMessage = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    StripeRawDataJson = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
+                    PackageId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PaymentIntents", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PaymentIntents_Packages_PackageId",
+                        column: x => x.PackageId,
+                        principalTable: "Packages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CarRentalAssetImages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ImageId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    ImageURL = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    CarRentalAssetId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CarRentalAssetImages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CarRentalAssetImages_CarRentalAssets_CarRentalAssetId",
+                        column: x => x.CarRentalAssetId,
+                        principalTable: "CarRentalAssets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Cars",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FactoryMake = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ModelName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ModelYear = table.Column<int>(type: "int", nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Capacity = table.Column<int>(type: "int", nullable: false),
+                    PricePerDay = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Transmission = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    FuelType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    IsAvailable = table.Column<bool>(type: "bit", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    CarRentalAssetId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Cars", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Cars_CarRentalAssets_CarRentalAssetId",
+                        column: x => x.CarRentalAssetId,
+                        principalTable: "CarRentalAssets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DisbursementItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DisbursementId = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
+                    AppointmentId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DisbursementItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DisbursementItems_Disbursements_DisbursementId",
+                        column: x => x.DisbursementId,
+                        principalTable: "Disbursements",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "HospitalSpecialties",
                 columns: table => new
                 {
@@ -364,17 +580,17 @@ namespace Elagy.DAL.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     MaxOccupancy = table.Column<int>(type: "int", nullable: false),
                     IsAvailable = table.Column<bool>(type: "bit", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     Amenities = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    RoomNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    RoomNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     FloorNumber = table.Column<int>(type: "int", nullable: false),
                     HasBalcony = table.Column<bool>(type: "bit", nullable: false),
-                    RoomType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    ViewType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    RoomType = table.Column<int>(type: "int", nullable: false),
+                    ViewType = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
                     IncludesBreakfast = table.Column<bool>(type: "bit", nullable: false),
                     HotelAssetId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
@@ -386,6 +602,63 @@ namespace Elagy.DAL.Migrations
                         column: x => x.HotelAssetId,
                         principalTable: "HotelAssets",
                         principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CarDrivers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CarRentalAssetId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CarId = table.Column<int>(type: "int", nullable: false),
+                    DriverId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    AssignmentDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    ReleaseDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    IsAssignedCurrent = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CarDrivers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CarDrivers_AspNetUsers_DriverId",
+                        column: x => x.DriverId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CarDrivers_CarRentalAssets_CarRentalAssetId",
+                        column: x => x.CarRentalAssetId,
+                        principalTable: "CarRentalAssets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CarDrivers_Cars_CarId",
+                        column: x => x.CarId,
+                        principalTable: "Cars",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CarImages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ImageId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    ImageURL = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    CarId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CarImages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CarImages_Cars_CarId",
+                        column: x => x.CarId,
+                        principalTable: "Cars",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -395,16 +668,17 @@ namespace Elagy.DAL.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DoctorId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    HospitalSpecialtyId = table.Column<int>(type: "int", nullable: false),
-                    DayOfWeekId = table.Column<int>(type: "int", nullable: false),
-                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     StartTime = table.Column<TimeOnly>(type: "time", nullable: false),
                     EndTime = table.Column<TimeOnly>(type: "time", nullable: false),
+                    TimeSlotSize = table.Column<int>(type: "int", nullable: false),
                     MaxCapacity = table.Column<int>(type: "int", nullable: false),
                     BookedSlots = table.Column<int>(type: "int", nullable: false),
+                    CancelledSlots = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    IsRecurring = table.Column<bool>(type: "bit", nullable: false)
+                    DoctorId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    DayOfWeekId = table.Column<int>(type: "int", nullable: false),
+                    HospitalSpecialtyId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -450,6 +724,29 @@ namespace Elagy.DAL.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "RoomSchedule",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    StartDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    EndDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    RoomscheduleStatus = table.Column<int>(type: "int", nullable: false),
+                    RoomId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RoomSchedule", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RoomSchedule_Rooms_RoomId",
+                        column: x => x.RoomId,
+                        principalTable: "Rooms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.InsertData(
                 table: "DayOfWeeks",
                 columns: new[] { "Id", "Name", "ShortCode" },
@@ -463,6 +760,37 @@ namespace Elagy.DAL.Migrations
                     { 6, "Friday", "FRI" },
                     { 7, "Saturday", "SAT" }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Appointments_CarRentalScheduleId",
+                table: "Appointments",
+                column: "CarRentalScheduleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Appointments_DisbursementItemId",
+                table: "Appointments",
+                column: "DisbursementItemId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Appointments_HotelScheduleId",
+                table: "Appointments",
+                column: "HotelScheduleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Appointments_PackageId",
+                table: "Appointments",
+                column: "PackageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Appointments_RoomId",
+                table: "Appointments",
+                column: "RoomId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Appointments_ScheduleId",
+                table: "Appointments",
+                column: "ScheduleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -497,6 +825,11 @@ namespace Elagy.DAL.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_CarRentalAssetId",
+                table: "AspNetUsers",
+                column: "CarRentalAssetId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AspNetUsers_GovernorateId",
                 table: "AspNetUsers",
                 column: "GovernorateId");
@@ -519,6 +852,47 @@ namespace Elagy.DAL.Migrations
                 column: "GovernateId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CarDrivers_CarId_DriverId",
+                table: "CarDrivers",
+                columns: new[] { "CarId", "DriverId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CarDrivers_CarRentalAssetId",
+                table: "CarDrivers",
+                column: "CarRentalAssetId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CarDrivers_DriverId",
+                table: "CarDrivers",
+                column: "DriverId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CarImages_CarId",
+                table: "CarImages",
+                column: "CarId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CarRentalAssetImages_CarRentalAssetId",
+                table: "CarRentalAssetImages",
+                column: "CarRentalAssetId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Cars_CarRentalAssetId",
+                table: "Cars",
+                column: "CarRentalAssetId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DisbursementItems_DisbursementId",
+                table: "DisbursementItems",
+                column: "DisbursementId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Disbursements_AssetId",
+                table: "Disbursements",
+                column: "AssetId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Governaties_CountryId",
                 table: "Governaties",
                 column: "CountryId");
@@ -535,6 +909,16 @@ namespace Elagy.DAL.Migrations
                 column: "SpecialtyId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Packages_PatientId",
+                table: "Packages",
+                column: "PatientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PaymentIntents_PackageId",
+                table: "PaymentIntents",
+                column: "PackageId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RoomImages_RoomId",
                 table: "RoomImages",
                 column: "RoomId");
@@ -543,6 +927,11 @@ namespace Elagy.DAL.Migrations
                 name: "IX_Rooms_HotelAssetId",
                 table: "Rooms",
                 column: "HotelAssetId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RoomSchedule_RoomId",
+                table: "RoomSchedule",
+                column: "RoomId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Schedules_DayOfWeekId",
@@ -558,6 +947,46 @@ namespace Elagy.DAL.Migrations
                 name: "IX_Schedules_HospitalSpecialtyId",
                 table: "Schedules",
                 column: "HospitalSpecialtyId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Appointments_DisbursementItems_DisbursementItemId",
+                table: "Appointments",
+                column: "DisbursementItemId",
+                principalTable: "DisbursementItems",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Appointments_Packages_PackageId",
+                table: "Appointments",
+                column: "PackageId",
+                principalTable: "Packages",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Appointments_RoomSchedule_HotelScheduleId",
+                table: "Appointments",
+                column: "HotelScheduleId",
+                principalTable: "RoomSchedule",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Appointments_Rooms_RoomId",
+                table: "Appointments",
+                column: "RoomId",
+                principalTable: "Rooms",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Appointments_Schedules_ScheduleId",
+                table: "Appointments",
+                column: "ScheduleId",
+                principalTable: "Schedules",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_AspNetUserClaims_AspNetUsers_UserId",
@@ -584,6 +1013,14 @@ namespace Elagy.DAL.Migrations
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
+                name: "FK_AspNetUsers_CarRentalAssets_CarRentalAssetId",
+                table: "AspNetUsers",
+                column: "CarRentalAssetId",
+                principalTable: "CarRentalAssets",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_AspNetUsers_HospitalSpecialties_HospitalSpecialtyId",
                 table: "AspNetUsers",
                 column: "HospitalSpecialtyId",
@@ -598,6 +1035,9 @@ namespace Elagy.DAL.Migrations
             migrationBuilder.DropForeignKey(
                 name: "FK_Assets_AspNetUsers_Id",
                 table: "Assets");
+
+            migrationBuilder.DropTable(
+                name: "Appointments");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
@@ -615,16 +1055,43 @@ namespace Elagy.DAL.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "CarRentalAssets");
+                name: "CarDrivers");
+
+            migrationBuilder.DropTable(
+                name: "CarImages");
+
+            migrationBuilder.DropTable(
+                name: "CarRentalAssetImages");
+
+            migrationBuilder.DropTable(
+                name: "PaymentIntents");
 
             migrationBuilder.DropTable(
                 name: "RoomImages");
+
+            migrationBuilder.DropTable(
+                name: "CarRentalSchedules");
+
+            migrationBuilder.DropTable(
+                name: "DisbursementItems");
+
+            migrationBuilder.DropTable(
+                name: "RoomSchedule");
 
             migrationBuilder.DropTable(
                 name: "Schedules");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Cars");
+
+            migrationBuilder.DropTable(
+                name: "Packages");
+
+            migrationBuilder.DropTable(
+                name: "Disbursements");
 
             migrationBuilder.DropTable(
                 name: "Rooms");
@@ -637,6 +1104,9 @@ namespace Elagy.DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "CarRentalAssets");
 
             migrationBuilder.DropTable(
                 name: "HospitalSpecialties");

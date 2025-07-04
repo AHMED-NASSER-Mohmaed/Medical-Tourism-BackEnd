@@ -33,6 +33,11 @@ namespace Elagy.Core.IRepositories
         IDriverRepository Drivers { get; }
         ICarDriverRepository CarDrivers { get; }
         ///////////////////////////
+        
+        //nasser
+        IGenericRepository<RoomSchedule> RoomSchedule { get; }
+        public IGenericRepository<CarSchedule> CarSchedule { get; }
+
         Task<int> CompleteAsync();
     }
 }

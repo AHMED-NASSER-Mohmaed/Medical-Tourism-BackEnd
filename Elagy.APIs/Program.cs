@@ -84,7 +84,7 @@ builder.Services.AddScoped<ICountryService, CountryService>();
 
 builder.Services.AddScoped<ISpecialtyService, SpecialtyService>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
-builder.Services.AddScoped<IScheduleService, ScheduleService>();
+builder.Services.AddScoped<ISpecialtyScheduleService, ScheduleService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
 
 
@@ -250,10 +250,10 @@ using (var scope = app.Services.CreateScope())
         await appContext.Database.MigrateAsync();
         logger.LogInformation("Database migrations applied.");
 
-        // Execute seeding methods in a logical order
-        await DbInitializer.SeedRoles(userManager, roleManager, logger);
-        await DbInitializer.SeedSuperAdminAsync(userManager, roleManager, logger);
-        await DbInitializer.SeedStaticDataAsync(appContext, logger);
+        //Execute seeding methods in a logical order
+       await DbInitializer.SeedRoles(userManager, roleManager, logger);
+       await DbInitializer.SeedSuperAdminAsync(userManager, roleManager, logger);
+       await DbInitializer.SeedStaticDataAsync(appContext, logger);
 
         logger.LogInformation("Database seeding completed successfully.");
     }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Elagy.Core.DTOs.Room;
+using Elagy.Core.DTOs.RoomSchedule;
 using Elagy.Core.Entities;
 using System;
 using System.Collections.Generic;
@@ -32,7 +33,14 @@ namespace Elagy.BL.Mapping
             CreateMap<Room, RoomResponseDto>()
                 .ForMember(dest => dest.HotelAssetName, opt => opt.MapFrom(src => src.HotelAsset.Name))
                 .ForMember(dest => dest.HotelStarRating, opt => opt.MapFrom(src => src.HotelAsset.StarRating))
-                .ForMember(dest => dest.RoomImages, opt => opt.MapFrom(src => src.RoomImages)); 
+                .ForMember(dest => dest.RoomImages, opt => opt.MapFrom(src => src.RoomImages));
+
+            CreateMap<CreateRoomScheduleDTO, RoomSchedule>();
+
+            // RoomSchedule to CreateRoomScheduleResponseDTO
+            CreateMap<RoomSchedule, CreateRoomScheduleResponseDTO>();
+                 
+
 
         }
     }

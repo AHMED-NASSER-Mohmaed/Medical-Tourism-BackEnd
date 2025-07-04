@@ -23,5 +23,6 @@ namespace Elagy.Core.IServices
         Task<RoomResponseDto> ChangeRoomInternalStatusAsync(int roomId, RoomStatus newInternalStatus, string hotelAssetId);
         Task<PagedResponseDto<RoomResponseDto>> GetAvailableRoomsForWebsiteAsync(PaginationParameters paginationParameters, string hotellId);
         Task<RoomResponseDto?> GetRoomByIdAsync(int roomId);
+        
     }
 }

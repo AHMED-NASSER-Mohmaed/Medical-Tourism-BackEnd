@@ -13,9 +13,9 @@ namespace Elagy.BL.Services
 {
     public class BookingService : IBookingService
     {
-        private readonly IScheduleService _scheduleService;
+        private readonly ISpecialtyScheduleService _scheduleService;
 
-        public BookingService(IScheduleService scheduleService)
+        public BookingService(ISpecialtyScheduleService scheduleService)
         {
             _scheduleService= scheduleService;
         }
