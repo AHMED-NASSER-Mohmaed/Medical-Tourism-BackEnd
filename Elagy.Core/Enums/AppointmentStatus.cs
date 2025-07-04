@@ -11,6 +11,6 @@ namespace Elagy.Core.Enums
         Pending,
         Booked,
         Cancelled,
-        Completed
+        Completed 
     }
 }

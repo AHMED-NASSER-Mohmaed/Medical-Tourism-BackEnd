@@ -1,11 +1,10 @@
 using Elagy.APIs.Initializers; // Add this namespace for DbInitializer
 using Elagy.BL.Helpers; // for services like AuthService, PatientService, etc.
-using Elagy.BL.Services; 
+using Elagy.BL.Services;
 using Elagy.Core.Entities;
 using Elagy.Core.Helpers; // for intefaceses like IEmailService, IJwtTokenGenerator, etc.
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
-using Elagy.Core.IServices.ISpecialtyService;
 using Elagy.Core.Temps;
 using Elagy.DAL;
 using Microsoft.AspNetCore.Identity;
@@ -85,7 +84,7 @@ builder.Services.AddScoped<ICountryService, CountryService>();
 
 builder.Services.AddScoped<ISpecialtyService, SpecialtyService>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
-builder.Services.AddScoped<IScheduleService, ScheduleService>();
+builder.Services.AddScoped<ISpecialtyScheduleService, ScheduleService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
 
 
@@ -251,8 +250,7 @@ using (var scope = app.Services.CreateScope())
         await appContext.Database.MigrateAsync();
         logger.LogInformation("Database migrations applied.");
 
-        // Execute seeding methods in a logical order
-        await DbInitializer.SeedRoles(userManager, roleManager, logger);
+       await DbInitializer.SeedRoles(userManager, roleManager, logger);
         await DbInitializer.SeedSuperAdminAsync(userManager, roleManager, logger);
         await DbInitializer.SeedStaticDataAsync(appContext, logger);
 
@@ -271,8 +269,8 @@ using (var scope = app.Services.CreateScope())
 
 
 
- 
- 
+
+
 
 
 

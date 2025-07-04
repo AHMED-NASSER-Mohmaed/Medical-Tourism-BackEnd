@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Elagy.DAL.Configurations
 {
-    public class ScheduleConfiguration : IEntityTypeConfiguration<Schedule>
+    public class ScheduleConfiguration : IEntityTypeConfiguration<SpecialtySchedule>
     {
-        public void Configure(EntityTypeBuilder<Schedule> builder)
+        public void Configure(EntityTypeBuilder<SpecialtySchedule> builder)
         {
             builder.HasKey(s => s.Id);
 
@@ -48,6 +48,16 @@ namespace Elagy.DAL.Configurations
                    .HasForeignKey(s => s.DayOfWeekId)
                    .OnDelete(DeleteBehavior.Restrict);
 
+            builder.Property(x => x.Price)
+            .HasPrecision(18, 2)
+            .IsRequired();
+
+
+
+            builder.HasMany(s => s.Appointments)
+           .WithOne(a => a.Schedule)
+           .HasForeignKey(a => a.ScheduleId)
+           .OnDelete(DeleteBehavior.Restrict); // or Cascade, depending on your rules
 
         }
     }

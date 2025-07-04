@@ -6,15 +6,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elagy.Core.IServices.ISpecialtyService
+namespace Elagy.Core.IServices
 {
-    public interface IScheduleService
+    public interface ISpecialtyScheduleService
     {
         //Retrieves list of all schedules hospital's admin dashboard
         Task<PagedResponseDto<ScheduleResponseDto>> GetAllSchedulesForHospitalAdminAsync(string hospitalId, PaginationParameters paginationParameters);
     
         //Creates a new schedule slot for a doctor within a specific hospital specialty.
         Task<ScheduleResponseDto> CreateScheduleAsync(CreateScheduleSlotDto createDto, string hospitalId);
+        Task<PagedResponseDto<ScheduleResponseDto>> GetAvailableSchedulesByDoctorIdAsync(string doctorId, PaginationParameters paginationParameters);
 
         Task<ScheduleResponseDto> UpdateScheduleAsync(int scheduleId, UpdateScheduleDto updateDto, string hospitalId);
      

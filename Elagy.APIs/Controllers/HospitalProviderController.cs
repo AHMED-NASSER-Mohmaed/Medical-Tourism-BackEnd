@@ -3,8 +3,7 @@ using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Schedule;
 using Elagy.Core.DTOs.User;
 using Elagy.Core.IServices;
-using Elagy.Core.IServices.ISpecialtyService;
-using Microsoft.AspNetCore.Authorization;  
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -16,11 +15,11 @@ namespace Elagy.APIs.Controllers
     public class HospitalProviderController : ProfileImageBaseController
     {
         private readonly IHospitalProviderService _hospitalProviderService;
-        private readonly IScheduleService _scheduleService;
+        private readonly ISpecialtyScheduleService _scheduleService;
 
         public HospitalProviderController(
             IImageProfile profileImageService,
-             IScheduleService scheduleService,
+             ISpecialtyScheduleService scheduleService,
             IHospitalProviderService hospitalProviderService,  
             ILogger<HospitalProviderController> logger)   
             : base(profileImageService, logger)                                       

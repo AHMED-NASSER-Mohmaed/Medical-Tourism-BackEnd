@@ -14,14 +14,14 @@ namespace Elagy.Core.IServices
     {
         // --- Car Rental Admin Dashboard Driver Management ---
         Task<PagedResponseDto<DriverResponseDto>> GetAllDriversForCarRentalAdminAsync(string carRentalAssetId, PaginationParameters paginationParameters);
-        Task<DriverResponseDto> CreateDriverAsync(DriverCreateDto createDto, string carRentalAssetId, IFormFile? licenseDocument);
-        Task<DriverResponseDto> UpdateDriverAsync(string driverId, DriverUpdateDto updateDto, string carRentalAssetId, IFormFile? newLicenseDocument = null);
+        Task<DriverResponseDto> CreateDriverAsync(DriverCreateDto createDto, string carRentalAssetId, IFormFile? licenseDocument, IFormFile? profileImage);
+        Task<DriverResponseDto> UpdateDriverAsync(string driverId, DriverUpdateDto updateDto, string carRentalAssetId, IFormFile? newLicenseDocument = null, IFormFile? newProfileImage = null);
         Task<DriverResponseDto> DeleteDriverAsync(string driverId, string carRentalAssetId);
         Task<DriverResponseDto> ChangeDriverInternalStatusAsync(string driverId, DriverStatus newDriverStatus, string carRentalAssetId);
 
 
         // --- Public/Website Driver Display & Details ---
         Task<DriverResponseDto?> GetDriverByIdAsync(string driverId);
-        Task<PagedResponseDto<DriverResponseDto>> GetAvailableDriversForWebsiteAsync(PaginationParameters paginationParameters);
+       
     }
 }

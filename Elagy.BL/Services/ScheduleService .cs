@@ -5,15 +5,14 @@ using Elagy.Core.DTOs.Schedule;
 using Elagy.Core.Entities;
 using Elagy.Core.Enums;
 using Elagy.Core.IRepositories;
-
-using Elagy.Core.IServices.ISpecialtyService;
+using Elagy.Core.IServices;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Elagy.BL.Services
 {
-    public class ScheduleService : IScheduleService
+    public class ScheduleService : ISpecialtyScheduleService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -89,6 +88,50 @@ namespace Elagy.BL.Services
             }
         }
 
+
+        public async Task<PagedResponseDto<ScheduleResponseDto>> GetAvailableSchedulesByDoctorIdAsync(string doctorId, PaginationParameters paginationParameters)
+        {
+            try
+            {
+                // Step 1: Get all schedules for the doctor (active only)
+                var schedules = await _unitOfWork.Schedules.GetSchedulesByDoctorIdAsync(doctorId, isActive: true);
+
+                // Step 2: Convert to IQueryable for in-memory filtering
+                var query = schedules.AsQueryable();
+
+
+                // Step 4: Filter by DayOfWeekId
+                if (paginationParameters.FilterDayOfWeekId.HasValue)
+                {
+                    query = query.Where(s => s.DayOfWeekId == paginationParameters.FilterDayOfWeekId.Value);
+                }
+
+
+                // Step 6: Count and paginate
+                var totalCount = query.Count();
+
+                var pagedSchedules = query
+                    .OrderBy(s => s.DayOfWeekId)
+                    .ThenBy(s => s.StartTime)
+                    .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+                    .Take(paginationParameters.PageSize)
+                    .ToList();
+
+                // Step 7: Map to DTO
+                var scheduleDtos = _mapper.Map<IEnumerable<ScheduleResponseDto>>(pagedSchedules);
+
+                return new PagedResponseDto<ScheduleResponseDto>(
+                    scheduleDtos, totalCount, paginationParameters.PageNumber, paginationParameters.PageSize
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting available schedules for doctor ID: {doctorId}");
+                return new PagedResponseDto<ScheduleResponseDto>(
+                    Enumerable.Empty<ScheduleResponseDto>(), 0, paginationParameters.PageNumber, paginationParameters.PageSize
+                );
+            }
+        }
         public async Task<ScheduleResponseDto> CreateScheduleAsync(CreateScheduleSlotDto createDto, string hospitalId)
         {
             try
@@ -134,7 +177,7 @@ namespace Elagy.BL.Services
                 throw new InvalidOperationException("Doctor already has an overlapping schedule for the specified day and time.");
 
                 // 4. Map DTO to Schedule entity
-                var schedule = _mapper.Map<Schedule>(createDto);
+                var schedule = _mapper.Map<SpecialtySchedule>(createDto);
 
 
                 // 5. Add to repository and persist

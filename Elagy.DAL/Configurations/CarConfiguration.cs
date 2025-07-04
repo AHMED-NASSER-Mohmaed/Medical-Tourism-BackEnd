@@ -38,6 +38,18 @@ namespace Elagy.DAL.Configurations
                    .WithOne(ci => ci.Car)
                    .HasForeignKey(ci => ci.CarId)
                    .OnDelete(DeleteBehavior.Cascade); // If car deleted, its images delete
+
+
+
+            // Relationship: Car → CarRentalSchedules
+            builder.HasMany(c => c.carRentalSchedules)
+                   .WithOne(s => s.Car)
+                   .HasForeignKey(s => s.CarId)
+                   .OnDelete(DeleteBehavior.Cascade);
+
+
         }
+
+
     }
 }

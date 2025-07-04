@@ -10,14 +10,14 @@ namespace Elagy.Core.Entities
 {
     public  class Car
     {
- public int Id { get; set; } // Primary Key for Car
-
-        // Basic Info
+        public int Id { get; set; } // Primary Key for Car
         [Required] public string FactoryMake { get; set; } // e.g., "Toyota"
         [Required] public string ModelName { get; set; } // e.g., "Camry"
         [Required] public int ModelYear { get; set; } // e.g., 2022
         [Required] public CarType Type { get; set; } // e.g., Sedan, SUV
         [Required] public int Capacity { get; set; } // Max passengers
+
+        public decimal Price { get; set; } // Base price of the car, can be used for purchase or rental
 
         // Rental Specifics
         [Required] public decimal PricePerDay { get; set; } // Daily rental price
@@ -35,6 +35,6 @@ namespace Elagy.Core.Entities
 
 
         public ICollection<CarDriver>? CarDrivers { get; set; }
-
+        public ICollection<CarSchedule> carRentalSchedules { get; set; } = new List<CarSchedule>(); // Appointments for this car
     }
 }

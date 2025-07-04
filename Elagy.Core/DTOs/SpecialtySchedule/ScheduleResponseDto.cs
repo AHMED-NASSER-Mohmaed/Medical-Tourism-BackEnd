@@ -9,7 +9,6 @@ namespace Elagy.Core.DTOs.Schedule
     public class ScheduleResponseDto
     {
         public int Id { get; set; }
-
         public string DoctorId { get; set; } 
         public string DoctorName { get; set; }
         public string Specialty { get; set; }

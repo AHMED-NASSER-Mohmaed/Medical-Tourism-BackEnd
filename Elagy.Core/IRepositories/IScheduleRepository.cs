@@ -7,18 +7,20 @@ using System.Threading.Tasks;
 
 namespace Elagy.Core.IRepositories
 {
-    public interface IScheduleRepository: IGenericRepository<Schedule>
+    public interface IScheduleRepository: IGenericRepository<SpecialtySchedule>
     {
         // Get schedules for a specific doctor
-        Task<IEnumerable<Schedule>> GetSchedulesByDoctorIdAsync(string doctorId, bool? isActive = null);
+        Task<IEnumerable<SpecialtySchedule>> GetSchedulesByDoctorIdAsync(string doctorId, bool? isActive = null);
         //Retrieves schedules associated with a specific hospital
-        Task<IEnumerable<Schedule>> GetSchedulesByHospitalIdAsync(string hospitalId, bool? isActive = null);
+        Task<IEnumerable<SpecialtySchedule>> GetSchedulesByHospitalIdAsync(string hospitalId, bool? isActive = null);
 
         // Get schedules for a specific hospital specialty (clinic)
-        Task<IEnumerable<Schedule>> GetSchedulesByHospitalSpecialtyIdAsync(int hospitalSpecialtyId, bool? isActive = null);
+        Task<IEnumerable<SpecialtySchedule>> GetSchedulesByHospitalSpecialtyIdAsync(int hospitalSpecialtyId, bool? isActive = null);
 
         // Get schedules with all related details (Doctor, HospitalSpecialty, DayOfWeek)
-        Task<Schedule?> GetScheduleByIdWithDetailsAsync(int scheduleId);
+        Task<SpecialtySchedule?> GetScheduleByIdWithDetailsAsync(int scheduleId);
         Task<bool> UpdateScheduleStatusAsync(int scheduleId, bool newIsActiveStatus);
+
+        Task<IEnumerable<SpecialtySchedule>> GetAvailableSchedulesByDoctorIdAsync(string doctorId);
     }
 }

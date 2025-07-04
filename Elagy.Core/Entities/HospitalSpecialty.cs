@@ -20,7 +20,7 @@ namespace Elagy.Core.Entities
         public bool IsActive { get; set; } 
 
         public ICollection<Doctor> Doctors { get; set; }
-        public ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
+        public ICollection<SpecialtySchedule> Schedules { get; set; } = new List<SpecialtySchedule>();
     }
 }
     

@@ -13,6 +13,6 @@ namespace Elagy.Core.Entities
         public string ShortCode { get; set; } // "MON", "TUE"
 
     
-        public ICollection<Schedule> Schedules { get; set; }
+        public ICollection<SpecialtySchedule> Schedules { get; set; }
     }
 }

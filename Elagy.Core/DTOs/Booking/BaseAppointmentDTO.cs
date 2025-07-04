@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elagy.Core.Entities
+namespace Elagy.Core.DTOs.Booking
 {
-    public class CarRentalSchedule
+    public abstract class BaseAppointmentDTO
     {
+
     }
 }

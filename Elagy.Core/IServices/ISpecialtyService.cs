@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elagy.Core.IServices.ISpecialtyService
+namespace Elagy.Core.IServices
 {
     public interface ISpecialtyService
     {

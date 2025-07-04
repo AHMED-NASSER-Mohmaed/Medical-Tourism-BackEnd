@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Elagy.Core.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,23 +7,23 @@ using System.Threading.Tasks;
 
 namespace Elagy.Core.Entities
 {
-    internal class Package
+    //booking object
+    public class Package
     {
-         public int Id { get; set; }
+        public int Id { get; set; }
 
         public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }// Assuming these are DateTimeOffset for better timezone handling
+        public DateTime? PaymentConfirmedAt { get; set; }
+
+ 
+        public BookingStatus Status { get; set; }
 
 
-
-        public string PatientId { get; set; } // Assuming Patient.Id is a string (from IdentityUser)
-
+        public string PatientId { get; set; } 
         //naavigation property
         public Patient Patient { get; set; }
 
-
         public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
-
 
     }
 }

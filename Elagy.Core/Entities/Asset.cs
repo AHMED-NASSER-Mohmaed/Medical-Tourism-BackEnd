@@ -32,6 +32,10 @@ namespace Elagy.Core.Entities
         // Navigation property to the Principal (ServiceProvider).
         public ServiceProvider ServiceProvider { get; set; }
 
-    }
+
+
+        //payment information
+        public ICollection<Disbursement> Disbursements { get; set; } // Payment information related to the service provider
+     }
 }
 
