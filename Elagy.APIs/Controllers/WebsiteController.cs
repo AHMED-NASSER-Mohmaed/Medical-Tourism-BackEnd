@@ -86,7 +86,7 @@ namespace Elagy.APIs.Controllers
 
         public async Task<ActionResult<IEnumerable<HotelProviderProfileDto>>> GetHospitalProviders(
       [FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10,
-      [FromQuery] string SearchTerm = null, [FromQuery] Status? UserStatus = null,
+      [FromQuery] string SearchTerm = null, [FromQuery] Status? UserStatus = Status.Active,
       [FromQuery] int? specialtyId = null,
       [FromQuery] int? GovernerateId = null)
         {

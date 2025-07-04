@@ -22,7 +22,8 @@ namespace Elagy.APIs.Controllers
 
        
 
-        [HttpGet("SuperAdmin")] 
+        [HttpGet("SuperAdmin")]
+        [AllowAnonymous]
         
         public async Task<IActionResult> GetAllSpecialtiesForSuperAdminDashboard(
              [FromQuery] int PageNumber = 1,

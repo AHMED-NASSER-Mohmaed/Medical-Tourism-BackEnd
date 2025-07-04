@@ -17,10 +17,11 @@ namespace Elagy.DAL.Repositories
 
         private IQueryable<Specialty> GetSpecialtiesWithAllDetails()
         {
-            return _dbSet
+            // Access _context directly from the base class (it's protected).
+            return _context.Specialties
                 .Include(s => s.HospitalSpecialties)
-                    .ThenInclude(hs => hs.HospitalAsset);
-
+                    .ThenInclude(hs => hs.HospitalAsset)
+                .AsNoTracking();
         }
 
 
