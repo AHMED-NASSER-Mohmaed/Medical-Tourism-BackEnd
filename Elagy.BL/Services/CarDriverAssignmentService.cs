@@ -52,7 +52,7 @@ namespace Elagy.BL.Services
                 }
 
 
-                if (car.Status != CarStatus.Available || car.IsAvailable == false)
+                if (car.Status != CarStatus.Available)
                 {
                     throw new InvalidOperationException($"Car {createDto.CarId} is not 'Available' for assignment. Current status: {car.Status}.");
                 }

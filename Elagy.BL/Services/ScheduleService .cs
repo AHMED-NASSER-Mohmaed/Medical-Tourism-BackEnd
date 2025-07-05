@@ -315,39 +315,40 @@ namespace Elagy.BL.Services
                 // 1. Start with an IQueryable from the repository for all schedules
                 var query = _unitOfWork.Schedules.AsQueryable();
 
-                // 2. Filter for truly available slots (active and has capacity)
                 query = query.Where(s => s.IsActive == true && s.BookedSlots < s.MaxCapacity);
 
-                // 3. Apply optional filters from PaginationParameters
+                if (!string.IsNullOrWhiteSpace(paginationParameters.hospitalId)) // Using SpecialtyId from PaginationParameters
+                {
+                    query = query.Where(s => s.HospitalSpecialty.HospitalAssetId == paginationParameters.hospitalId);
+                }
 
-                // Filter by Specialty (SpecialtyId) - requires Include
-                if (paginationParameters.SpecialtyId.HasValue) // Using SpecialtyId from PaginationParameters
+
+                if (paginationParameters.SpecialtyId.HasValue) 
                 {
                     query = query.Where(s => s.HospitalSpecialty.SpecialtyId == paginationParameters.SpecialtyId.Value);
                 }
-                // Filter by DoctorId
-                if (!string.IsNullOrWhiteSpace(paginationParameters.FilterDoctorId)) // Using FilterDoctorId from PaginationParameters
+
+                if (!string.IsNullOrWhiteSpace(paginationParameters.FilterDoctorId)) 
                 {
                     query = query.Where(s => s.DoctorId == paginationParameters.FilterDoctorId);
                 }
-                // Filter by DayOfWeekId
+
                 if (paginationParameters.FilterDayOfWeekId.HasValue)
                 {
                     query = query.Where(s => s.DayOfWeekId == paginationParameters.FilterDayOfWeekId.Value);
                 }
                  
-                // 4. Get total count AFTER applying filters
                 var totalCount = await query.CountAsync();
 
-                // 5. Apply pagination and eager load navigation properties for DTO mapping
                 var pagedSchedules = await query
-                    .Include(s => s.Doctor) // Needed for DoctorName, Email
-                    .Include(s => s.HospitalSpecialty) // Needed for HospitalName, SpecialtyName
+                    .Include(s => s.Doctor) 
+                    .Include(s => s.HospitalSpecialty)
                         .ThenInclude(hs => hs.HospitalAsset)
                     .Include(s => s.HospitalSpecialty)
                         .ThenInclude(hs => hs.Specialty)
-                    .Include(s => s.DayOfWeek) // Needed for DayOfWeekName, ShortCode
-                    .OrderBy(s => s.StartTime)
+                    .Include(s => s.DayOfWeek)
+                    .OrderBy(s => s.DayOfWeekId)
+                    .ThenBy(s => s.StartTime)
                     .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
                     .Take(paginationParameters.PageSize)
                     .ToListAsync();

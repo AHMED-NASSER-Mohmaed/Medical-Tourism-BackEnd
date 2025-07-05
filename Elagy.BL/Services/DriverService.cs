@@ -199,10 +199,10 @@ namespace Elagy.BL.Services
 
                 var totalCount = query.Count();
 
-                var pagedDrivers = await query
+                var pagedDrivers =  query
                     .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
                     .Take(paginationParameters.PageSize)
-                    .ToListAsync();
+                    .ToList();
                 var driverDtos = _mapper.Map<IEnumerable<DriverResponseDto>>(pagedDrivers);
 
                 return new PagedResponseDto<DriverResponseDto>(driverDtos, totalCount, paginationParameters.PageNumber, paginationParameters.PageSize);
