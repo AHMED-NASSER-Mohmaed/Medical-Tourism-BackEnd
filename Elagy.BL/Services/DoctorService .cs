@@ -533,12 +533,10 @@ namespace Elagy.BL.Services
                 IQueryable<Doctor> query = doctors.AsQueryable();
                 if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
-                    string term = paginationParameters.SearchTerm.Trim().ToLower();
+                    string term = paginationParameters.SearchTerm.Trim();
                     query = query.Where(d =>
-                        d.FirstName.ToLower().Contains(term) ||
-                        d.LastName.ToLower().Contains(term) ||
-                        (d.Bio != null && d.Bio.ToLower().Contains(term)) ||
-                        (d.Qualification != null && d.Qualification.ToLower().Contains(term))
+                        d.FirstName.Contains(term) ||
+                        d.LastName.Contains(term)
                     );
                 }
 

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 namespace Elagy.APIs.Controllers
 {
     [Route("api/[controller]")]
+    [ApiController]
     // Protect this controller, allowing only ServiceProviders that are CarRental type
     [Authorize(Roles = "CarRentalServiceProvider")] // Assuming a generic ServiceProvider role for all providers
     public class CarRentalProviderController : BaseApiController
@@ -157,7 +158,7 @@ namespace Elagy.APIs.Controllers
             }
         }
 
-        [HttpGet("{carDriverId}")] 
+        [HttpGet("assignment/{carDriverId}")]
         public async Task<IActionResult> GetAssignmentById(int carDriverId)
         {
             if (carDriverId <= 0) return BadRequest("Car Driver Assignment ID must be positive.");
