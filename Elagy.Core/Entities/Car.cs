@@ -13,19 +13,17 @@ namespace Elagy.Core.Entities
         public int Id { get; set; } 
         [Required] public string FactoryMake { get; set; } 
         [Required] public string ModelName { get; set; }
-        [Required] public int ModelYear { get; set; } 
-        [Required] public int PlateNumber { get; set; } 
+        [Required] public int ModelYear { get; set; }
 
         [Required] public CarType Type { get; set; } 
         [Required] public int Capacity { get; set; } 
 
         public decimal Price { get; set; } 
 
-
         [Required] public decimal PricePerDay { get; set; } 
         [Required] public TransmissionType Transmission { get; set; }
         [Required] public FuelType FuelType { get; set; }
-        public bool IsAvailable { get; set; } = true;
+        public bool IsAvailable { get; set; } = true; 
         public CarStatus Status { get; set; } 
         public string Description { get; set; } 
 
@@ -37,6 +35,6 @@ namespace Elagy.Core.Entities
 
 
         public ICollection<CarDriver>? CarDrivers { get; set; }
-        public ICollection<CarSchedule> carRentalSchedules { get; set; } = new List<CarSchedule>(); // Appointments for this car
+        public ICollection<CarSchedule> carRentalSchedules { get; set; } = new List<CarSchedule>(); 
     }
 }

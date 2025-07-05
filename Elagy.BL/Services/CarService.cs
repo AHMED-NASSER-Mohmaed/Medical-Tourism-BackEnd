@@ -84,7 +84,7 @@ namespace Elagy.BL.Services
                 {
                     query = query.Where(c => c.PricePerDay <= paginationParameters.MaxPrice.Value);
                 }
-
+                
                 if (paginationParameters.MinOccupancy.HasValue)
                 {
                     query = query.Where(c => c.Capacity >= paginationParameters.MinOccupancy.Value);

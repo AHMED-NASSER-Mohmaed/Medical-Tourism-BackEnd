@@ -1,6 +1,7 @@
 using AutoMapper;
 using Elagy.Core.DTOs.Auth;
 using Elagy.Core.DTOs.Doctor;
+using Elagy.Core.DTOs.Room;
 using Elagy.Core.DTOs.Specialty;
 using Elagy.Core.DTOs.User;
 using Elagy.Core.Entities;
@@ -21,7 +22,7 @@ namespace Elagy.BL.Mapping
                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
                               .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.IsActive ? Status.Active : Status.Deactivated));
 
-
+            CreateMap<HospitalAssetImage, RoomImageDto>();
 
 
             // Map SpecialtyCreateDto to Specialty entity

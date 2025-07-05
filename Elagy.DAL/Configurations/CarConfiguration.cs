@@ -20,7 +20,7 @@ namespace Elagy.DAL.Configurations
             builder.Property(c => c.ModelName).IsRequired().HasMaxLength(50); // ModelName in DTO
             builder.Property(c => c.ModelYear).IsRequired(); // ModelYear in DTO
             builder.Property(c => c.Capacity).IsRequired();
-            builder.Property(p=>p.PlateNumber).IsRequired().HasMaxLength(10);
+          
 
             builder.Property(c => c.PricePerDay).HasColumnType("decimal(18,2)").IsRequired();;
         
