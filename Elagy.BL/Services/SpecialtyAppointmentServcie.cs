@@ -76,6 +76,18 @@ namespace Elagy.BL.Services
             }
         }
 
+        public async Task<(int booked, int cancelled)> GetBookedAndCancelled(int _scheduleId)
+        {
+
+            IQueryable<SpecialtyAppointment> QueryCancelledAppoinment = _unitOfWork.SpecialtyAppointments.AsQueryable();
+            QueryCancelledAppoinment = QueryCancelledAppoinment.Where(a => a.SpecialtyScheduleId == _scheduleId && a.Status == AppointmentStatus.Cancelled);
+
+            IQueryable<SpecialtyAppointment> QueryBookedAppoinment = _unitOfWork.SpecialtyAppointments.AsQueryable();
+            QueryBookedAppoinment = QueryBookedAppoinment.Where(a => a.SpecialtyScheduleId == _scheduleId && a.Status == AppointmentStatus.Booked);
+
+            return (await QueryBookedAppoinment.CountAsync(), await QueryCancelledAppoinment.CountAsync());
+        }
+
         public async Task<(bool IsAvailable, int AppointmentCount, SpecialtySchedule SS)> IsAvailableAppointmentForBooking(DateOnly Date, int SpecialtyScheduleId)
         {
 
