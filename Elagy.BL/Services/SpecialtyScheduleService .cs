@@ -155,7 +155,7 @@ namespace Elagy.BL.Services
                 // validate the start and end time and the estimated time for one patient
                 if (createDto.EndTime <= createDto.StartTime) 
                     throw new ArgumentException("End time must be after start time.");
-                if (createDto.TimeSlotSize <= 0) 
+                if (createDto.TimeSlotSize.TotalMinutes<=0) 
                     throw new ArgumentException("Time slot size must be a positive integer.");
 
                 // convert to total minutes to calc the maxcapacity in the period
