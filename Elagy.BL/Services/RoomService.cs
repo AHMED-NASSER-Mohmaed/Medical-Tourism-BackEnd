@@ -180,7 +180,7 @@ namespace Elagy.BL.Services
 
                 if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
-                    string term = paginationParameters.SearchTerm.Trim().ToLower();
+                    string term = paginationParameters.SearchTerm.Trim();
                     query = query.Where(r => r.RoomNumber.Contains(term));
 
                 }

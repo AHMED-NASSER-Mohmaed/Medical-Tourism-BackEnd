@@ -49,11 +49,11 @@ namespace Elagy.BL.Services
                 // Search by make, model, description
                 if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
-                    string term = paginationParameters.SearchTerm.Trim().ToLower();
+                    string term = paginationParameters.SearchTerm.Trim();
                     query = query.Where(c =>
-                        c.FactoryMake.ToLower().Contains(term) ||
-                        c.ModelName.ToLower().Contains(term) ||
-                        c.Description.ToLower().Contains(term)
+                        c.FactoryMake.Contains(term) ||
+                        c.ModelName.Contains(term) ||
+                        c.Description.Contains(term)
                     );
                 }
 
@@ -326,11 +326,11 @@ namespace Elagy.BL.Services
                 // SearchTerm on Car properties (e.g., Make, ModelName, Description)
                 if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
-                    string term = paginationParameters.SearchTerm.Trim().ToLower();
+                    string term = paginationParameters.SearchTerm.Trim();
                     query = query.Where(c =>
-                        c.FactoryMake.ToLower().Contains(term) ||
-                        c.ModelName.ToLower().Contains(term) ||
-                        c.Description.ToLower().Contains(term)
+                        c.FactoryMake.Contains(term) ||
+                        c.ModelName.Contains(term) ||
+                        c.Description.Contains(term)
                     );
                 }
 

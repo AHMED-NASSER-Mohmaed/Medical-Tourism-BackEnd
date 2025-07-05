@@ -39,11 +39,11 @@ namespace Elagy.BL.Services
 
                 if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
-                    string term = paginationParameters.SearchTerm.Trim().ToLower();
+                    string term = paginationParameters.SearchTerm.Trim();
                     query = query.Where(s =>
-                        s.Doctor.FirstName.ToLower().Contains(term) ||
-                        s.Doctor.LastName.ToLower().Contains(term) ||
-                        s.HospitalSpecialty.Specialty.Name.ToLower().Contains(term)
+                        s.Doctor.FirstName.Contains(term) ||
+                        s.Doctor.LastName.Contains(term) ||
+                        s.HospitalSpecialty.Specialty.Name.Contains(term)
                     );
                 }
 

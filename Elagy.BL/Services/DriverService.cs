@@ -185,10 +185,10 @@ namespace Elagy.BL.Services
 
                 if(!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
-                    string term = paginationParameters.SearchTerm.Trim().ToLower();
-                    query = query.Where(s=>s.FirstName.ToLower().Contains(term)||
-                                        s.LastName.ToLower().Contains(term)||
-                                        s.Email.ToLower().Contains(term));
+                    string term = paginationParameters.SearchTerm.Trim();
+                    query = query.Where(s=>s.FirstName.Contains(term)||
+                                        s.LastName.Contains(term)||
+                                        s.Email.Contains(term));
                 }
 
                 if(paginationParameters.DriverStatus.HasValue)

@@ -34,10 +34,10 @@ namespace Elagy.BL.Services
 
                 if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
-                    string searchTermLower = paginationParameters.SearchTerm.Trim().ToLower();
+                    string searchTermLower = paginationParameters.SearchTerm.Trim();
                     query = query.Where(s =>
-                        s.Name.ToLower().Contains(searchTermLower) ||
-                        (s.Description != null && s.Description.ToLower().Contains(searchTermLower))
+                        s.Name.Contains(searchTermLower) ||
+                        (s.Description != null && s.Description.Contains(searchTermLower))
                     );
                 }
 
@@ -293,8 +293,8 @@ namespace Elagy.BL.Services
                 // Apply SearchTerm filter
                 if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
-                    string term = paginationParameters.SearchTerm.Trim().ToLower();
-                    query = query.Where(s => s.Name.ToLower().Contains(term) || (s.Description != null && s.Description.ToLower().Contains(term)));
+                    string term = paginationParameters.SearchTerm.Trim();
+                    query = query.Where(s => s.Name..Contains(term) || (s.Description != null && s.Description.Contains(term)));
                 }
 
                 // Apply FilterIsActive (for the Specialty entity itself, not the link status)
@@ -334,11 +334,11 @@ namespace Elagy.BL.Services
 
             if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
             {
-                string term = paginationParameters.SearchTerm.Trim().ToLower();
+                string term = paginationParameters.SearchTerm.Trim();
                 query = query.Where(hs =>
-                    hs.Specialty.Name.ToLower().Contains(term) ||
+                    hs.Specialty.Name.Contains(term) ||
                     (hs.Specialty.Description != null &&
-                     hs.Specialty.Description.ToLower().Contains(term))
+                     hs.Specialty.Description.Contains(term))
                 );
             }
 
