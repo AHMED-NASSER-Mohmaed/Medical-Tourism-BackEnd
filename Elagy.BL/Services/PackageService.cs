@@ -39,7 +39,6 @@ namespace Elagy.BL.Services
 
             await _unitOfWork.Packages.AddAsync(createdPackage);
 
-            //await _unitOfWork.CompleteAsync();
 
             return createdPackage;
         }

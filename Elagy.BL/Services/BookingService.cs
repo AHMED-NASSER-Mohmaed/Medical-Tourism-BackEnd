@@ -19,12 +19,15 @@ namespace Elagy.BL.Services
     public class BookingService : IBookingService
     {
         private readonly ISpecialtyAppointmentService _specialtyAppointment;
+        private readonly IRoomAppointmentService _roomApointmentService;
+
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
-        public BookingService(ISpecialtyAppointmentService specialtyAppointment,IMapper mapper,IUnitOfWork unitOfWork)
+        public BookingService(ISpecialtyAppointmentService specialtyAppointment,IMapper mapper,IUnitOfWork unitOfWork, IRoomAppointmentService roomApointmentService)
         {
             _specialtyAppointment = specialtyAppointment;
+            _roomApointmentService = roomApointmentService;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
         }
@@ -59,12 +62,9 @@ namespace Elagy.BL.Services
                 _packageResponseDTO.SpecialtyAppoinment=_specialtyResponseDto;
 
 
-                if(request.HotelAppointment!=null)
+                if(request.RoomAppointment!=null)
                 {
-
-
-                    // Handle hotel appointment booking logic here
-                    // This part is not implemented in the original code, so you may need to add it based on your requirements.
+                    await _roomApointmentService.BookAppointment(CreatedPackage, request.RoomAppointment);
                 }
 
                 if(request.CarAppointment != null)
@@ -76,10 +76,7 @@ namespace Elagy.BL.Services
 
 
 
-                /////
-                ///
-                ///
-                ///
+                 
 
                 await _unitOfWork.CompleteAsync();
 

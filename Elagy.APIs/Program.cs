@@ -94,6 +94,9 @@ builder.Services.AddScoped<IPackgeService, PackageService>();
 builder.Services.AddScoped<ISpecialtyAppointmentService, SpecialtyAppointmentServcie>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 
+builder.Services.AddScoped<IRoomScheduleService, RoomScheduleService>();
+
+builder.Services.AddScoped<IRoomAppointmentService, RoomAppointmentService>();
 
 builder.Services.AddScoped<SessionService>();
 
