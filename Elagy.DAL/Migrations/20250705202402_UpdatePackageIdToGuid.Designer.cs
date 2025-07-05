@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Elagy.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250704030259_StatusAddedToCarRentalSchedul")]
-    partial class StatusAddedToCarRentalSchedul
+    [Migration("20250705202402_UpdatePackageIdToGuid")]
+    partial class UpdatePackageIdToGuid
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,7 +32,7 @@ namespace Elagy.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("DisbursementItemId")
+                    b.Property<int?>("DisbursementItemId")
                         .HasColumnType("int");
 
                     b.Property<string>("Discriminator")
@@ -40,8 +40,8 @@ namespace Elagy.DAL.Migrations
                         .HasMaxLength(21)
                         .HasColumnType("nvarchar(21)");
 
-                    b.Property<int>("PackageId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("PackageId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -56,7 +56,8 @@ namespace Elagy.DAL.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DisbursementItemId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[DisbursementItemId] IS NOT NULL");
 
                     b.HasIndex("PackageId");
 
@@ -178,6 +179,9 @@ namespace Elagy.DAL.Migrations
 
                     b.Property<int>("ModelYear")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("PricePerDay")
                         .HasColumnType("decimal(18,2)");
@@ -301,7 +305,7 @@ namespace Elagy.DAL.Migrations
                     b.ToTable("CarRentalAssetImages");
                 });
 
-            modelBuilder.Entity("Elagy.Core.Entities.CarRentalSchedule", b =>
+            modelBuilder.Entity("Elagy.Core.Entities.CarSchedule", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -320,6 +324,9 @@ namespace Elagy.DAL.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -524,11 +531,8 @@ namespace Elagy.DAL.Migrations
 
             modelBuilder.Entity("Elagy.Core.Entities.Package", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime");
@@ -542,6 +546,9 @@ namespace Elagy.DAL.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -601,8 +608,8 @@ namespace Elagy.DAL.Migrations
                     b.Property<bool>("IsCaptured")
                         .HasColumnType("bit");
 
-                    b.Property<int>("PackageId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("PackageId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PaymentMethodType")
                         .IsRequired()
@@ -762,9 +769,6 @@ namespace Elagy.DAL.Migrations
                     b.Property<DateOnly>("EndDate")
                         .HasColumnType("date");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<int>("RoomId")
                         .HasColumnType("int");
 
@@ -773,6 +777,9 @@ namespace Elagy.DAL.Migrations
 
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -814,12 +821,6 @@ namespace Elagy.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BookedSlots")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CancelledSlots")
-                        .HasColumnType("int");
-
                     b.Property<int>("DayOfWeekId")
                         .HasColumnType("int");
 
@@ -846,8 +847,8 @@ namespace Elagy.DAL.Migrations
                     b.Property<TimeOnly>("StartTime")
                         .HasColumnType("time");
 
-                    b.Property<int>("TimeSlotSize")
-                        .HasColumnType("int");
+                    b.Property<TimeSpan>("TimeSlotSize")
+                        .HasColumnType("time");
 
                     b.HasKey("Id");
 
@@ -1170,20 +1171,23 @@ namespace Elagy.DAL.Migrations
                 {
                     b.HasBaseType("Elagy.Core.Entities.Appointment");
 
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
                     b.Property<TimeOnly>("ExistingTime")
                         .HasColumnType("time");
-
-                    b.Property<int>("IsOffile")
-                        .HasColumnType("int");
 
                     b.Property<string>("MeetingUrl")
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)");
 
-                    b.Property<int>("ScheduleId")
+                    b.Property<int>("ServiceDeliveryType")
                         .HasColumnType("int");
 
-                    b.HasIndex("ScheduleId");
+                    b.Property<int>("SpecialtyScheduleId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("SpecialtyScheduleId");
 
                     b.HasDiscriminator().HasValue("SpecialtyAppointment");
                 });
@@ -1362,8 +1366,7 @@ namespace Elagy.DAL.Migrations
                     b.HasOne("Elagy.Core.Entities.DisbursementItem", "DisbursementItem")
                         .WithOne("Appointment")
                         .HasForeignKey("Elagy.Core.Entities.Appointment", "DisbursementItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Elagy.Core.Entities.Package", "Package")
                         .WithMany("Appointments")
@@ -1454,7 +1457,7 @@ namespace Elagy.DAL.Migrations
                     b.Navigation("CarRentalAsset");
                 });
 
-            modelBuilder.Entity("Elagy.Core.Entities.CarRentalSchedule", b =>
+            modelBuilder.Entity("Elagy.Core.Entities.CarSchedule", b =>
                 {
                     b.HasOne("Elagy.Core.Entities.Car", "Car")
                         .WithMany("carRentalSchedules")
@@ -1662,7 +1665,7 @@ namespace Elagy.DAL.Migrations
 
             modelBuilder.Entity("Elagy.Core.Entities.CarRentalAppointment", b =>
                 {
-                    b.HasOne("Elagy.Core.Entities.CarRentalSchedule", "CarRentalSchedule")
+                    b.HasOne("Elagy.Core.Entities.CarSchedule", "CarRentalSchedule")
                         .WithMany("CarRentalAppointments")
                         .HasForeignKey("CarRentalScheduleId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1692,13 +1695,13 @@ namespace Elagy.DAL.Migrations
 
             modelBuilder.Entity("Elagy.Core.Entities.SpecialtyAppointment", b =>
                 {
-                    b.HasOne("Elagy.Core.Entities.SpecialtySchedule", "Schedule")
+                    b.HasOne("Elagy.Core.Entities.SpecialtySchedule", "SpecialtySchedule")
                         .WithMany("Appointments")
-                        .HasForeignKey("ScheduleId")
+                        .HasForeignKey("SpecialtyScheduleId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Schedule");
+                    b.Navigation("SpecialtySchedule");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.CarRentalAsset", b =>
@@ -1764,7 +1767,7 @@ namespace Elagy.DAL.Migrations
                     b.Navigation("carRentalSchedules");
                 });
 
-            modelBuilder.Entity("Elagy.Core.Entities.CarRentalSchedule", b =>
+            modelBuilder.Entity("Elagy.Core.Entities.CarSchedule", b =>
                 {
                     b.Navigation("CarRentalAppointments");
                 });

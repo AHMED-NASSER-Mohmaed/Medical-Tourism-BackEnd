@@ -18,6 +18,7 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Stripe;
+using Stripe.Checkout;
 
 
 
@@ -84,8 +85,19 @@ builder.Services.AddScoped<ICountryService, CountryService>();
 
 builder.Services.AddScoped<ISpecialtyService, SpecialtyService>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
-builder.Services.AddScoped<ISpecialtyScheduleService, ScheduleService>();
+builder.Services.AddScoped<ISpecialtyScheduleService, SpecialtyScheduleService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
+
+
+
+builder.Services.AddScoped<IPackgeService, PackageService>();
+builder.Services.AddScoped<ISpecialtyAppointmentService, SpecialtyAppointmentServcie>();
+builder.Services.AddScoped<IBookingService, BookingService>();
+
+
+builder.Services.AddScoped<SessionService>();
+
+
 
 
 
@@ -251,9 +263,9 @@ using (var scope = app.Services.CreateScope())
         logger.LogInformation("Database migrations applied.");
 
         //Execute seeding methods in a logical order
-       await DbInitializer.SeedRoles(userManager, roleManager, logger);
-       await DbInitializer.SeedSuperAdminAsync(userManager, roleManager, logger);
-       await DbInitializer.SeedStaticDataAsync(appContext, logger);
+        //await DbInitializer.SeedRoles(userManager, roleManager, logger);
+        //await DbInitializer.SeedSuperAdminAsync(userManager, roleManager, logger);
+        //await DbInitializer.SeedStaticDataAsync(appContext, logger);
 
         logger.LogInformation("Database seeding completed successfully.");
     }

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elagy.Core.DTOs.Booking
+namespace Elagy.Core.DTOs.RoomAppoinment
 {
-    public class HotelAppointmentDTO
+    public class RoomAppointmentResponseDTO
     {
         public DateOnly CheckInDate { get; set; }
         public DateOnly CheckOutDate { get; set; }

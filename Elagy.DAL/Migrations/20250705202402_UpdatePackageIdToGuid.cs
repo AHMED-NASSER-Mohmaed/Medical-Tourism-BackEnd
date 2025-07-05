@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Elagy.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class UpdatePackageIdToGuid : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -25,18 +25,6 @@ namespace Elagy.DAL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetRoles", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "CarRentalSchedules",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CarRentalSchedules", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -131,8 +119,8 @@ namespace Elagy.DAL.Migrations
                     price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    PackageId = table.Column<int>(type: "int", nullable: false),
-                    DisbursementItemId = table.Column<int>(type: "int", nullable: false),
+                    PackageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DisbursementItemId = table.Column<int>(type: "int", nullable: true),
                     Discriminator = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false),
                     StartingDateTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     EndingDateTime = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -145,20 +133,15 @@ namespace Elagy.DAL.Migrations
                     CheckOutDate = table.Column<DateOnly>(type: "date", nullable: true),
                     HotelScheduleId = table.Column<int>(type: "int", nullable: true),
                     RoomId = table.Column<int>(type: "int", nullable: true),
-                    IsOffile = table.Column<int>(type: "int", nullable: true),
+                    ServiceDeliveryType = table.Column<int>(type: "int", nullable: true),
                     MeetingUrl = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true),
                     ExistingTime = table.Column<TimeOnly>(type: "time", nullable: true),
-                    ScheduleId = table.Column<int>(type: "int", nullable: true)
+                    Date = table.Column<DateOnly>(type: "date", nullable: true),
+                    SpecialtyScheduleId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Appointments", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Appointments_CarRentalSchedules_CarRentalScheduleId",
-                        column: x => x.CarRentalScheduleId,
-                        principalTable: "CarRentalSchedules",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -331,11 +314,11 @@ namespace Elagy.DAL.Migrations
                 name: "Packages",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
                     PaymentConfirmedAt = table.Column<DateTime>(type: "datetime", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PatientId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
@@ -461,7 +444,7 @@ namespace Elagy.DAL.Migrations
                     StripeRawDataJson = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
-                    PackageId = table.Column<int>(type: "int", nullable: false)
+                    PackageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -506,6 +489,7 @@ namespace Elagy.DAL.Migrations
                     ModelYear = table.Column<int>(type: "int", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Capacity = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PricePerDay = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Transmission = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     FuelType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
@@ -663,6 +647,29 @@ namespace Elagy.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CarRentalSchedules",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    StartingDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    EndingDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    CarId = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CarRentalSchedules", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CarRentalSchedules_Cars_CarId",
+                        column: x => x.CarId,
+                        principalTable: "Cars",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Schedules",
                 columns: table => new
                 {
@@ -670,10 +677,8 @@ namespace Elagy.DAL.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     StartTime = table.Column<TimeOnly>(type: "time", nullable: false),
                     EndTime = table.Column<TimeOnly>(type: "time", nullable: false),
-                    TimeSlotSize = table.Column<int>(type: "int", nullable: false),
+                    TimeSlotSize = table.Column<TimeSpan>(type: "time", nullable: false),
                     MaxCapacity = table.Column<int>(type: "int", nullable: false),
-                    BookedSlots = table.Column<int>(type: "int", nullable: false),
-                    CancelledSlots = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     DoctorId = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -730,7 +735,7 @@ namespace Elagy.DAL.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     StartDate = table.Column<DateOnly>(type: "date", nullable: false),
                     EndDate = table.Column<DateOnly>(type: "date", nullable: false),
                     RoomscheduleStatus = table.Column<int>(type: "int", nullable: false),
@@ -770,7 +775,8 @@ namespace Elagy.DAL.Migrations
                 name: "IX_Appointments_DisbursementItemId",
                 table: "Appointments",
                 column: "DisbursementItemId",
-                unique: true);
+                unique: true,
+                filter: "[DisbursementItemId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Appointments_HotelScheduleId",
@@ -788,9 +794,9 @@ namespace Elagy.DAL.Migrations
                 column: "RoomId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Appointments_ScheduleId",
+                name: "IX_Appointments_SpecialtyScheduleId",
                 table: "Appointments",
-                column: "ScheduleId");
+                column: "SpecialtyScheduleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -878,6 +884,11 @@ namespace Elagy.DAL.Migrations
                 column: "CarRentalAssetId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CarRentalSchedules_CarId",
+                table: "CarRentalSchedules",
+                column: "CarId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Cars_CarRentalAssetId",
                 table: "Cars",
                 column: "CarRentalAssetId");
@@ -949,6 +960,14 @@ namespace Elagy.DAL.Migrations
                 column: "HospitalSpecialtyId");
 
             migrationBuilder.AddForeignKey(
+                name: "FK_Appointments_CarRentalSchedules_CarRentalScheduleId",
+                table: "Appointments",
+                column: "CarRentalScheduleId",
+                principalTable: "CarRentalSchedules",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_Appointments_DisbursementItems_DisbursementItemId",
                 table: "Appointments",
                 column: "DisbursementItemId",
@@ -981,9 +1000,9 @@ namespace Elagy.DAL.Migrations
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Appointments_Schedules_ScheduleId",
+                name: "FK_Appointments_Schedules_SpecialtyScheduleId",
                 table: "Appointments",
-                column: "ScheduleId",
+                column: "SpecialtyScheduleId",
                 principalTable: "Schedules",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
@@ -1085,10 +1104,10 @@ namespace Elagy.DAL.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Cars");
+                name: "Packages");
 
             migrationBuilder.DropTable(
-                name: "Packages");
+                name: "Cars");
 
             migrationBuilder.DropTable(
                 name: "Disbursements");

@@ -62,7 +62,7 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
         builder.ApplyConfiguration(new HospitalSpecialtyConfiguration());
         builder.ApplyConfiguration(new DoctorConfiguration());
         builder.ApplyConfiguration(new DayOfWeekConfiguration());
-        builder.ApplyConfiguration(new ScheduleConfiguration());
+        builder.ApplyConfiguration(new SpecialtyScheduleConfiguration());
         builder.ApplyConfiguration(new RoomConfiguration());
         builder.ApplyConfiguration(new RoomImageConfiguration());
         builder.ApplyConfiguration(new CarConfiguration());

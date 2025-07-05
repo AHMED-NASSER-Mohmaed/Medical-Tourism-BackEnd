@@ -1,4 +1,5 @@
 ﻿using Elagy.Core.DTOs.Booking;
+using Elagy.Core.DTOs.Package;
 using Elagy.Core.Entities;
 using Elagy.Core.Enums;
 using System;
@@ -12,7 +13,7 @@ namespace Elagy.Core.IServices
     public interface IBookingService
     {
 
-        Task<Package> CreatePendingBookingAsync(CreateBookingRequest request);
+        Task<PackageResponseDTO> CreatePendingBookingAsync(string PatientId,CreateBookingRequest request);
         Task<Package?> GetBookingByIdAsync(int PackageId);
         Task UpdateBookingStatusAsync(int PackageId, BookingStatus newStatus, string? stripeSessionId = null, string? stripePaymentIntentId = null);
 

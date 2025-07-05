@@ -26,7 +26,7 @@ namespace Elagy.Core.IRepositories
         IDoctorRepository Doctors { get; }
         IHospitalRepository Hospitals { get; }
         IHospitalSpecialtyRepository HospitalSpecialties { get; }
-        IScheduleRepository Schedules { get; }
+        IScheduleRepository SpecialtySchedule { get; }
         IRoomRepository Rooms { get; }
 
         ICarRepository Cars { get; }
@@ -36,7 +36,13 @@ namespace Elagy.Core.IRepositories
         
         //nasser
         IGenericRepository<RoomSchedule> RoomSchedule { get; }
-        public IGenericRepository<CarSchedule> CarSchedule { get; }
+        IGenericRepository<CarSchedule> CarSchedule { get; }
+
+        //appoinments
+        IGenericRepository<SpecialtyAppointment> SpecialtyAppointments { get; }
+        IGenericRepository<Package> Packages{ get; }
+
+
 
         Task<int> CompleteAsync();
     }
