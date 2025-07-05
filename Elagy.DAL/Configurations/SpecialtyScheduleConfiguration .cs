@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Elagy.DAL.Configurations
 {
-    public class ScheduleConfiguration : IEntityTypeConfiguration<SpecialtySchedule>
+    public class SpecialtyScheduleConfiguration : IEntityTypeConfiguration<SpecialtySchedule>
     {
         public void Configure(EntityTypeBuilder<SpecialtySchedule> builder)
         {
@@ -21,8 +21,11 @@ namespace Elagy.DAL.Configurations
             builder.Property(s => s.DayOfWeekId).IsRequired();
             builder.Property(s => s.StartTime).IsRequired();
             builder.Property(s => s.EndTime).IsRequired();
+
+            builder.Property(s => s.TimeSlotSize).HasColumnType("time").IsRequired();
+
             builder.Property(s => s.MaxCapacity).IsRequired();
-            builder.Property(s => s.BookedSlots).IsRequired();
+            //builder.Property(s => s.BookedSlots).IsRequired();
             builder.Property(s => s.IsActive).IsRequired();
  
             // Relationships:
@@ -55,8 +58,8 @@ namespace Elagy.DAL.Configurations
 
 
             builder.HasMany(s => s.Appointments)
-           .WithOne(a => a.Schedule)
-           .HasForeignKey(a => a.ScheduleId)
+           .WithOne(a => a.SpecialtySchedule)
+           .HasForeignKey(a => a.SpecialtyScheduleId)
            .OnDelete(DeleteBehavior.Restrict); // or Cascade, depending on your rules
 
         }

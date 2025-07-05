@@ -13,12 +13,19 @@ namespace Elagy.DAL.Configurations
 
             builder.HasKey(p => p.Id);
 
+            builder.Property(p => p.Id)
+           .ValueGeneratedNever();
+
             builder.Property(p => p.CreatedAt)
                    .HasColumnType("datetime")
                    .IsRequired();
 
             builder.Property(p => p.PaymentConfirmedAt)
                    .HasColumnType("datetime");
+
+            builder.Property(p => p.TotalAmount)
+                   .HasColumnType("decimal(18,2)")
+                   .IsRequired();
 
             builder.Property(p => p.Status)
                    .HasConversion<int>()

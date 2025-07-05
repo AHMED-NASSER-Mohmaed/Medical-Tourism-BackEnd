@@ -9,9 +9,9 @@ public class SpecialtyAppointmentConfiguration : IEntityTypeConfiguration<Specia
         builder.Property(s => s.MeetingUrl).HasMaxLength(512);
         builder.Property(s => s.ExistingTime).IsRequired();
 
-        builder.HasOne(s => s.Schedule)
+        builder.HasOne(s => s.SpecialtySchedule)
                .WithMany(s => s.Appointments)
-               .HasForeignKey(s => s.ScheduleId)
+               .HasForeignKey(s => s.SpecialtyScheduleId)
                .OnDelete(DeleteBehavior.Restrict); // ✅
     }
 }

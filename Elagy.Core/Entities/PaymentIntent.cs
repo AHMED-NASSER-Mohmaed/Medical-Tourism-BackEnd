@@ -52,7 +52,7 @@ namespace Elagy.Core.Entities
 
 
         //forging key to the package
-        public int PackageId{ get; set; } 
+        public Guid PackageId{ get; set; } 
         public Package Packages{ get; set; } 
     }
 }

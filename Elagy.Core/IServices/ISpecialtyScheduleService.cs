@@ -1,4 +1,5 @@
 ﻿using Elagy.Core.DTOs.Pagination;
+using Elagy.Core.DTOs.RoomSchedule;
 using Elagy.Core.DTOs.Schedule;
 using System;
 using System.Collections.Generic;
@@ -32,5 +33,8 @@ namespace Elagy.Core.IServices
 
         /// Retrieves a single schedule slot by its ID, typically for detail view.
         Task<ScheduleResponseDto?> GetScheduleByIdAsync(int scheduleId);
+        
+        //Task<(bool isAvailable, DateTime attendTime)> BookSpecialtySchedule(int SpecialtyScheduleId);
+
     }
 }

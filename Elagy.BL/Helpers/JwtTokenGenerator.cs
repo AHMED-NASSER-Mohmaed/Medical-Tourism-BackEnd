@@ -28,7 +28,7 @@ namespace Elagy.BL.Helpers
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(JwtRegisteredClaimNames.Email, user.UserName),
                 new Claim(ClaimTypes.NameIdentifier, user.Id), // Standard claim for user ID
                 new Claim(ClaimTypes.Name, user.UserName), // Standard claim for username
                 new Claim(ClaimTypes.GivenName, user.FirstName ?? ""), // Add first name

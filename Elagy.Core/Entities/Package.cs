@@ -10,7 +10,10 @@ namespace Elagy.Core.Entities
     //booking object
     public class Package
     {
-        public int Id { get; set; }
+        //public int Id { get; set; }
+
+        public Guid Id { get; set; }= Guid.NewGuid();
+
 
         public DateTime CreatedAt { get; set; }
         public DateTime? PaymentConfirmedAt { get; set; }
@@ -19,11 +22,14 @@ namespace Elagy.Core.Entities
         public BookingStatus Status { get; set; }
 
 
+        public decimal TotalAmount { get; set; }
+
         public string PatientId { get; set; } 
         //naavigation property
         public Patient Patient { get; set; }
 
-        public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+        public List<Appointment> Appointments { get; set; } = new List<Appointment>();
 
     }
+
 }

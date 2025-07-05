@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elagy.Core.Enums
+namespace Elagy.Core.IServices
 {
-    public enum AppointmentType
+    internal interface ICarAppointment
     {
-        Specialty , Room , Car
     }
 }
