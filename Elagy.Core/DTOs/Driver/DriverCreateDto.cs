@@ -31,7 +31,5 @@ namespace Elagy.Core.DTOs.Driver
         public float Rating { get; set; } = 0.0f;
         public DriverStatus DriverStatus { get; set; } = DriverStatus.Available;
 
-        [Required(ErrorMessage = "Car Rental Asset ID is required.")] // Now explicitly required in DTO
-        public string CarRentalAssetId { get; set; } 
     }
 }

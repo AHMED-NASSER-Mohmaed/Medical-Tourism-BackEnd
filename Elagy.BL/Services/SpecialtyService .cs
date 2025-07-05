@@ -34,10 +34,10 @@ namespace Elagy.BL.Services
 
                 if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
-                    string searchTermLower = paginationParameters.SearchTerm.Trim();
+                    string searchTermLower = paginationParameters.SearchTerm.Trim().ToLower();
                     query = query.Where(s =>
-                        s.Name.Contains(searchTermLower) ||
-                        (s.Description != null && s.Description.Contains(searchTermLower))
+                        s.Name.ToLower().Contains(searchTermLower) ||
+                        (s.Description != null && s.Description.ToLower().Contains(searchTermLower))
                     );
                 }
 
@@ -334,11 +334,11 @@ namespace Elagy.BL.Services
 
             if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
             {
-                string term = paginationParameters.SearchTerm.Trim();
+                string term = paginationParameters.SearchTerm.Trim().ToLower();
                 query = query.Where(hs =>
-                    hs.Specialty.Name.Contains(term) ||
+                    hs.Specialty.Name.ToLower().Contains(term) ||
                     (hs.Specialty.Description != null &&
-                     hs.Specialty.Description.Contains(term))
+                     hs.Specialty.Description.ToLower().Contains(term))
                 );
             }
 

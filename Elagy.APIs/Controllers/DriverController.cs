@@ -74,7 +74,7 @@ namespace Elagy.APIs.Controllers
 
             try
             {
-                _logger.LogInformation($"Received request to create driver for Car Rental Asset {createDto.CarRentalAssetId}. Email: {createDto.Email}");
+                _logger.LogInformation($"Received request to create driver for Car Rental Asset {carRentalAssetId}. Email: {createDto.Email}");
 
                 var result = await _driverService.CreateDriverAsync(createDto, carRentalAssetId, licenseDocument, profileImage);
 
@@ -83,7 +83,7 @@ namespace Elagy.APIs.Controllers
   
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error creating driver for Car Rental Asset {createDto.CarRentalAssetId}.");
+                _logger.LogError(ex, $"Error creating driver for Car Rental Asset {carRentalAssetId}.");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while creating the driver.");
             }
         }

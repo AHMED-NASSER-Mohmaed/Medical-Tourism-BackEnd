@@ -120,7 +120,7 @@ namespace Elagy.BL.Services
                 driver.DriveLicenseLicenseNumberId = licenseId;
                 driver.ImageURL = profileImageUrl; 
                 driver.ImageId = profileImageId; 
-                driver.CarRentalAssetId = createDto.CarRentalAssetId; 
+                driver.CarRentalAssetId = carRentalAssetId; 
 
                 // Set Identity-specific initial states
                 driver.EmailConfirmed = true;
@@ -145,7 +145,7 @@ namespace Elagy.BL.Services
 
                 return _mapper.Map<DriverResponseDto>(createdDriverWithDetails);
             }
-            catch (Exception ex) { _logger.LogError(ex, $"Error creating driver for Car Rental Asset {createDto.CarRentalAssetId}."); throw; }
+            catch (Exception ex) { _logger.LogError(ex, $"Error creating driver for Car Rental Asset {carRentalAssetId}."); throw; }
         }
 
         public async Task<DriverResponseDto> DeleteDriverAsync(string driverId, string carRentalAssetId)
@@ -185,10 +185,10 @@ namespace Elagy.BL.Services
 
                 if(!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
-                    string term = paginationParameters.SearchTerm.Trim();
-                    query = query.Where(s=>s.FirstName.Contains(term)||
-                                        s.LastName.Contains(term)||
-                                        s.Email.Contains(term));
+                    string term = paginationParameters.SearchTerm.Trim().ToLower();
+                    query = query.Where(s=>s.FirstName.ToLower().Contains(term)||
+                                        s.LastName.ToLower().Contains(term)||
+                                        s.Email.ToLower().Contains(term));
                 }
 
                 if(paginationParameters.DriverStatus.HasValue)

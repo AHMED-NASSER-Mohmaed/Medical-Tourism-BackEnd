@@ -71,11 +71,11 @@ namespace Elagy.BL.Services
                 // 3. Apply SearchTerm filter
                 if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
-                    string term = paginationParameters.SearchTerm.Trim();
+                    string term = paginationParameters.SearchTerm.Trim().ToLower();
                     query = query.Where(d =>
-                        d.FirstName.Contains(term) ||
-                        d.LastName.Contains(term) ||
-                        d.Email.Contains(term)
+                        d.FirstName.ToLower().Contains(term) ||
+                        d.LastName.ToLower().Contains(term) ||
+                        d.Email.ToLower().Contains(term)
                     );
                 }
 
@@ -121,11 +121,11 @@ namespace Elagy.BL.Services
                 var query = doctors.AsQueryable();
                 if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
-                    string term = paginationParameters.SearchTerm.Trim();
+                    string term = paginationParameters.SearchTerm.Trim().ToLower();
                     query = query.Where(d =>
-                        d.FirstName.Contains(term) ||
-                        d.LastName.Contains(term) ||
-                        d.Email.Contains(term) 
+                        d.FirstName.ToLower().Contains(term) ||
+                        d.LastName.ToLower().Contains(term) ||
+                        d.Email.ToLower().Contains(term) 
                        
                     );
                 }
@@ -487,10 +487,10 @@ namespace Elagy.BL.Services
                 var query = doctors.AsQueryable();
                 if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
-                    string term = paginationParameters.SearchTerm.Trim();
+                    string term = paginationParameters.SearchTerm.Trim().ToLower();
                     query = query.Where(d =>
-                        d.FirstName.Contains(term) ||
-                        d.LastName.Contains(term) 
+                        d.FirstName.ToLower().Contains(term) ||
+                        d.LastName.ToLower().Contains(term) 
                     );
                 }
 
