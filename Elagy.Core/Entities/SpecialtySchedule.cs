@@ -13,11 +13,6 @@ namespace Elagy.Core.Entities
         public TimeOnly EndTime { get; set; }
         public TimeSpan TimeSlotSize {  get; set; }
         public int MaxCapacity { get; set; }
-
-        //public int BookedSlots { get; set; } = 0; // Driven
-
-        //added by nasser ya mahdy
-        //public int CancelledSlots { get; set; } = 0; // Driven
         public decimal Price { get; set; }
         public bool IsActive { get; set; } = true;
         public string DoctorId { get; set; }

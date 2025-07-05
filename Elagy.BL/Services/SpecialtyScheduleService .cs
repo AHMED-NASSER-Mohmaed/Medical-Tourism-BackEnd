@@ -16,6 +16,8 @@ namespace Elagy.BL.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+   
+
         private readonly ILogger<SpecialtyScheduleService> _logger;
 
         public SpecialtyScheduleService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<SpecialtyScheduleService> logger)
@@ -23,6 +25,7 @@ namespace Elagy.BL.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+
         }
 
         /// Retrieves a paginated list of all schedules for a specific hospital's admin dashboard
@@ -317,6 +320,7 @@ namespace Elagy.BL.Services
                 // 2. Filter for truly available slots (active and has capacity)
                 //query = query.Where(s => s.IsActive == true && s.BookedSlots < s.MaxCapacity);
                 //booked slots is going to be driven from appoinment relation  
+            
 
                 if (!string.IsNullOrWhiteSpace(paginationParameters.hospitalId)) // Using SpecialtyId from PaginationParameters
                 {
@@ -338,21 +342,28 @@ namespace Elagy.BL.Services
                 {
                     query = query.Where(s => s.DayOfWeekId == paginationParameters.FilterDayOfWeekId.Value);
                 }
-                 
+                if (!string.IsNullOrWhiteSpace(paginationParameters.FilterDoctorId))
+                {
+                    query = query.Where(d => d.DoctorId == paginationParameters.FilterDoctorId);
+
+                }
+
+
+
+                var scheduleIds = query.Select(s => s.Id).ToList();
+
+
                 var totalCount = await query.CountAsync();
 
+
                 var pagedSchedules = await query
-                    .Include(s => s.Doctor) 
-                    .Include(s => s.HospitalSpecialty)
-                        .ThenInclude(hs => hs.HospitalAsset)
-                    .Include(s => s.HospitalSpecialty)
-                        .ThenInclude(hs => hs.Specialty)
-                    .Include(s => s.DayOfWeek)
+                   
                     .OrderBy(s => s.DayOfWeekId)
                     .ThenBy(s => s.StartTime)
                     .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
                     .Take(paginationParameters.PageSize)
                     .ToListAsync();
+
 
                 // 6. Map to DTOs
                 var scheduleDtos = _mapper.Map<IEnumerable<ScheduleResponseDto>>(pagedSchedules);

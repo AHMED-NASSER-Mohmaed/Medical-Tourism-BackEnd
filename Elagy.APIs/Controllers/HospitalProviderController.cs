@@ -215,7 +215,6 @@ namespace Elagy.APIs.Controllers
             [FromQuery] int PageNumber = 1,
             [FromQuery] int PageSize = 10,
             [FromQuery] string? SearchTerm = null,
-            [FromQuery] int? SpecialtyId = null,
             [FromQuery] int? FilterDayOfWeekId = null,
             [FromQuery] string? FilterDoctorId = null,
             [FromQuery] int? FilterSpecialtyId = null,
@@ -233,7 +232,6 @@ namespace Elagy.APIs.Controllers
                     SearchTerm = SearchTerm,
                     FilterDayOfWeekId = FilterDayOfWeekId,
                     FilterDoctorId = FilterDoctorId,
-                    SpecialtyId = SpecialtyId,
                     hospitalId = FilterHospitalId,
                 };
 

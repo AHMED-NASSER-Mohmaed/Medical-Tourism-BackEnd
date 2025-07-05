@@ -20,6 +20,8 @@ namespace Elagy.APIs.Controllers
         private readonly IDoctorService _doctorService;
         private readonly ISpecialtyScheduleService _scheduleService;
         private readonly ISuperAdminService _superAdminService;
+        private readonly ICarService _carservice;
+
 
         public WebsiteController(
             IHospitalProviderService hospitalProviderService,
@@ -29,7 +31,8 @@ namespace Elagy.APIs.Controllers
             ISpecialtyService specialtyService,
             IDoctorService doctorService,
             ISpecialtyScheduleService scheduleService,
-            ISuperAdminService superAdminService)
+            ISuperAdminService superAdminService,
+            ICarService carservice)
         {
             _hospitalProviderService = hospitalProviderService;
             _carRentalProviderService = carRentalProviderService;
@@ -39,9 +42,58 @@ namespace Elagy.APIs.Controllers
             _doctorService = doctorService;
             _scheduleService = scheduleService;
             _superAdminService = superAdminService;
+            _carservice=carservice;
         }
 
-     
+
+        // still needd to maintain
+        [HttpGet("CarRentals")]
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<HotelProviderProfileDto>>> GetCarRentalProviders(
+        [FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10,
+        [FromQuery] string SearchTerm = null, [FromQuery] Status? UserStatus = null)
+        {
+            var Filter = new PaginationParameters();
+            Filter.PageNumber = PageNumber;
+            Filter.PageSize = PageSize;
+            Filter.SearchTerm = SearchTerm;
+            Filter.UserStatus = UserStatus;
+
+            var providers = await _superAdminService.GetCarRentalProvidersForAdminDashboardAsync(Filter);
+            return Ok(providers);
+        }
+        [HttpGet("CarAvailable/{carRentalId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAvailableCarsForWebsite(string carRentalId,
+              [FromQuery] int PageNumber = 1,
+              [FromQuery] int PageSize = 10,
+              [FromQuery] string? SearchTerm = null,
+              [FromQuery] CarType? CarType = null,
+              [FromQuery] decimal? MinPrice = null,
+              [FromQuery] decimal? MaxPrice = null)
+        {
+            if (PageNumber < 1 || PageSize < 1) return BadRequest("PageNumber and PageSize must be greater than 0.");
+
+            try
+            {
+                var paginationParams = new PaginationParameters
+                {
+                    PageNumber = PageNumber,
+                    PageSize = PageSize,
+                    SearchTerm = SearchTerm,
+                    CarType = CarType,
+                    MinPrice = MinPrice,
+                    MaxPrice = MaxPrice
+                };
+
+                var result = await _carservice.GetAvailableCarsForWebsiteAsync(paginationParams, carRentalId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving available cars.");
+            }
+        }
 
         [HttpGet("hotels")]
         [AllowAnonymous]
@@ -120,22 +172,9 @@ namespace Elagy.APIs.Controllers
             }
         }
 
-        // still needd to maintain
-        [HttpGet("CarRentals")]
-        [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<HotelProviderProfileDto>>> GetCarRentalProviders(
-        [FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10,
-        [FromQuery] string SearchTerm = null, [FromQuery] Status? UserStatus = null)
-        {
-            var Filter = new PaginationParameters();
-            Filter.PageNumber = PageNumber;
-            Filter.PageSize = PageSize;
-            Filter.SearchTerm = SearchTerm;
-            Filter.UserStatus = UserStatus;
+      
 
-            var providers = await _superAdminService.GetCarRentalProvidersForAdminDashboardAsync(Filter);
-            return Ok(providers);
-        }
+       
 
 
         [HttpGet("Hospitals")]
@@ -233,31 +272,7 @@ namespace Elagy.APIs.Controllers
         }
 
 
-        [HttpGet("Doctors-in-Specialty/{hospitalSpecialtyId}")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetDoctorsByHospitalSpecialty(
-           int hospitalSpecialtyId,
-           [FromQuery] int PageNumber = 1,
-           [FromQuery] int PageSize = 10,
-           [FromQuery] string? SearchTerm = null,
-           [FromQuery] int? SpecialtyId = null)
-
-        {
-            if (hospitalSpecialtyId <= 0 || PageNumber < 1 || PageSize < 1)
-            {
-                return BadRequest("Invalid pagination parameters or HospitalSpecialtyId.");
-            }
-            try
-            {
-                var paginationParams = new PaginationParameters { PageNumber = PageNumber, PageSize = PageSize, SearchTerm = SearchTerm };
-                var result = await _doctorService.GetAllDoctorsPerHospitalSpecialty(hospitalSpecialtyId, paginationParams);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving doctors for the specialty.");
-            }
-        }
+      
 
         [HttpGet("Doctors-in-Specialty/{specialtyId}/{hospitalId}")]
         [AllowAnonymous]
