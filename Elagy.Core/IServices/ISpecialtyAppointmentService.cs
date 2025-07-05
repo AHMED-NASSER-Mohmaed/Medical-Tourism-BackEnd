@@ -12,6 +12,7 @@ namespace Elagy.Core.IServices
     public interface ISpecialtyAppointmentService
     {
         Task<Package> BookAppointment(string PatientId,CreateSpecialtyAppointmentDTO _);
+        Task<(int booked, int cancelled)> GetBookedAndCancelled(int _scheduleId);
         Task<(bool IsAvailable,int AppointmentCount, SpecialtySchedule SS)> IsAvailableAppointmentForBooking(DateOnly _ ,int SpecialtyScheduleId);
 
 
