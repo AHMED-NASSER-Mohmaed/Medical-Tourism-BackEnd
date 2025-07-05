@@ -83,7 +83,7 @@ namespace Elagy.APIs.Controllers
         // POST: api/Doctors
         [HttpPost()]
         [Authorize(Roles = "HospitalServiceProvider")]
-        public async Task<IActionResult> CreateDoctor([FromForm] DoctorCreateDto createDto,IFormFile document)
+        public async Task<IActionResult> CreateDoctor([FromForm] DoctorCreateDto createDto, IFormFile? licenseDocumentFile, IFormFile? profileImageFile)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -92,7 +92,7 @@ namespace Elagy.APIs.Controllers
 
             try
             {
-                var result = await _doctorService.CreateDoctorAsync(createDto, hospitalId, document);
+                var result = await _doctorService.CreateDoctorAsync(createDto, hospitalId, licenseDocumentFile, profileImageFile);
      
                 return CreatedAtAction(nameof(GetDoctorById), new { doctorId = result.Id }, result);
             }
@@ -134,7 +134,7 @@ namespace Elagy.APIs.Controllers
 
         [HttpPut("{doctorId}")]
         [Authorize(Roles = "HospitalServiceProvider")]
-        public async Task<IActionResult> UpdateDoctor(string doctorId, [FromForm] DoctorUpdateDto updateDto,IFormFile document)
+        public async Task<IActionResult> UpdateDoctor(string doctorId, [FromForm] DoctorUpdateDto updateDto, IFormFile? licenseDocumentFile, IFormFile? profileImageFile)
         {
             // Validate route ID matches DTO ID (if DTO had ID) or simply ensures route ID is valid
             if (string.IsNullOrWhiteSpace(doctorId)) return BadRequest("Doctor ID cannot be empty.");
@@ -146,7 +146,7 @@ namespace Elagy.APIs.Controllers
             try
             {
                 // Call service method with doctorId from route, DTO from body, and hospitalId from token
-                var result = await _doctorService.UpdateDoctorAsync(doctorId, updateDto, hospitalId, document);
+                var result = await _doctorService.UpdateDoctorAsync(doctorId, updateDto, hospitalId, licenseDocumentFile, profileImageFile);
                 return Ok(result);
             }
             catch (KeyNotFoundException ex) // Doctor not found

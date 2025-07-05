@@ -161,10 +161,9 @@ namespace Elagy.DAL.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("FuelType")
-                        .IsRequired()
+                    b.Property<int>("FuelType")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
@@ -183,20 +182,17 @@ namespace Elagy.DAL.Migrations
                     b.Property<decimal>("PricePerDay")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
+                    b.Property<int>("Status")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("int");
 
-                    b.Property<string>("Transmission")
-                        .IsRequired()
+                    b.Property<int>("Transmission")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("int");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
+                    b.Property<int>("Type")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -498,6 +494,35 @@ namespace Elagy.DAL.Migrations
                     b.ToTable("Governaties");
                 });
 
+            modelBuilder.Entity("Elagy.Core.Entities.HospitalAssetImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("HospitalAssetId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ImageId")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("ImageURL")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HospitalAssetId");
+
+                    b.ToTable("HospitalAssetImages");
+                });
+
             modelBuilder.Entity("Elagy.Core.Entities.HospitalSpecialty", b =>
                 {
                     b.Property<int>("Id")
@@ -524,6 +549,35 @@ namespace Elagy.DAL.Migrations
                         .IsUnique();
 
                     b.ToTable("HospitalSpecialties", (string)null);
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.HotelAssetImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("HotelAssetId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ImageId")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("ImageURL")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HotelAssetId");
+
+                    b.ToTable("HotelAssetImages");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.Package", b =>
@@ -1299,6 +1353,9 @@ namespace Elagy.DAL.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<int>("DriverStatus")
+                        .HasColumnType("int");
+
                     b.Property<int>("YearsOfExperience")
                         .HasColumnType("int");
 
@@ -1498,6 +1555,17 @@ namespace Elagy.DAL.Migrations
                     b.Navigation("Country");
                 });
 
+            modelBuilder.Entity("Elagy.Core.Entities.HospitalAssetImage", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.HospitalAsset", "HospitalAsset")
+                        .WithMany("HospitalAssetImages")
+                        .HasForeignKey("HospitalAssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("HospitalAsset");
+                });
+
             modelBuilder.Entity("Elagy.Core.Entities.HospitalSpecialty", b =>
                 {
                     b.HasOne("Elagy.Core.Entities.HospitalAsset", "HospitalAsset")
@@ -1515,6 +1583,17 @@ namespace Elagy.DAL.Migrations
                     b.Navigation("HospitalAsset");
 
                     b.Navigation("Specialty");
+                });
+
+            modelBuilder.Entity("Elagy.Core.Entities.HotelAssetImage", b =>
+                {
+                    b.HasOne("Elagy.Core.Entities.HotelAsset", "HotelAsset")
+                        .WithMany("HotelAssetImages")
+                        .HasForeignKey("HotelAssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("HotelAsset");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.Package", b =>
@@ -1830,11 +1909,15 @@ namespace Elagy.DAL.Migrations
 
             modelBuilder.Entity("Elagy.Core.Entities.HospitalAsset", b =>
                 {
+                    b.Navigation("HospitalAssetImages");
+
                     b.Navigation("HospitalSpecialties");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.HotelAsset", b =>
                 {
+                    b.Navigation("HotelAssetImages");
+
                     b.Navigation("Rooms");
                 });
 

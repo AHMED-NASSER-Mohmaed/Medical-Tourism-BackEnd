@@ -87,6 +87,50 @@ namespace Elagy.BL.Services
             }
         }
 
+
+        public async Task<PagedResponseDto<ScheduleResponseDto>> GetAvailableSchedulesByDoctorIdAsync(string doctorId, PaginationParameters paginationParameters)
+        {
+            try
+            {
+                // Step 1: Get all schedules for the doctor (active only)
+                var schedules = await _unitOfWork.SpecialtySchedule.GetSchedulesByDoctorIdAsync(doctorId, isActive: true);
+
+                // Step 2: Convert to IQueryable for in-memory filtering
+                var query = schedules.AsQueryable();
+
+
+                // Step 4: Filter by DayOfWeekId
+                if (paginationParameters.FilterDayOfWeekId.HasValue)
+                {
+                    query = query.Where(s => s.DayOfWeekId == paginationParameters.FilterDayOfWeekId.Value);
+                }
+
+
+                // Step 6: Count and paginate
+                var totalCount = query.Count();
+
+                var pagedSchedules = query
+                    .OrderBy(s => s.DayOfWeekId)
+                    .ThenBy(s => s.StartTime)
+                    .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+                    .Take(paginationParameters.PageSize)
+                    .ToList();
+
+                // Step 7: Map to DTO
+                var scheduleDtos = _mapper.Map<IEnumerable<ScheduleResponseDto>>(pagedSchedules);
+
+                return new PagedResponseDto<ScheduleResponseDto>(
+                    scheduleDtos, totalCount, paginationParameters.PageNumber, paginationParameters.PageSize
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting available schedules for doctor ID: {doctorId}");
+                return new PagedResponseDto<ScheduleResponseDto>(
+                    Enumerable.Empty<ScheduleResponseDto>(), 0, paginationParameters.PageNumber, paginationParameters.PageSize
+                );
+            }
+        }
         public async Task<ScheduleResponseDto> CreateScheduleAsync(CreateScheduleSlotDto createDto, string hospitalId)
         {
             try
@@ -111,7 +155,7 @@ namespace Elagy.BL.Services
                 // validate the start and end time and the estimated time for one patient
                 if (createDto.EndTime <= createDto.StartTime) 
                     throw new ArgumentException("End time must be after start time.");
-                if (createDto.TimeSlotSize <= 0) 
+                if (createDto.TimeSlotSize.TotalMinutes<=0) 
                     throw new ArgumentException("Time slot size must be a positive integer.");
 
                 // convert to total minutes to calc the maxcapacity in the period
@@ -274,36 +318,38 @@ namespace Elagy.BL.Services
                 //query = query.Where(s => s.IsActive == true && s.BookedSlots < s.MaxCapacity);
                 //booked slots is going to be driven from appoinment relation  
 
-                // 3. Apply optional filters from PaginationParameters
+                if (!string.IsNullOrWhiteSpace(paginationParameters.hospitalId)) // Using SpecialtyId from PaginationParameters
+                {
+                    query = query.Where(s => s.HospitalSpecialty.HospitalAssetId == paginationParameters.hospitalId);
+                }
 
-                // Filter by Specialty (SpecialtyId) - requires Include
-                if (paginationParameters.SpecialtyId.HasValue) // Using SpecialtyId from PaginationParameters
+
+                if (paginationParameters.SpecialtyId.HasValue) 
                 {
                     query = query.Where(s => s.HospitalSpecialty.SpecialtyId == paginationParameters.SpecialtyId.Value);
                 }
-                // Filter by DoctorId
-                if (!string.IsNullOrWhiteSpace(paginationParameters.FilterDoctorId)) // Using FilterDoctorId from PaginationParameters
+
+                if (!string.IsNullOrWhiteSpace(paginationParameters.FilterDoctorId)) 
                 {
                     query = query.Where(s => s.DoctorId == paginationParameters.FilterDoctorId);
                 }
-                // Filter by DayOfWeekId
+
                 if (paginationParameters.FilterDayOfWeekId.HasValue)
                 {
                     query = query.Where(s => s.DayOfWeekId == paginationParameters.FilterDayOfWeekId.Value);
                 }
                  
-                // 4. Get total count AFTER applying filters
                 var totalCount = await query.CountAsync();
 
-                // 5. Apply pagination and eager load navigation properties for DTO mapping
                 var pagedSchedules = await query
-                    .Include(s => s.Doctor) // Needed for DoctorName, Email
-                    .Include(s => s.HospitalSpecialty) // Needed for HospitalName, SpecialtyName
+                    .Include(s => s.Doctor) 
+                    .Include(s => s.HospitalSpecialty)
                         .ThenInclude(hs => hs.HospitalAsset)
                     .Include(s => s.HospitalSpecialty)
                         .ThenInclude(hs => hs.Specialty)
-                    .Include(s => s.DayOfWeek) // Needed for DayOfWeekName, ShortCode
-                    .OrderBy(s => s.StartTime)
+                    .Include(s => s.DayOfWeek)
+                    .OrderBy(s => s.DayOfWeekId)
+                    .ThenBy(s => s.StartTime)
                     .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
                     .Take(paginationParameters.PageSize)
                     .ToListAsync();

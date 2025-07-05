@@ -12,7 +12,7 @@ namespace Elagy.APIs.Initializers
 {
     public static class DbInitializer
     {
-
+ 
 
         public static async Task SeedRoles(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ILogger logger)
         {
@@ -39,13 +39,33 @@ namespace Elagy.APIs.Initializers
             }
             logger.LogInformation("Role seeding completed.");
         }
- 
-      public static async Task SeedStaticDataAsync(ApplicationDbContext context, ILogger logger)
-        {
-            logger.LogInformation("Starting static data seeding...");
 
-            // List of Arab countries and their governorates (major administrative divisions)
-            var arabCountries = new Dictionary<string, List<string>>
+        public static async Task SeedStaticDataAsync(ApplicationDbContext context, ILogger logger)
+        {
+
+
+            if (!await context.Specialties.AnyAsync())
+            {
+                var specialties = new List<Specialty>
+        {
+            new Specialty { Name = "Cardiology", Description = "Heart and cardiovascular system" },
+            new Specialty { Name = "Neurology", Description = "Nervous system disorders" },
+            new Specialty { Name = "Dermatology", Description = "Skin-related conditions" },
+            new Specialty { Name = "Pediatrics", Description = "Child healthcare" },
+            new Specialty { Name = "Orthopedics", Description = "Musculoskeletal system" },
+            new Specialty { Name = "Psychiatry", Description = "Mental health treatment" },
+            new Specialty { Name = "Gynecology", Description = "Women's reproductive health" },
+            new Specialty { Name = "Ophthalmology", Description = "Eye care and vision" },
+            new Specialty { Name = "Urology", Description = "Urinary and male reproductive systems" },
+            new Specialty { Name = "General Surgery", Description = "Broad surgical specialty" }
+        };
+
+                await context.Specialties.AddRangeAsync(specialties);
+                await context.SaveChangesAsync();
+                logger.LogInformation("Starting static data seeding...");
+
+                // List of Arab countries and their governorates (major administrative divisions)
+                var arabCountries = new Dictionary<string, List<string>>
             {
                 { "Egypt", new List<string> { "Cairo", "Alexandria", "Aswan", "Asyut", "Beheira", "Beni Suef", "Dakahlia", "Damietta", "Faiyum", "Gharbia", "Giza", "Ismailia", "Kafr El Sheikh", "Luxor", "Matruh", "Minya", "Monufia", "New Valley", "North Sinai", "Port Said", "Qalyubia", "Qena", "Red Sea", "Sharqia", "Sohag", "South Sinai", "Suez" } },
                 { "Saudi Arabia", new List<string> { "Riyadh", "Makkah", "Madinah", "Eastern Province", "Qassim", "Asir", "Tabuk", "Hail", "Northern Borders", "Jazan", "Najran", "Al Bahah", "Al Jawf" } },
@@ -71,44 +91,45 @@ namespace Elagy.APIs.Initializers
                 { "Yemen", new List<string> { "Aden", "Abyan", "Al Bayda", "Al Hudaydah", "Al Jawf", "Al Mahrah", "Al Mahwit", "Amran", "Dhamar", "Hadhramaut", "Hajjah", "Ibb", "Lahij", "Ma'rib", "Raymah", "Saada", "Sanaa", "Shabwah", "Socotra", "Taiz" } }
             };
 
-            // Seed Countries
-            foreach (var country in arabCountries.Keys)
-            {
-                if (!await context.Countries.AnyAsync(c => c.Name == country))
+                // Seed Countries
+                foreach (var country in arabCountries.Keys)
                 {
-                    context.Countries.Add(new Country { Name = country });
-                }
-            }
-            await context.SaveChangesAsync();
-
-            // Fetch all countries from DB for ID mapping
-            var dbCountries = await context.Countries.ToListAsync();
-            var countryNameToId = dbCountries.ToDictionary(c => c.Name, c => c.Id);
-
-            // Seed Governorates
-            foreach (var kvp in arabCountries)
-            {
-                var countryName = kvp.Key;
-                var governorates = kvp.Value;
-                if (!countryNameToId.TryGetValue(countryName, out int countryId))
-                {
-                    logger.LogError($"Country '{countryName}' not found in DB after seeding.");
-                    continue;
-                }
-
-                foreach (var gov in governorates)
-                {
-                    if (!await context.Governaties.AnyAsync(g => g.Name == gov && g.CountryId == countryId))
+                    if (!await context.Countries.AnyAsync(c => c.Name == country))
                     {
-                        context.Governaties.Add(new Governorate { Name = gov, CountryId = countryId });
+                        context.Countries.Add(new Country { Name = country });
                     }
                 }
+                await context.SaveChangesAsync();
+
+                // Fetch all countries from DB for ID mapping
+                var dbCountries = await context.Countries.ToListAsync();
+                var countryNameToId = dbCountries.ToDictionary(c => c.Name, c => c.Id);
+
+                // Seed Governorates
+                foreach (var kvp in arabCountries)
+                {
+                    var countryName = kvp.Key;
+                    var governorates = kvp.Value;
+                    if (!countryNameToId.TryGetValue(countryName, out int countryId))
+                    {
+                        logger.LogError($"Country '{countryName}' not found in DB after seeding.");
+                        continue;
+                    }
+
+                    foreach (var gov in governorates)
+                    {
+                        if (!await context.Governaties.AnyAsync(g => g.Name == gov && g.CountryId == countryId))
+                        {
+                            context.Governaties.Add(new Governorate { Name = gov, CountryId = countryId });
+                        }
+                    }
+                }
+                await context.SaveChangesAsync();
+
+                logger.LogInformation("Static data seeding for all Arab countries and their governorates completed.");
+
             }
-            await context.SaveChangesAsync();
-
-            logger.LogInformation("Static data seeding for all Arab countries and their governorates completed.");
         }
-
       
         public static async Task SeedSuperAdminAsync(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ILogger logger)
         {

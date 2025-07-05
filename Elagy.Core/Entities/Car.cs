@@ -10,24 +10,22 @@ namespace Elagy.Core.Entities
 {
     public  class Car
     {
- public int Id { get; set; } // Primary Key for Car
+        public int Id { get; set; } 
+        [Required] public string FactoryMake { get; set; } 
+        [Required] public string ModelName { get; set; }
+        [Required] public int ModelYear { get; set; }
 
-        // Basic Info
-        [Required] public string FactoryMake { get; set; } // e.g., "Toyota"
-        [Required] public string ModelName { get; set; } // e.g., "Camry"
-        [Required] public int ModelYear { get; set; } // e.g., 2022
-        [Required] public CarType Type { get; set; } // e.g., Sedan, SUV
-        [Required] public int Capacity { get; set; } // Max passengers
+        [Required] public CarType Type { get; set; } 
+        [Required] public int Capacity { get; set; } 
 
-        public decimal Price { get; set; } // Base price of the car, can be used for purchase or rental
+        public decimal Price { get; set; } 
 
-        // Rental Specifics
-        [Required] public decimal PricePerDay { get; set; } // Daily rental price
+        [Required] public decimal PricePerDay { get; set; } 
         [Required] public TransmissionType Transmission { get; set; }
         [Required] public FuelType FuelType { get; set; }
-        public bool IsAvailable { get; set; } = true; // General operational availability for rental
-        public CarStatus Status { get; set; } // Internal status (Available, OnRide, UnderMaintenance)
-        public string Description { get; set; } // Detailed description of the car
+        public bool IsAvailable { get; set; } = true; 
+        public CarStatus Status { get; set; } 
+        public string Description { get; set; } 
 
 
         public ICollection<CarImage>? CarImages { get; set; }
@@ -37,6 +35,6 @@ namespace Elagy.Core.Entities
 
 
         public ICollection<CarDriver>? CarDrivers { get; set; }
-        public ICollection<CarSchedule> carRentalSchedules { get; set; } = new List<CarSchedule>(); // Appointments for this car
+        public ICollection<CarSchedule> carRentalSchedules { get; set; } = new List<CarSchedule>(); 
     }
 }

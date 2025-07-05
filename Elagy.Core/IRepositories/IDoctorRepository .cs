@@ -14,6 +14,8 @@ namespace Elagy.Core.IRepositories
         // for website show 
         Task<IEnumerable<Doctor>> GetDoctorsByHospitalSpecialtyIdAsync(int hospitalSpecialtyId);
         //show doctor details
-        Task<Doctor?> GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync(string doctorId); 
+        Task<Doctor?> GetDoctorByIdWithHospitalSpecialtyAndSpecialtyAsync(string doctorId);
+
+        Task<IEnumerable<Doctor>> GetDoctorsBySpecialtyIdAsync(int specialtyId);
     }
 }

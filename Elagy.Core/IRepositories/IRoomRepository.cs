@@ -11,7 +11,7 @@ namespace Elagy.Core.IRepositories
     public interface IRoomRepository : IGenericRepository<Room>
     {
         /// Gets all rooms for a specific hotel asset (provider).
-        IQueryable<Room> GetRoomsByHotelId(string hotelAssetId);
+        Task <IEnumerable<Room>> GetRoomsByHotelId(string hotelAssetId);
         /// Gets a single room by its ID, including all related details (HotelAsset, etc.).
         Task<Room?> GetRoomByIdWithDetailsAsync(int roomId);
     }

@@ -15,6 +15,11 @@ namespace Elagy.DAL.Configurations
             // Property configurations for HospitalAsset specific properties
             builder.Property(ha => ha.NumberOfDepartments).IsRequired();
             builder.Property(ha => ha.EmergencyServices).IsRequired();
+
+            builder.HasMany(ha => ha.HospitalAssetImages)
+                   .WithOne(hai => hai.HospitalAsset)
+                   .HasForeignKey(hai => hai.HospitalAssetId)
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

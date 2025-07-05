@@ -11,7 +11,6 @@ namespace Elagy.Core.Entities
         //doctor certificate
         public string MedicalLicenseNumberURL { get; set; }
         public string MedicalLicenseNumberId { get; set; }
-
         public int YearsOfExperience { get; set; }
         public string Bio { get; set; }
         public string Qualification { get; set; } 

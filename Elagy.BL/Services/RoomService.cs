@@ -181,7 +181,7 @@ namespace Elagy.BL.Services
                 if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
                     string term = paginationParameters.SearchTerm.Trim().ToLower();
-                    query = query.Where(r => r.RoomNumber.Contains(term));
+                    query = query.Where(r => r.RoomNumber.ToLower().Contains(term));
 
                 }
                 if (paginationParameters.RoomType.HasValue)
@@ -229,53 +229,54 @@ namespace Elagy.BL.Services
 
           }
 
-        public async Task<PagedResponseDto<RoomResponseDto>> GetAvailableRoomsForWebsiteAsync(PaginationParameters paginationParameters, string hotellId)
+        public async Task<PagedResponseDto<RoomResponseDto>> GetAvailableRoomsForWebsiteAsync(
+    PaginationParameters paginationParameters, string hotelId)
         {
             try
             {
-                // 1. Start with an IQueryable from the repository, including HotelAsset for potential filtering and DTO mapping.
-                var baseQuery = _unitOfWork.Rooms.GetRoomsByHotelId(hotellId);
+                // 1. Get all rooms of the hotel (with full details)
+                var allRooms = await _unitOfWork.Rooms.GetRoomsByHotelId(hotelId);
 
-                // Apply initial filters
-                var query = baseQuery
-                    .Where(r => r.IsAvailable &&
-                           (r.Status == RoomStatus.CleanAndAvailable ||
-                            r.Status == RoomStatus.Reserved));
+                // 2. Convert to IQueryable for in-memory filtering
+                var query = allRooms.AsQueryable();
 
-                // Apply other filters
+                // 3. Filter only available and properly statused rooms
+                query = query.Where(r => r.IsAvailable && (r.Status!= RoomStatus.UnderMaintenance));
+
+                // 4. Optional: filter by HotelAssetId again if passed
                 if (!string.IsNullOrWhiteSpace(paginationParameters.HotelAssetId))
                     query = query.Where(r => r.HotelAssetId == paginationParameters.HotelAssetId);
 
                 if (paginationParameters.RoomType.HasValue)
                     query = query.Where(r => r.RoomType == paginationParameters.RoomType.Value);
 
-                // ... (other filters remain the same)
+                if (paginationParameters.MinPrice.HasValue)
+                    query = query.Where(r => r.Price >= paginationParameters.MinPrice.Value);
 
-                // Governorate filter requires proper includes
+                if (paginationParameters.MaxPrice.HasValue)
+                    query = query.Where(r => r.Price <= paginationParameters.MaxPrice.Value);
+
+                // Governorate filter via nested navigation (ensure navigation loaded in repository)
                 if (paginationParameters.FilterGovernorateId.HasValue)
                 {
-                    query = query
-                        .Include(r => r.HotelAsset)
-                            .ThenInclude(ha => ha.ServiceProvider)
-                        .Where(r => r.HotelAsset.ServiceProvider.GovernorateId ==
-                                    paginationParameters.FilterGovernorateId.Value);
+                    query = query.Where(r =>
+                        r.HotelAsset != null &&
+                        r.HotelAsset.ServiceProvider != null &&
+                        r.HotelAsset.ServiceProvider.GovernorateId == paginationParameters.FilterGovernorateId.Value);
                 }
 
-                // Get total count BEFORE pagination
-                var totalCount = await query.CountAsync();
+                // 5. Count and paginate
+                var totalCount = query.Count();
 
-                // Apply pagination and includes
-                var pagedRooms = await query
-                    .Include(r => r.HotelAsset)
-                        .ThenInclude(ha => ha.ServiceProvider)
-                            .ThenInclude(sp => sp.Governorate)
-                    .Include(r => r.RoomImages)
+                var pagedRooms = query
                     .OrderBy(r => r.Price)
                     .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
                     .Take(paginationParameters.PageSize)
-                    .ToListAsync();
+                    .ToList();
 
+                // 6. Map to DTO
                 var roomDtos = _mapper.Map<IEnumerable<RoomResponseDto>>(pagedRooms);
+
                 return new PagedResponseDto<RoomResponseDto>(
                     roomDtos,
                     totalCount,
@@ -294,6 +295,7 @@ namespace Elagy.BL.Services
                 );
             }
         }
+
 
         public async Task<RoomResponseDto?> GetRoomByIdAsync(int roomId)
         {

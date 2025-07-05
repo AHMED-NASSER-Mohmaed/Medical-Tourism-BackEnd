@@ -46,5 +46,13 @@ namespace Elagy.DAL.Repositories
             return await GetDoctorsWithAllDetails()
                 .FirstOrDefaultAsync(d => d.Id == doctorId);
         }
+
+        public async Task<IEnumerable<Doctor>> GetDoctorsBySpecialtyIdAsync(int specialtyId)
+        {
+            var query = GetDoctorsWithAllDetails()
+                .Where(d => d.HospitalSpecialty.SpecialtyId == specialtyId);
+
+            return await query.ToListAsync();
+        }
     }
 }

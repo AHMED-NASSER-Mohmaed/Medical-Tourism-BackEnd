@@ -26,17 +26,12 @@ namespace Elagy.BL.Services
         }
         #region Supper Admin Dashboard CRUD
 
-        public async Task<PagedResponseDto<SpecialtyResponseDto>> GetAllSpecialties(PaginationParameters paginationParameters) // MODIFIED: Accepts paginationParameters
+        public async Task<PagedResponseDto<SpecialtyResponseDto>> GetAllSpecialties(PaginationParameters paginationParameters)
         {
             try
             {
-                // Retrieve all specialties from the repository (materialized here as IEnumerable)
-                var allSpecialties = await _unitOfWork.Specialties.GetAllSpecialtiesAsync(); // Returns IEnumerable
+                IQueryable<Specialty> query = _unitOfWork.Specialties.AsQueryable();
 
-                // Convert to IQueryable for convenient filtering and pagination in memory
-                IQueryable<Specialty> query = allSpecialties.AsQueryable();
-
-                // Apply SearchTerm filter (case-insensitive)
                 if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
                     string searchTermLower = paginationParameters.SearchTerm.Trim().ToLower();
@@ -46,35 +41,40 @@ namespace Elagy.BL.Services
                     );
                 }
 
-                // Apply UserStatus filter (maps to Specialty.IsActive)
-                if (paginationParameters.FilterIsActive.HasValue)
+                if (paginationParameters.UserStatus.HasValue)
                 {
-                 
-                    query = query.Where(s => s.IsActive ==paginationParameters.FilterIsActive.Value);
+                    bool targetIsActive = (paginationParameters.UserStatus.Value == Status.Active);
+                    query = query.Where(s => s.IsActive == targetIsActive);
                 }
 
-                // Apply SpecialtyId filter (if provided)
                 if (paginationParameters.SpecialtyId.HasValue)
                 {
                     query = query.Where(s => s.Id == paginationParameters.SpecialtyId.Value);
                 }
 
-                // Get total count AFTER applying filters (in-memory Count())
-                var totalCount = query.Count();
+                var totalCount = await query.CountAsync();
 
-                // Apply Pagination (Skip and Take) (in-memory)
-                var pagedSpecialties = query
+                // CORRECTED: Explicitly project to an anonymous type matching SpecialtyResponseDto's simple properties
+                var pagedSpecialties = await query
                     .OrderBy(s => s.Name)
+                    .Select(s => new Specialty // Project to a NEW Specialty instance with only needed scalar properties
+                    {
+                        Id = s.Id,
+                        Name = s.Name,
+                        Description = s.Description,
+                        IsActive = s.IsActive // Include if needed, even if not directly mapped to DTO
+                        // Do NOT include navigation properties like HospitalSpecialties here
+                    })
                     .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
                     .Take(paginationParameters.PageSize)
-                    .ToList(); // Materialize the paginated set
+                    .ToListAsync();
 
                 var specialtyDtos = _mapper.Map<IEnumerable<SpecialtyResponseDto>>(pagedSpecialties);
                 return new PagedResponseDto<SpecialtyResponseDto>(specialtyDtos, totalCount, paginationParameters.PageNumber, paginationParameters.PageSize);
             }
             catch (Exception ex) { _logger.LogError(ex, "Error retrieving paginated specialties for Super Admin Dashboard."); throw; }
         }
-        
+
 
         public async Task<SpecialtyResponseDto> CreateSpecialty(SpecialtyCreateDto createDto)
         {
@@ -293,8 +293,8 @@ namespace Elagy.BL.Services
                 // Apply SearchTerm filter
                 if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
-                    string term = paginationParameters.SearchTerm.Trim().ToLower();
-                    query = query.Where(s => s.Name.ToLower().Contains(term) || (s.Description != null && s.Description.ToLower().Contains(term)));
+                    string term = paginationParameters.SearchTerm.Trim();
+                    query = query.Where(s => s.Name.Contains(term) || (s.Description != null && s.Description.Contains(term)));
                 }
 
                 // Apply FilterIsActive (for the Specialty entity itself, not the link status)
@@ -384,8 +384,9 @@ namespace Elagy.BL.Services
                     Id = s.Id,
                     Name = s.Name,
                     Description = null // Explicitly set to null as per the service method's comment
-                   ,status=s.IsActive
-                    
+                   ,
+                    Status = s.IsActive ? Status.Active : Status.Deactivated
+
                 }).ToList();
 
                 _logger.LogInformation($"Successfully retrieved {specialtyDtos.Count} available active global specialties to link for Hospital ID: {hospitalId}.");
@@ -498,10 +499,6 @@ namespace Elagy.BL.Services
                 throw;
             }
         }
-
-    
-
-  
     }
  }
 

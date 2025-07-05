@@ -16,25 +16,34 @@ namespace Elagy.Core.DTOs.Pagination
         }
 
         public Status? UserStatus { get; set; } 
-        public string? SearchTerm { get; set; }  
-
+        public string? SearchTerm { get; set; }
+        public string? hospitalId { get; set; }
         public int? SpecialtyId {  get; set; }
+        public string? FilterDoctorId { get; set; }
+
         public int? FilterDayOfWeekId { get; set; }
         public DateTime? FilterStartDate { get; set; }
         public DateTime? FilterEndDate { get; set; }
-        public string? FilterDoctorId { get; set; }
-        public bool? FilterIsRecurring { get; set; }
         public bool? FilterIsActive { get; set; }// general  status filter except users
 
         public string? HotelAssetId { get; set; } 
         public RoomCategory? RoomType { get; set; }  //for website filter
         public RoomStatus? RoomStatus { get; set; } //for admin flter
+        public DriverStatus? DriverStatus {  get; set; }
+
+        public CarType? CarType { get; set; }
+        public CarStatus? CarStatus { get; set; }
 
         public decimal? MinPrice { get; set; }  
         public decimal? MaxPrice { get; set; } 
         public int? MinOccupancy { get; set; } 
         public int? MaxOccupancy { get; set; } 
         public int? FilterGovernorateId { get; set; } //filter service providers by location for website 
+
+
+
+
+
 
 
     }

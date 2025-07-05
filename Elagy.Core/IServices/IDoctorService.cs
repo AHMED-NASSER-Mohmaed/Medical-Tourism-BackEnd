@@ -21,11 +21,13 @@ namespace Elagy.Core.IServices
         Task<PagedResponseDto<DoctorProfileDto>> GetAllDoctorsPerHospitalSpecialty(int hospitalSpecialtyId, PaginationParameters paginationParameters);
 
         // hospital id is token from [jwt token]
-        Task<DoctorProfileDto> CreateDoctorAsync(DoctorCreateDto createDto, string hospitalId, IFormFile? licenseDocumentFile);
+
+        Task<PagedResponseDto<DoctorProfileDto>> GetDoctorsBySpecialtyIdForAdminDashboardAsync(int specialtyId, PaginationParameters paginationParameters);
+        Task<DoctorProfileDto> CreateDoctorAsync(DoctorCreateDto createDto, string hospitalId, IFormFile? licenseDocumentFile, IFormFile? profileImageFile);
 
         // MODIFIED: Added doctorId as a separate parameter, hospitalId from token
-        Task<DoctorProfileDto> UpdateDoctorAsync(string doctorId, DoctorUpdateDto updateDto, string hospitalId, IFormFile? newLicenseDocumentFile = null);
-
+        Task<DoctorProfileDto> UpdateDoctorAsync(string doctorId, DoctorUpdateDto updateDto, string hospitalId, IFormFile? newLicenseDocumentFile = null, IFormFile? newProfileImageFile = null);
+        Task<PagedResponseDto<DoctorProfileDto>> GetAllDoctorsPerHospitalSpecialty(string hospitalId, int specialtyId, PaginationParameters paginationParameters);
         // hospital id is token from [jwt token], doctor id from params
         Task<DoctorProfileDto> DeleteDoctorAsync(string doctorId, string hospitalId);
         Task<DoctorProfileDto?> GetDoctorByIdAsync(string doctorId);

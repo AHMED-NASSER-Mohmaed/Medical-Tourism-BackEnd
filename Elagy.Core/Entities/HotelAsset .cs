@@ -7,6 +7,6 @@
         public bool? HasRestaurant { get; set; }
 
         public ICollection<Room>? Rooms { get; set; }
-        // Additional navigation property (e.g., to RoomTypes if defined as separate entities)
+        public ICollection<HotelAssetImage>? HotelAssetImages { get; set; }
     }
 }

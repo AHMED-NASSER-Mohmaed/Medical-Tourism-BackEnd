@@ -11,5 +11,8 @@ public class CarRentalProviderProfileDto : BaseServiceProviderProfileDto
     public string[] Models { get; set; }  // Specific models available for rent (e.g., Toyota Camry, Ford Explorer)
 
     public TransmissionType Transmission { get; set; }   // "Automatic", "Manual"
-    public string[] RentalPolicies { get; set; } // (e.g., age restrictions, insurance requirements, mileage limits)
+    public string[] RentalPolicies { get; set; }
+
+    public ICollection<AssetImageResponseDto>? AssetImages { get; set; }
+    // (e.g., age restrictions, insurance requirements, mileage limits)
 }

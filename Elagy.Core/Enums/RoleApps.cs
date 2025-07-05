@@ -14,5 +14,6 @@ namespace Elagy.Core.Enums
         CarRentalServiceProvider = 3,
         SuperAdmin = 4,
         Doctor=5,
+        Driver=6
     }
 }

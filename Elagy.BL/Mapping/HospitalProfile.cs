@@ -1,6 +1,7 @@
 using AutoMapper;
 using Elagy.Core.DTOs.Auth;
 using Elagy.Core.DTOs.Doctor;
+using Elagy.Core.DTOs.Room;
 using Elagy.Core.DTOs.Specialty;
 using Elagy.Core.DTOs.User;
 using Elagy.Core.Entities;
@@ -19,8 +20,9 @@ namespace Elagy.BL.Mapping
                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
-                              .ForMember(dest => dest.status, opt => opt.MapFrom(src => src.IsActive ? Status.Active : Status.Deactivated));
+                              .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.IsActive ? Status.Active : Status.Deactivated));
 
+            CreateMap<HospitalAssetImage, RoomImageDto>();
 
 
             // Map SpecialtyCreateDto to Specialty entity
@@ -56,7 +58,6 @@ namespace Elagy.BL.Mapping
                 .ForMember(dest => dest.ImageId, opt => opt.Ignore()) // Image is uploaded separately
                 .ForMember(dest => dest.ImageURL, opt => opt.Ignore())
                 // MedicalLicenseNumberId is mapped from MedicalLicenseNumber
-                .ForMember(dest => dest.MedicalLicenseNumberId, opt => opt.MapFrom(src => src.MedicalLicenseNumber))
                 // Correctly map GovernorateId (Foreign Key property on User/Doctor)
                 .ForMember(dest => dest.GovernorateId, opt => opt.MapFrom(src => src.GovernorateId))
                 .ForMember(dest => dest.Governorate, opt => opt.Ignore()) // Ignore Governorate navigation property
@@ -101,12 +102,9 @@ namespace Elagy.BL.Mapping
                   .ForMember(dest => dest.GovernorateName, opt => opt.MapFrom(src => src.Governorate.Name))
                   .ForMember(dest => dest.CountryId, opt => opt.MapFrom(src => src.Governorate.Country.Id))
                   .ForMember(dest => dest.CountryName, opt => opt.MapFrom(src => src.Governorate.Country.Name))
-                  .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email ?? src.UserName));
-
-
-
-
-
+                  .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email ?? src.UserName))
+                  .ForMember(dest => dest.MedicalLicenseNumber, opt => opt.MapFrom(src => src.MedicalLicenseNumberURL));
+                    
 
         }
     }

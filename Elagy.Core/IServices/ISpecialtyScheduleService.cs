@@ -16,6 +16,7 @@ namespace Elagy.Core.IServices
     
         //Creates a new schedule slot for a doctor within a specific hospital specialty.
         Task<ScheduleResponseDto> CreateScheduleAsync(CreateScheduleSlotDto createDto, string hospitalId);
+        Task<PagedResponseDto<ScheduleResponseDto>> GetAvailableSchedulesByDoctorIdAsync(string doctorId, PaginationParameters paginationParameters);
 
         Task<ScheduleResponseDto> UpdateScheduleAsync(int scheduleId, UpdateScheduleDto updateDto, string hospitalId);
      

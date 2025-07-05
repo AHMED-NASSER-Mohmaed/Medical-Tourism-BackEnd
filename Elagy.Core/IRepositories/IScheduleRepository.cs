@@ -20,5 +20,7 @@ namespace Elagy.Core.IRepositories
         // Get schedules with all related details (Doctor, HospitalSpecialty, DayOfWeek)
         Task<SpecialtySchedule?> GetScheduleByIdWithDetailsAsync(int scheduleId);
         Task<bool> UpdateScheduleStatusAsync(int scheduleId, bool newIsActiveStatus);
+
+        Task<IEnumerable<SpecialtySchedule>> GetAvailableSchedulesByDoctorIdAsync(string doctorId);
     }
 }

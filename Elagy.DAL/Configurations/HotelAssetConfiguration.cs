@@ -16,6 +16,11 @@ namespace Elagy.DAL.Configurations
             builder.Property(ho => ho.StarRating).IsRequired(false);
             builder.Property(ho => ho.HasPool).IsRequired(false);
             builder.Property(ho => ho.HasRestaurant).IsRequired(false);
+
+            builder.HasMany(ho => ho.HotelAssetImages)
+                  .WithOne(hai => hai.HotelAsset)
+                  .HasForeignKey(hai => hai.HotelAssetId)
+                  .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

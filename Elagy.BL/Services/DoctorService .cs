@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore; 
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace Elagy.BL.Services
 {
@@ -52,6 +53,60 @@ namespace Elagy.BL.Services
             {
                 _logger.LogError(ex, $"Error retrieving doctor by ID {doctorId}.");
                 throw; 
+            }
+        }
+
+
+        public async Task<PagedResponseDto<DoctorProfileDto>> GetDoctorsBySpecialtyIdForAdminDashboardAsync(
+    int specialtyId, PaginationParameters paginationParameters)
+        {
+            try
+            {
+                // 1. Get all doctors for this SpecialtyId (includes full navigation via .Include())
+                var doctors = await _unitOfWork.Doctors.GetDoctorsBySpecialtyIdAsync(specialtyId);
+
+                // 2. Convert to queryable for in-memory filtering
+                var query = doctors.AsQueryable();
+
+                // 3. Apply SearchTerm filter
+                if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
+                {
+                    string term = paginationParameters.SearchTerm.Trim().ToLower();
+                    query = query.Where(d =>
+                        d.FirstName.ToLower().Contains(term) ||
+                        d.LastName.ToLower().Contains(term) ||
+                        d.Email.ToLower().Contains(term)
+                    );
+                }
+
+
+                // 6. Pagination
+                var totalCount = query.Count();
+                var pagedDoctors = query
+                    .OrderBy(d => d.FirstName)
+                    .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+                    .Take(paginationParameters.PageSize)
+                    .ToList();
+
+                // 7. Mapping
+                var doctorDtos = _mapper.Map<IEnumerable<DoctorProfileDto>>(pagedDoctors);
+
+                return new PagedResponseDto<DoctorProfileDto>(
+                    doctorDtos,
+                    totalCount,
+                    paginationParameters.PageNumber,
+                    paginationParameters.PageSize
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving doctors for Specialty ID: {specialtyId}");
+                return new PagedResponseDto<DoctorProfileDto>(
+                    Enumerable.Empty<DoctorProfileDto>(),
+                    0,
+                    paginationParameters.PageNumber,
+                    paginationParameters.PageSize
+                );
             }
         }
         public async Task<PagedResponseDto<DoctorProfileDto>> GetAllDoctorsForAdminDashboardAsync(string hospitalId, PaginationParameters paginationParameters)
@@ -110,7 +165,7 @@ namespace Elagy.BL.Services
 
         /// Creates a new doctor account, assigning them to a specific hospital specialty.
       
-        public async Task<DoctorProfileDto> CreateDoctorAsync(DoctorCreateDto createDto, string hospitalId, IFormFile? licenseDocumentFile )
+        public async Task<DoctorProfileDto> CreateDoctorAsync(DoctorCreateDto createDto, string hospitalId, IFormFile? licenseDocumentFile, IFormFile? profileImageFile)
         {
             try
             {
@@ -137,15 +192,26 @@ namespace Elagy.BL.Services
 
                 //2.Validate Governorate and Country IDs for the doctor's address.
 
-                //Assuming _unitOfWork.Governorates.GetByIdAsync exists.
                 string licenseUrl = null;
                 string licenseId = null;
                 if (licenseDocumentFile != null)
                 {
-                    var uploadResult = await _fileStorageService.UploadSingleFileAsync(licenseDocumentFile, $"doctors/licenses/{createDto.Email.Replace("@", "_").Replace(".", "_")}");
+                    var uploadResult = await _fileStorageService.UploadSingleFileAsync(licenseDocumentFile);
                     if (uploadResult.Success) { licenseUrl = uploadResult.Url; licenseId = uploadResult.Id; }
                     else { throw new InvalidOperationException($"Failed to upload doctor license document: {uploadResult.Message}"); }
                 }
+                else { throw new ArgumentException("Doctor license document is required."); }
+
+                // 2. Handle Profile Image Upload
+                string imageUrl = null;
+                string imageId = null;
+                if (profileImageFile != null)
+                {
+                    var uploadResult = await _fileStorageService.UploadSingleFileAsync(profileImageFile);
+                    if (uploadResult.Success) { imageUrl = uploadResult.Url; imageId = uploadResult.Id; }
+                    else { _logger.LogWarning($"Failed to upload profile image for {createDto.Email}. Proceeding without image. Details: {uploadResult.Message}"); }
+                }
+
 
                 else { throw new ArgumentException("Doctor license document is required."); } // License must be provided
 
@@ -172,8 +238,22 @@ namespace Elagy.BL.Services
 
                 // 4. Map DTO to Doctor entity (which inherits from IdentityUser).
 
+
                 var doctor = _mapper.Map<Doctor>(createDto);
-                doctor.PhoneNumber = createDto.Phone; // Explicitly map Phone from DTO to Identity's PhoneNumber property.
+                doctor.PhoneNumber = createDto.Phone;
+                doctor.MedicalLicenseNumberURL = licenseUrl; // Set from upload result
+                doctor.MedicalLicenseNumberId = licenseId;   // Set from upload result
+                doctor.ImageURL = imageUrl; // Set profile image URL (from User base)
+                doctor.ImageId = imageId;   // Set profile image ID (from User base)
+                doctor.HospitalSpecialtyId = createDto.HospitalSpecialtyId;
+                doctor.Status = Status.Active;
+                doctor.UserType = UserType.Doctor;
+                doctor.EmailConfirmed = true;
+                doctor.PhoneNumberConfirmed = true;
+                doctor.TwoFactorEnabled = true;
+                doctor.LockoutEnabled = true;
+                doctor.AccessFailedCount = 5;
+                doctor.PhoneNumber = createDto.Phone; 
 
                 // 5. Create the user with IdentityUserManager.
                 var result = await _userManager.CreateAsync(doctor, createDto.Password);
@@ -210,7 +290,7 @@ namespace Elagy.BL.Services
         }
 
 
-        public async Task<DoctorProfileDto> UpdateDoctorAsync(string doctorId, DoctorUpdateDto updateDto, string hospitalId, IFormFile? newLicenseDocumentFile = null)
+        public async Task<DoctorProfileDto> UpdateDoctorAsync(string doctorId, DoctorUpdateDto updateDto, string hospitalId, IFormFile? newLicenseDocumentFile = null, IFormFile? newProfileImageFile = null)
         {
             try
             {
@@ -229,6 +309,26 @@ namespace Elagy.BL.Services
                     _logger.LogWarning($"Hospital Admin {hospitalId} attempted to update doctor {doctorId} not affiliated with their hospital.");
                     throw new UnauthorizedAccessException($"Doctor with ID {doctorId} is not affiliated with your hospital.");
                 }
+
+
+                if (newLicenseDocumentFile != null)
+                {
+                    if (!string.IsNullOrEmpty(doctor.MedicalLicenseNumberId)) { await _fileStorageService.DeleteFileAsync(doctor.MedicalLicenseNumberId); }
+                    var uploadResult = await _fileStorageService.UploadSingleFileAsync(newLicenseDocumentFile);
+                    if (uploadResult.Success) { doctor.MedicalLicenseNumberURL = uploadResult.Url; doctor.MedicalLicenseNumberId = uploadResult.Id; }
+                    else { throw new InvalidOperationException($"Failed to upload new license document: {uploadResult.Message}"); }
+                }
+
+                // 2. Handle Profile Image Update
+                if (newProfileImageFile != null)
+                {
+                    if (!string.IsNullOrEmpty(doctor.ImageId)) { await _fileStorageService.DeleteFileAsync(doctor.ImageId); }
+                    var uploadResult = await _fileStorageService.UploadSingleFileAsync(newProfileImageFile);
+                    if (uploadResult.Success) { doctor.ImageURL = uploadResult.Url; doctor.ImageId = uploadResult.Id; }
+                    else { _logger.LogWarning($"Failed to upload new profile image. Proceeding without image. Details: {uploadResult.Message}"); }
+                }
+
+
 
                 // 3. Validate and update HospitalSpecialtyId if it's being changed.
                 if (doctor.HospitalSpecialtyId != updateDto.HospitalSpecialtyId)
@@ -411,6 +511,49 @@ namespace Elagy.BL.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error getting doctors for Hospital Specialty ID: {hospitalSpecialtyId}.");
+                return new PagedResponseDto<DoctorProfileDto>(Enumerable.Empty<DoctorProfileDto>(), 0, paginationParameters.PageNumber, paginationParameters.PageSize);
+            }
+        }
+
+
+
+        public async Task<PagedResponseDto<DoctorProfileDto>> GetAllDoctorsPerHospitalSpecialty(string hospitalId, int specialtyId, PaginationParameters paginationParameters)
+        {
+            try
+            {
+                var hospitalSpecialty = await _unitOfWork.HospitalSpecialties.GetByHospitalAndSpecialtyIdAsync(hospitalId, specialtyId);
+                if (hospitalSpecialty == null || !hospitalSpecialty.IsActive)
+                {
+                    _logger.LogWarning($"Doctor search failed: Hospital Specialty link for Hospital {hospitalId} and Specialty {specialtyId} not found or is inactive.");
+                    return new PagedResponseDto<DoctorProfileDto>(Enumerable.Empty<DoctorProfileDto>(), 0, paginationParameters.PageNumber, paginationParameters.PageSize);
+                }
+
+                var doctors = await _unitOfWork.Doctors.GetDoctorsByHospitalSpecialtyIdAsync(hospitalSpecialty.Id); // Only active doctors
+
+                IQueryable<Doctor> query = doctors.AsQueryable();
+                if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
+                {
+                    string term = paginationParameters.SearchTerm.Trim();
+                    query = query.Where(d =>
+                        d.FirstName.Contains(term) ||
+                        d.LastName.Contains(term)
+                    );
+                }
+
+                var totalCount = query.Count();
+
+                var pagedDoctors =  query
+                    .OrderBy(d => d.LastName) // Default sorting
+                    .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+                    .Take(paginationParameters.PageSize)
+                    .ToList();
+
+                var doctorDtos = _mapper.Map<IEnumerable<DoctorProfileDto>>(pagedDoctors);
+                return new PagedResponseDto<DoctorProfileDto>(doctorDtos, totalCount, paginationParameters.PageNumber, paginationParameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting doctors per Hospital {hospitalId} and Specialty {specialtyId}.");
                 return new PagedResponseDto<DoctorProfileDto>(Enumerable.Empty<DoctorProfileDto>(), 0, paginationParameters.PageNumber, paginationParameters.PageSize);
             }
         }
