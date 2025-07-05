@@ -22,9 +22,7 @@ namespace Elagy.Core.DTOs.Schedule
         public TimeSpan TimeSlotSize { get; set; } 
         public decimal Price { get; set; } 
         public int MaxCapacity { get; set; }
-        public int AvailableSlots => MaxCapacity - BookedSlots-CancelledSlots;
-        public int BookedSlots { get; set; }
-        public int CancelledSlots { get; set; } 
+        public int AvailableSlots {  get; set; }
         public bool IsActive { get; set; } 
 
     }
