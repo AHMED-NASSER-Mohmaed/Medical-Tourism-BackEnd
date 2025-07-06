@@ -3,8 +3,10 @@ using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Specialty;
 using Elagy.Core.Entities;
 using Elagy.Core.Enums;
+using Elagy.Core.Helpers;
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -14,15 +16,18 @@ namespace Elagy.BL.Services
 {
     public class SpecialtyService : ISpecialtyService
     {
+
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IFileStorageService _fileStorageService;
         private readonly IMapper _mapper;
         private readonly ILogger<SpecialtyService> _logger;
 
-        public SpecialtyService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<SpecialtyService> logger)
+        public SpecialtyService(IFileStorageService fileStorageService,IUnitOfWork unitOfWork, IMapper mapper, ILogger<SpecialtyService> logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _fileStorageService = fileStorageService;
         }
         #region Supper Admin Dashboard CRUD
 
@@ -76,10 +81,20 @@ namespace Elagy.BL.Services
         }
 
 
-        public async Task<SpecialtyResponseDto> CreateSpecialty(SpecialtyCreateDto createDto)
+        public async Task<SpecialtyResponseDto> CreateSpecialty(SpecialtyCreateDto createDto, IFormFile? specialtyImageFile)
         {
             try
             {
+
+                string imageUrl = null;
+                string imageId = null;
+                if (specialtyImageFile != null)
+                {
+                    // Use UploadSingleFileAsync for one image
+                    var uploadResult = await _fileStorageService.UploadSingleFileAsync(specialtyImageFile, $"specialties/{createDto.Name.Replace(" ", "").ToLower()}");
+                    if (uploadResult.Success) { imageUrl = uploadResult.Url; imageId = uploadResult.Id; }
+                    else { throw new InvalidOperationException($"Failed to upload specialty image: {uploadResult.Message}"); }
+                }
                 if (string.IsNullOrWhiteSpace(createDto.Name))
                 {
                     _logger.LogWarning("Specialty creation failed: Name is required.");
@@ -141,7 +156,7 @@ namespace Elagy.BL.Services
             }
         }
 
-        public async Task<SpecialtyResponseDto> UpdateSpecialty(int specialtyId, SpecialtyUpdateDto updateDto)
+        public async Task<SpecialtyResponseDto> UpdateSpecialty(int specialtyId, SpecialtyUpdateDto updateDto, IFormFile? newSpecialtyImageFile)
         {
             try
             {
@@ -155,9 +170,21 @@ namespace Elagy.BL.Services
                     _logger.LogWarning($"Update failed: Specialty with ID {specialtyId} not found or is inactive.");
                     throw new KeyNotFoundException($"Specialty with ID {specialtyId} not found or is inactive.");
                 }
-
+                if (newSpecialtyImageFile != null)
+                {
+                   
+                    if (!string.IsNullOrEmpty(specialtyToUpdate.ImageId))
+                    {
+                        var deleteResult = await _fileStorageService.DeleteFileAsync(specialtyToUpdate.ImageId);
+                        if (!deleteResult) _logger.LogWarning($"Failed to delete old image {specialtyToUpdate.ImageId} for specialty {specialtyId}.");
+                    }
+                    
+                    var uploadResult = await _fileStorageService.UploadSingleFileAsync(newSpecialtyImageFile, $"specialties/{specialtyToUpdate.Name.Replace(" ", "").ToLower()}");
+                    if (uploadResult.Success) { specialtyToUpdate.ImageURL = uploadResult.Url; specialtyToUpdate.ImageId = uploadResult.Id; }
+                    else { throw new InvalidOperationException($"Failed to upload new specialty image: {uploadResult.Message}"); }
+                }
                 // 2. Implement Business Logic / Validation
- 
+
                 if (!string.Equals(specialtyToUpdate.Name, updateDto.Name, StringComparison.OrdinalIgnoreCase))
                 {
                     _logger.LogInformation($"Specialty name changed from '{specialtyToUpdate.Name}' to '{updateDto.Name}'. Checking for uniqueness.");

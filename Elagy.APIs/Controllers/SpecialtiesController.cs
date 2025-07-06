@@ -185,7 +185,7 @@ namespace Elagy.APIs.Controllers
 
         [HttpPost("SuperAdmin")]
         [Authorize(Roles = "SuperAdmin")]
-        public async Task<IActionResult> CreateSpecialty([FromBody] SpecialtyCreateDto createDto)
+        public async Task<IActionResult> CreateSpecialty([FromForm] SpecialtyCreateDto createDto, IFormFile? SpecialtyImageFile)
         {
             if (!ModelState.IsValid)
             {
@@ -193,7 +193,7 @@ namespace Elagy.APIs.Controllers
             }
             try
             {
-                var result = await _specialtyService.CreateSpecialty(createDto);
+                var result = await _specialtyService.CreateSpecialty(createDto, SpecialtyImageFile);
                 return CreatedAtAction(nameof(GetSpecialtyById), new { id = result.Id }, result);
             }
             catch (ArgumentException ex)
@@ -248,7 +248,7 @@ namespace Elagy.APIs.Controllers
 
         [HttpPut("SuperAdmin/{id}")]
         [Authorize(Roles = "SuperAdmin")] 
-        public async Task<IActionResult> UpdateSpecialty(int id, [FromBody] SpecialtyUpdateDto updateDto)
+        public async Task<IActionResult> UpdateSpecialty(int id, [FromForm] SpecialtyUpdateDto updateDto, IFormFile? newspecialtyImageFile)
         {
             if (!ModelState.IsValid)
             {
@@ -257,7 +257,7 @@ namespace Elagy.APIs.Controllers
 
             try
             {
-                var result = await _specialtyService.UpdateSpecialty(id, updateDto); // Pass route ID
+                var result = await _specialtyService.UpdateSpecialty(id, updateDto, newspecialtyImageFile); // Pass route ID
                 return Ok(result);
             }
             catch (KeyNotFoundException ex)
