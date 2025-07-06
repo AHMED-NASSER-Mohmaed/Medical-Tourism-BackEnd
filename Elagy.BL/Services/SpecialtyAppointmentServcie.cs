@@ -16,10 +16,12 @@ namespace Elagy.BL.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPackgeService _packgeService;
-        public SpecialtyAppointmentServcie(IUnitOfWork unitOfWork,IPackgeService packgeService)
+        private readonly IRoomScheduleService _RoomScheduleService;
+        public SpecialtyAppointmentServcie(IUnitOfWork unitOfWork,IPackgeService packgeService, IRoomScheduleService roomScheduleService)
         {
             _unitOfWork = unitOfWork;
             _packgeService = packgeService;
+            _RoomScheduleService = roomScheduleService;
         }
 
         public async Task<Package> BookAppointment(string patientId, CreateSpecialtyAppointmentDTO SADTO)
@@ -39,32 +41,62 @@ namespace Elagy.BL.Services
             try
             {
 
-                Package createPackage = await _packgeService.CreatePackage(patientId);
+                //Package createPackage = await _packgeService.CreatePackage(patientId);
 
                 double TotalMinutes = ( (ss.TimeSlotSize.Hours * 60) + ss.TimeSlotSize.Minutes ) * nOfBookedAppoinment;
 
 
-                createPackage.Appointments.Add (new SpecialtyAppointment
+                /* createPackage.Appointments.Add(new SpecialtyAppointment
+                 {
+                     price = ss.Price,
+                     Type = AppointmentType.Specialty,
+                     //Status = AppointmentStatus.Pending,
+                     Status = AppointmentStatus.Booked,
+                     PackageId = createPackage.Id,
+                     Package = createPackage,
+                     ServiceDeliveryType = SpecialtyAppointmentDeliveryType.Onsite, // Assuming on-site delivery for specialty appointments
+
+                     Date = SADTO.AppointmentDate,
+
+                     ExistingTime = ss.StartTime.AddMinutes(TotalMinutes),
+
+                     SpecialtyScheduleId = SADTO.SpecialtyScheduleId,
+
+                 });
+
+
+                 _unitOfWork.Packages.Update(createPackage);
+ */
+
+                //CreateRoomSchedule();
+
+                 
+
+                Guid packageId = Guid.NewGuid(); // Generate a new package ID
+
+                var createPackage = new Package
                 {
-                    price = ss.Price,
-                    Type = AppointmentType.Specialty,
-                    //Status = AppointmentStatus.Pending,
-                    Status = AppointmentStatus.Booked,
-                    PackageId = createPackage.Id,
-                    Package = createPackage,
-                    ServiceDeliveryType = SpecialtyAppointmentDeliveryType.Onsite, // Assuming on-site delivery for specialty appointments
+                    Id = packageId,
+                    PatientId = patientId,
+                    CreatedAt = DateTime.UtcNow,
+                    Status = BookingStatus.Confirmed,
+                    Appointments = new List<Appointment>
+                    {
+                        new SpecialtyAppointment
+                        {
+                            price = ss.Price,
+                            Type = AppointmentType.Specialty,
+                            Status = AppointmentStatus.Booked,
+                            PackageId = packageId,
+                            ServiceDeliveryType = SpecialtyAppointmentDeliveryType.Onsite,
+                            Date = SADTO.AppointmentDate,
+                            ExistingTime = ss.StartTime.AddMinutes(TotalMinutes),
+                            SpecialtyScheduleId = SADTO.SpecialtyScheduleId
+                        }
+                    }
+                };
 
-                    Date = SADTO.AppointmentDate,
-
-                    ExistingTime = ss.StartTime.AddMinutes(TotalMinutes),
-
-                    SpecialtyScheduleId = SADTO.SpecialtyScheduleId,
-
-                });
-
-
-                _unitOfWork.Packages.Update(createPackage);
- 
+                await _unitOfWork.Packages.AddAsync(createPackage);
 
                 return createPackage;
 
@@ -72,7 +104,7 @@ namespace Elagy.BL.Services
             catch (Exception ex)
             {
                 // Handle exceptions, log them, or rethrow as needed
-                throw new InvalidOperationException("An error occurred while booking the appointment.", ex);
+                throw new InvalidOperationException("An error occurred while booking the specialty appointment.", ex);
             }
         }
 

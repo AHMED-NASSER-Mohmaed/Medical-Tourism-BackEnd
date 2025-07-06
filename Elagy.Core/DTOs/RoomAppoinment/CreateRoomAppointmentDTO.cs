@@ -12,5 +12,6 @@ namespace Elagy.Core.DTOs.RoomAppoinment
         public DateOnly CheckOutDate { get; set; }
         //forgien key
         public int RoomId { get; set; }
+        public DateOnly EndDate { get; set; }
     }
 }

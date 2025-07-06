@@ -55,6 +55,9 @@ namespace Elagy.BL.Services
 
             await _unitOfWork.RoomSchedule.AddAsync(roomSchedule);
 
+            await _unitOfWork.CompleteAsync();
+
+
 
             var query = _unitOfWork.RoomSchedule.AsQueryable();
 
@@ -76,9 +79,9 @@ namespace Elagy.BL.Services
 
             var result = await query.ToListAsync();
 
-            return result.Count()!=0?true:false;
+            return result.Count()==0?true:false;
         }
 
-        
+        //////////////////////////////////////////////////////////////////////////////////////////////////
     }
 }
