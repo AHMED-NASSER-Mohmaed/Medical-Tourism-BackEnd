@@ -14,6 +14,7 @@ namespace Elagy.Core.DTOs.RoomSchedule
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
         public ScheduleStatus RoomscheduleStatus { get; set; }
+        public List<DateOnly> UnavailableDates { get; set; }=new List<DateOnly>();
         public int RoomId { get; set; }
     }
 }

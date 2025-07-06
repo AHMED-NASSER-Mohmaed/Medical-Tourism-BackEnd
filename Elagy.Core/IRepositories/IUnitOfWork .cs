@@ -41,6 +41,9 @@ namespace Elagy.Core.IRepositories
         //appoinments
         IGenericRepository<SpecialtyAppointment> SpecialtyAppointments { get; }
         IGenericRepository<Package> Packages{ get; }
+         IGenericRepository<RoomAppointment> RoomAppointments { get;  }
+         IGenericRepository<CarRentalAppointment> CarRentalAppointments { get;  }
+        
 
 
 

@@ -1,5 +1,6 @@
 ﻿using Elagy.Core.DTOs.CarRentals;
 using Elagy.Core.DTOs.Pagination;
+using Elagy.Core.DTOs.TOP;
 using Elagy.Core.Enums;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -23,5 +24,6 @@ namespace Elagy.Core.IServices
         // --- Public/Website Car Display & Details ---
         Task<PagedResponseDto<CarResponseDto>> GetAvailableCarsForWebsiteAsync(PaginationParameters paginationParameters, string CarRentalAssetId);
         Task<CarResponseDto?> GetCarByIdAsync(int carId);
+        Task<IEnumerable<CarBookingCountDto>> GetTopCarsByRentals();
     }
 }

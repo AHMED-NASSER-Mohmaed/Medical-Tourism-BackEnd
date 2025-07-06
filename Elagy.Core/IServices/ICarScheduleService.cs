@@ -14,5 +14,7 @@ namespace Elagy.Core.IServices
         Task<bool> IsAvilable(DateOnly Start, DateOnly End, int CarId);
         Task<CarSheduleResponseDTO> CreateCarSchedule(CreateCarScheduleDTO carScheduleDTO);
 
+        Task<UnavailableDatesDTO> GetAvailableCarsSchedules(int carId);
+
     }
 }

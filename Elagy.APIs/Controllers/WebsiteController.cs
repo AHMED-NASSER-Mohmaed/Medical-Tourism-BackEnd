@@ -1,5 +1,7 @@
-﻿using Elagy.Core.DTOs.Doctor;
+﻿using Elagy.BL.Services;
+using Elagy.Core.DTOs.Doctor;
 using Elagy.Core.DTOs.Pagination;
+using Elagy.Core.DTOs.TOP;
 using Elagy.Core.Enums;
 using Elagy.Core.IServices;
 using Microsoft.AspNetCore.Authorization;
@@ -21,6 +23,8 @@ namespace Elagy.APIs.Controllers
         private readonly ISpecialtyScheduleService _scheduleService;
         private readonly ISuperAdminService _superAdminService;
         private readonly ICarService _carservice;
+        private readonly IRoomScheduleService _RoomscheduleService;
+
 
 
         public WebsiteController(
@@ -32,7 +36,8 @@ namespace Elagy.APIs.Controllers
             IDoctorService doctorService,
             ISpecialtyScheduleService scheduleService,
             ISuperAdminService superAdminService,
-            ICarService carservice)
+            ICarService carservice,
+            IRoomScheduleService roomscheduleService)
         {
             _hospitalProviderService = hospitalProviderService;
             _carRentalProviderService = carRentalProviderService;
@@ -42,7 +47,8 @@ namespace Elagy.APIs.Controllers
             _doctorService = doctorService;
             _scheduleService = scheduleService;
             _superAdminService = superAdminService;
-            _carservice=carservice;
+            _carservice = carservice;
+            _RoomscheduleService = roomscheduleService;
         }
 
 
@@ -64,6 +70,8 @@ namespace Elagy.APIs.Controllers
             var providers = await _superAdminService.GetCarRentalProvidersForAdminDashboardAsync(Filter);
             return Ok(providers);
         }
+
+
         [HttpGet("CarAvailable/{carRentalId}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetAvailableCarsForWebsite(string carRentalId,
@@ -94,6 +102,21 @@ namespace Elagy.APIs.Controllers
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving available cars.");
+            }
+        }
+
+
+        [HttpGet("Top-Cars")]
+        public async Task<IActionResult> GetTopRentedCars()
+        {
+            try
+            {
+                var topCars = await _carservice.GetTopCarsByRentals();
+                return Ok(topCars);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error");
             }
         }
 
@@ -174,10 +197,39 @@ namespace Elagy.APIs.Controllers
             }
         }
 
-      
 
-       
 
+        [HttpGet("rooms-unavailable-dates/{roomId}")]
+        public async Task<IActionResult> GetFutureUnavailableDates(int roomId)
+        {
+            try
+            {
+                var result = await _RoomscheduleService.GetAvailableRoomsSchedules(roomId);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error");
+            }
+        }
+        [HttpGet("Top-Hotels")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetTopBookedHotels()
+        {
+            try
+            {
+                var topHotels = await _roomService.GetTopHotelsByBookings();
+                return Ok(topHotels);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error");
+            }
+        }
 
         [HttpGet("Hospitals")]
         [AllowAnonymous]
@@ -301,6 +353,22 @@ namespace Elagy.APIs.Controllers
             }
         }
 
+        [HttpGet("Top-Doctors")]
+        [ProducesResponseType(typeof(IEnumerable<DoctorBookingCountDto>), 200)]
+        public async Task<IActionResult> GetTopBookedDoctors()
+        {
+            try
+            {
+                var topDoctors = await _doctorService.GetTop3DoctorsByBookings();
+                return Ok(topDoctors);
+            }
+            catch (Exception ex)
+            {
+                // Log error
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
 
 
 
@@ -339,24 +407,24 @@ namespace Elagy.APIs.Controllers
         //   }
 
 
-        [HttpGet("doctors/available-schedules/{doctorId}")]
-    public async Task<IActionResult> GetAvailableSchedulesByDoctor(
-    string doctorId,
-    [FromQuery] int pageNumber = 1,
-    [FromQuery] int pageSize = 10,
-    [FromQuery] string? searchTerm = null,
-    [FromQuery] int? filterDayOfWeekId = null)
-        {
-            var paginationParameters = new PaginationParameters
-            {
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                SearchTerm = searchTerm,
-                FilterDayOfWeekId = filterDayOfWeekId,
-            };
+        //    [HttpGet("doctors/available-schedules/{doctorId}")]
+        //public async Task<IActionResult> GetAvailableSchedulesByDoctor(
+        //string doctorId,
+        //[FromQuery] int pageNumber = 1,
+        //[FromQuery] int pageSize = 10,
+        //[FromQuery] string? searchTerm = null,
+        //[FromQuery] int? filterDayOfWeekId = null)
+        //    {
+        //        var paginationParameters = new PaginationParameters
+        //        {
+        //            PageNumber = pageNumber,
+        //            PageSize = pageSize,
+        //            SearchTerm = searchTerm,
+        //            FilterDayOfWeekId = filterDayOfWeekId,
+        //        };
 
-            var result = await _scheduleService.GetAvailablePatientSlotsAsync(doctorId, paginationParameters);
-            return Ok(result);
-        }
+        //        var result = await _scheduleService.GetAvailablePatientSlotsAsync(doctorId, paginationParameters);
+        //        return Ok(result);
+        //    }
     }
 }

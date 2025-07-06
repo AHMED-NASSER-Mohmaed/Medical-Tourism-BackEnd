@@ -15,5 +15,6 @@ namespace Elagy.Core.IServices
         Task<(int booked, int cancelled)> GetBookedAndCancelled(int _scheduleId);
         Task<(bool IsAvailable,int AppointmentCount, SpecialtySchedule SS)> IsAvailableAppointmentForBooking(DateOnly _ ,int SpecialtyScheduleId);
 
+
     }
 }

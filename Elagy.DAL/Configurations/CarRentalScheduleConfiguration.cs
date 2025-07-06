@@ -27,11 +27,7 @@ namespace Elagy.DAL.Configurations
                    .HasForeignKey(crs => crs.CarId)
                    .OnDelete(DeleteBehavior.Restrict);
 
-            // Relationship with CarRentalAppointments
-            builder.HasMany(crs => crs.CarRentalAppointments)
-                   .WithOne(a => a.CarRentalSchedule)
-                   .HasForeignKey(a => a.CarRentalScheduleId)
-                   .OnDelete(DeleteBehavior.Restrict);
+     
         }
     }
 }

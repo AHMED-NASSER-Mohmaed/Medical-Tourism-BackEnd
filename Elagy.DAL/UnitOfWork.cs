@@ -52,7 +52,9 @@ namespace Elagy.DAL
         public ICarDriverRepository CarDrivers { get; private set; }
 
         public IGenericRepository<Package> Packages { get; private set; }
+        public IGenericRepository<RoomAppointment> RoomAppointments { get; private set; }
 
+        public IGenericRepository<CarRentalAppointment> CarRentalAppointments { get; private set; }
         public UnitOfWork(ApplicationDbContext context)
         {
             //IRepo injection
@@ -67,8 +69,8 @@ namespace Elagy.DAL
             CarRentalAssets = new GenericRepository<CarRentalAsset>(_context);
             Countries = new GenericRepository<Country>(_context);
             Governates = new GenericRepository<Governorate>(_context);
-
-
+            CarRentalAppointments=new GenericRepository<CarRentalAppointment>(_context);
+            RoomAppointments =new GenericRepository<RoomAppointment>(_context);
             DayOfWeeks=new GenericRepository<DayOfWeek>(_context);
             HospitalSpecialties = new HospitalSpecialtyRepository(_context);
             Specialties = new SpecialtyRepository(_context);

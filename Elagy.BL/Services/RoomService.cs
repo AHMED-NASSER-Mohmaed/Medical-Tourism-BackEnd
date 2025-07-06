@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Room;
+using Elagy.Core.DTOs.TOP;
 using Elagy.Core.Entities;
 using Elagy.Core.Enums;
 using Elagy.Core.Helpers;
@@ -314,6 +315,22 @@ namespace Elagy.BL.Services
                 _logger.LogError(ex, $"Error getting room by ID: {roomId}.");
                 throw;
             }
+        }
+
+        public async Task<IEnumerable<HotelBookingCountDto>> GetTopHotelsByBookings()
+        {
+            return await _unitOfWork.HotelAssets.AsQueryable()
+     .Select(hotel => new HotelBookingCountDto
+     {
+         HotelId = hotel.Id,
+         HotelName = hotel.Name,
+         BookingCount = hotel.Rooms
+             .SelectMany(room => room.RoomSchedules)
+             .Count(a => a.RoomscheduleStatus ==ScheduleStatus.Confirmed)
+     })
+     .OrderByDescending(dto => dto.BookingCount)
+     .Take(3)
+     .ToListAsync();
         }
 
         public async Task<RoomResponseDto> UpdateRoomAsync(int roomId, RoomUpdateDto updateDto, string hotelAssetId, List<IFormFile>? newImageFiles = null)

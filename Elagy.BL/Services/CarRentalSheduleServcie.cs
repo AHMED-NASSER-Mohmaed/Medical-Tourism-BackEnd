@@ -2,6 +2,7 @@
 using Elagy.Core.DTOs.CarRentalSchedule;
 using Elagy.Core.DTOs.RoomSchedule;
 using Elagy.Core.Entities;
+using Elagy.Core.Enums;
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
 using Microsoft.EntityFrameworkCore;
@@ -77,6 +78,7 @@ namespace Elagy.BL.Services
             return _map.Map<CarSheduleResponseDTO>(createdCarSchedule);
         }
 
+      
 
         public async Task<bool> IsAvilable(DateOnly StartDate, DateOnly EndDate, int carId)
         {
@@ -92,8 +94,33 @@ namespace Elagy.BL.Services
 
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
-       
 
 
+        public async Task<UnavailableDatesDTO> GetAvailableCarsSchedules(int carId)
+        {
+            var car =_unitOfWork.Cars.FindAsync(c=>c.Id== carId && c.IsAvailable && c.Status!=CarStatus.UnderMaintenance);
+
+            if (car == null)
+                throw new Exception("Car is not Available");
+
+            var today = DateOnly.FromDateTime(DateTime.Today);
+
+            var carschedules = _unitOfWork.CarSchedule.AsQueryable()
+                .Where(cs => cs.CarId == carId && cs.Status == ScheduleStatus.Confirmed && cs.StartingDate>=today)
+                .ToListAsync();
+
+            var carAppointments =  _unitOfWork.CarRentalAppointments.AsQueryable()
+       .Where(ca => ca.CarRentalSchedule.CarId == carId &&
+                    ca.Status != AppointmentStatus.Cancelled &&
+                    DateOnly.FromDateTime(ca.EndingDateTime) >= today)
+       .ToListAsync();
+
+            var unavailableDates=new HashSet<DateOnly>();
+
+
+            throw new Exception("wait");
+
+
+        }
     }
 }
