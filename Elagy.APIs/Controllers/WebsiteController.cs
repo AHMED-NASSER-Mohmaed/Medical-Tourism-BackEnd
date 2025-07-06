@@ -50,6 +50,7 @@ namespace Elagy.APIs.Controllers
         [HttpGet("CarRentals")]
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<HotelProviderProfileDto>>> GetCarRentalProviders(
+          [FromQuery] int ?governertaeId=null,
         [FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10,
         [FromQuery] string SearchTerm = null, [FromQuery] Status? UserStatus = null)
         {
@@ -58,6 +59,7 @@ namespace Elagy.APIs.Controllers
             Filter.PageSize = PageSize;
             Filter.SearchTerm = SearchTerm;
             Filter.UserStatus = UserStatus;
+            Filter.FilterGovernorateId = governertaeId;
 
             var providers = await _superAdminService.GetCarRentalProvidersForAdminDashboardAsync(Filter);
             return Ok(providers);
@@ -338,7 +340,7 @@ namespace Elagy.APIs.Controllers
 
 
         [HttpGet("doctors/available-schedules/{doctorId}")]
-        public async Task<IActionResult> GetAvailableSchedulesByDoctor(
+    public async Task<IActionResult> GetAvailableSchedulesByDoctor(
     string doctorId,
     [FromQuery] int pageNumber = 1,
     [FromQuery] int pageSize = 10,
@@ -354,7 +356,7 @@ namespace Elagy.APIs.Controllers
                 FilterDayOfWeekId = filterDayOfWeekId,
             };
 
-            var result = await _scheduleService.GetAvailableSchedulesByDoctorIdAsync(doctorId, paginationParameters);
+            var result = await _scheduleService.GetAvailablePatientSlotsAsync(doctorId, paginationParameters);
             return Ok(result);
         }
     }

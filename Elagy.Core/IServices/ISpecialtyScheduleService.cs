@@ -29,11 +29,10 @@ namespace Elagy.Core.IServices
 
         /// Retrieves a paginated list of available schedule slots for patient viewing (website).
 
-        Task<PagedResponseDto<ScheduleResponseDto>> GetAvailablePatientSlotsAsync(PaginationParameters paginationParameters);
+        Task<PagedResponseDto<ScheduleResponseDto>> GetAvailablePatientSlotsAsync(string doctorid,PaginationParameters paginationParameters);
 
         /// Retrieves a single schedule slot by its ID, typically for detail view.
         Task<ScheduleResponseDto?> GetScheduleByIdAsync(int scheduleId);
-        
         //Task<(bool isAvailable, DateTime attendTime)> BookSpecialtySchedule(int SpecialtyScheduleId);
 
     }
