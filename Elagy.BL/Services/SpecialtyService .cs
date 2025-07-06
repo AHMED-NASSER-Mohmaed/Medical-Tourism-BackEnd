@@ -170,19 +170,19 @@ namespace Elagy.BL.Services
                     _logger.LogWarning($"Update failed: Specialty with ID {specialtyId} not found or is inactive.");
                     throw new KeyNotFoundException($"Specialty with ID {specialtyId} not found or is inactive.");
                 }
-                if (newSpecialtyImageFile != null)
-                {
+                //if (newSpecialtyImageFile != null)
+                //{
                    
-                    if (!string.IsNullOrEmpty(specialtyToUpdate.ImageId))
-                    {
-                        var deleteResult = await _fileStorageService.DeleteFileAsync(specialtyToUpdate.ImageId);
-                        if (!deleteResult) _logger.LogWarning($"Failed to delete old image {specialtyToUpdate.ImageId} for specialty {specialtyId}.");
-                    }
+                //    if (!string.IsNullOrEmpty(specialtyToUpdate.ImageId))
+                //    {
+                //        var deleteResult = await _fileStorageService.DeleteFileAsync(specialtyToUpdate.ImageId);
+                //        if (!deleteResult) _logger.LogWarning($"Failed to delete old image {specialtyToUpdate.ImageId} for specialty {specialtyId}.");
+                //    }
                     
-                    var uploadResult = await _fileStorageService.UploadSingleFileAsync(newSpecialtyImageFile, $"specialties/{specialtyToUpdate.Name.Replace(" ", "").ToLower()}");
-                    if (uploadResult.Success) { specialtyToUpdate.ImageURL = uploadResult.Url; specialtyToUpdate.ImageId = uploadResult.Id; }
-                    else { throw new InvalidOperationException($"Failed to upload new specialty image: {uploadResult.Message}"); }
-                }
+                //    var uploadResult = await _fileStorageService.UploadSingleFileAsync(newSpecialtyImageFile, $"specialties/{specialtyToUpdate.Name.Replace(" ", "").ToLower()}");
+                //    if (uploadResult.Success) { specialtyToUpdate.ImageURL = uploadResult.Url; specialtyToUpdate.ImageId = uploadResult.Id; }
+                //    else { throw new InvalidOperationException($"Failed to upload new specialty image: {uploadResult.Message}"); }
+                //}
                 // 2. Implement Business Logic / Validation
 
                 if (!string.Equals(specialtyToUpdate.Name, updateDto.Name, StringComparison.OrdinalIgnoreCase))

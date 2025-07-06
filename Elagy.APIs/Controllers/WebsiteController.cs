@@ -345,8 +345,7 @@ namespace Elagy.APIs.Controllers
     [FromQuery] int pageNumber = 1,
     [FromQuery] int pageSize = 10,
     [FromQuery] string? searchTerm = null,
-    [FromQuery] int? filterDayOfWeekId = null
-)
+    [FromQuery] int? filterDayOfWeekId = null)
         {
             var paginationParameters = new PaginationParameters
             {
@@ -360,4 +359,4 @@ namespace Elagy.APIs.Controllers
             return Ok(result);
         }
     }
-    }
+}
