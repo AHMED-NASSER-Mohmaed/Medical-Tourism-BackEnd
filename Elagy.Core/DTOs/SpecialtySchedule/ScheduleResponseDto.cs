@@ -16,7 +16,7 @@ namespace Elagy.Core.DTOs.Schedule
         public string Hospital { get; set; }
         public string HospitalAssetId { get; set; }
         public int HospitalSpecialtyId { get; set; }
-        public DayOfWeekDto DayOfWeek { get; set; }
+        public int DayOfWeekId { get; set; }
 
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
