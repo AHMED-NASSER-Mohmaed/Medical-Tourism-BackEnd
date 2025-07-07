@@ -12,7 +12,7 @@ namespace Elagy.Core.DTOs.TOP
         public string HotelName { get; set; }
         public string HotelDescription{ get; set; }
         public int? starRating { get; set; }
-
+        public List<string> imageurls { get; set; }
         public int BookingCount { get; set; }
     }
 

@@ -326,6 +326,7 @@ namespace Elagy.BL.Services
          HotelName = hotel.Name,
          starRating=hotel.StarRating,
          HotelDescription=hotel.Description,
+         imageurls=hotel.HotelAssetImages.Select(img=>img.ImageURL).ToList(),
          BookingCount = hotel.Rooms
              .SelectMany(room => room.RoomSchedules)
              .Count(a => a.RoomscheduleStatus ==ScheduleStatus.Confirmed)
