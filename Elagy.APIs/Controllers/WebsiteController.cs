@@ -370,7 +370,20 @@ namespace Elagy.APIs.Controllers
         }
 
 
-
+        [HttpGet("specialties-top-booked")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetTopBookedSpecialties()
+        {
+            try
+            {
+                var topSpecialties = await _specialtyService.GetTopSpecialtiesByBookings();
+                return Ok(topSpecialties);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error");
+            }
+        }
 
 
         //[HttpGet("schedule/available-slots")]

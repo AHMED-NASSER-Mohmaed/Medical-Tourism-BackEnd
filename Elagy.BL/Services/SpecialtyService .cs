@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Specialty;
+using Elagy.Core.DTOs.TOP;
 using Elagy.Core.Entities;
 using Elagy.Core.Enums;
 using Elagy.Core.Helpers;
@@ -525,6 +526,27 @@ namespace Elagy.BL.Services
                 _logger.LogError(ex, $"Error changing status of specialty link {specialtyId}");
                 throw;
             }
+        }
+
+        public async Task<IEnumerable<TopSpecialtyDto>> GetTopSpecialtiesByBookings()
+        {
+            return await _unitOfWork.Specialties.AsQueryable()
+               .Select(specialty => new TopSpecialtyDto
+               {
+                   SpecialtyId = specialty.Id,
+                   SpecialtyName = specialty.Name,
+                   BookingCount = specialty.HospitalSpecialties
+                       .SelectMany(hs => hs.Doctors)
+                       .SelectMany(d => d.Schedules)
+                       .SelectMany(s => s.Appointments)
+                       .Count(a => a.Status != AppointmentStatus.Cancelled),
+                   DoctorCount = specialty.HospitalSpecialties
+                       .SelectMany(hs => hs.Doctors)
+                       .Count()
+               })
+               .OrderByDescending(dto => dto.BookingCount)
+               .Take(3)
+               .ToListAsync();
         }
     }
  }

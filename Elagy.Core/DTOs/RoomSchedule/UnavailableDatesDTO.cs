@@ -9,6 +9,8 @@ namespace Elagy.Core.DTOs.RoomSchedule
     public class UnavailableDatesDTO
     {
         public int RoomId { get; set; }
+        public string HotelId { get; set; }
+        public string HotelName { get; set; }
         public IEnumerable<DateOnly> UnavailableDates { get; set; }
 
     }

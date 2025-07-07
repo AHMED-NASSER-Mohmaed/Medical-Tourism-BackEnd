@@ -90,8 +90,9 @@ namespace Elagy.BL.Services
         public async Task<UnavailableDatesDTO> GetAvailableRoomsSchedules(int RoomId)
         {
 
-            var roomExists = await _unitOfWork.Rooms.GetByIdAsync(RoomId);
-            if (roomExists==null || !roomExists.IsAvailable ||roomExists.Status==RoomStatus.UnderMaintenance )
+      var room = await _unitOfWork.Rooms.AsQueryable().Include(r => r.HotelAsset).FirstOrDefaultAsync(r => r.Id == RoomId);
+
+            if (room == null || !room.IsAvailable || room.Status==RoomStatus.UnderMaintenance )
             {
                 throw new ArgumentException("The specified room is not available.");
             }
@@ -102,7 +103,7 @@ namespace Elagy.BL.Services
             var roomSchedules = await _unitOfWork.RoomSchedule.AsQueryable()
                 .Where(rs => rs.RoomId == RoomId &&
                              rs.RoomscheduleStatus == ScheduleStatus.Confirmed &&
-                             rs.EndDate >= today) //bring uavailable the roomschedules after today
+                             rs.EndDate >= today) //bring uavailable the roomschedules after from today
                 .ToListAsync();
 
 
@@ -139,6 +140,8 @@ namespace Elagy.BL.Services
             return new UnavailableDatesDTO
             {
                 RoomId=RoomId,
+                HotelId=room.HotelAsset.Id,
+                HotelName=room.HotelAsset.Name,
                 UnavailableDates=unavailableDates.Where(date=>date>today).OrderBy(date=>date).ToList(),
             };
 

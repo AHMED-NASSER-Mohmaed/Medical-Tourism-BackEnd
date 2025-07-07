@@ -14,5 +14,5 @@ public class CarRentalProviderProfileDto : BaseServiceProviderProfileDto
     public string[] RentalPolicies { get; set; }
 
     public ICollection<AssetImageResponseDto>? AssetImages { get; set; }
-    // (e.g., age restrictions, insurance requirements, mileage limits)
+   
 }
