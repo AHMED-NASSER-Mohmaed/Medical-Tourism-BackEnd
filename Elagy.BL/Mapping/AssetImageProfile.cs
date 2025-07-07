@@ -27,7 +27,7 @@ namespace Elagy.BL.Mapping
                     .ForMember(dest => dest.ImageId, opt => opt.MapFrom(src => src.ImageId))
     .ForMember(dest => dest.ImageURL, opt => opt.MapFrom(src => src.ImageURL))
     .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
-
+    
 
 
             CreateMap<CarRentalAssetImage, AssetImageResponseDto>()

@@ -545,7 +545,7 @@ namespace Elagy.BL.Services
                        .Count()
                })
                .OrderByDescending(dto => dto.BookingCount)
-               .Take(3)
+               .Take(4)
                .ToListAsync();
         }
     }

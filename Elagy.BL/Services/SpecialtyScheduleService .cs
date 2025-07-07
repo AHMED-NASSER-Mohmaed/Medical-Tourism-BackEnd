@@ -311,7 +311,7 @@ namespace Elagy.BL.Services
 
         public async Task<List<ScheduleResponseDto>> GetAvailablePatientSlotsAsync(string doctorId)
         {
-            var query=_unitOfWork.SpecialtySchedule.AsQueryable().Include(s=>s.DayOfWeek).AsQueryable(); 
+            var query=_unitOfWork.SpecialtySchedule.AsQueryable().Include(s=>s.DayOfWeek).AsQueryable(); // Ensure the repository is set up for querying
 
             query= query.Where(s => s.DoctorId == doctorId && s.IsActive)
                 .OrderBy(s => s.DayOfWeekId)
