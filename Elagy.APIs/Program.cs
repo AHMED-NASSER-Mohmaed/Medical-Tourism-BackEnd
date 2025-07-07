@@ -90,6 +90,7 @@ builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<ICarService, CarService>();
 builder.Services.AddScoped<IDriverService, DriverService>();
 builder.Services.AddScoped<ICarDriverAssignmentService, CarDriverAssignmentService>();
+builder.Services.AddScoped<IServiceProvidersWebsiteService, ServiceProvidersWebsiteService>();
 
 
 
