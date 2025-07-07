@@ -333,12 +333,12 @@ namespace Elagy.BL.Services
 
             IQueryable<ServiceProvider> query = _unitOfWork.ServiceProviders
                                                 .AsQueryable()
-                                                .OfType<ServiceProvider>();
+                                                .OfType<ServiceProvider>(); 
 
             query = query.Include(sp => sp.Governorate)
                 .ThenInclude(g => g.Country);
 
-            query= query.Include(sp => sp.ServiceAsset)
+            query= query.Include(sp => sp.ServiceAsset).ThenInclude(asset => ((HospitalAsset)asset).HospitalAssetImages) .Include(s=>s.ServiceAsset)
                 .ThenInclude(a => a.Governate)
                 .ThenInclude(g => g.Country)
                 .Where(sp => sp.ServiceAsset != null && sp.ServiceAsset.AssetType == AssetType.Hospital);
@@ -388,7 +388,9 @@ namespace Elagy.BL.Services
             // 2. Apply the fixed filter for CarRental assets
             //    Include ServiceAsset first, as it's needed for this filter (and likely for mapping).
             query = query
-                .Include(sp => sp.ServiceAsset) // Eager load ServiceAsset if needed for AssetType filter and mapping
+                .Include(sp => sp.ServiceAsset)
+                .ThenInclude(asset => ((CarRentalAsset)asset).CarRentalAssetImages).Include(s=>s.ServiceAsset).ThenInclude(a => a.Governate)
+                .ThenInclude(g => g.Country)  // Eager load ServiceAsset if needed for AssetType filter and mapping
                 .Where(sp => sp.ServiceAsset != null && sp.ServiceAsset.AssetType == AssetType.CarRental); // Filter for CarRental assets
 
 

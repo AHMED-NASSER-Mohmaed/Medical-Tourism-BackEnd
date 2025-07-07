@@ -324,6 +324,8 @@ namespace Elagy.BL.Services
      {
          HotelId = hotel.Id,
          HotelName = hotel.Name,
+         starRating=hotel.StarRating,
+         HotelDescription=hotel.Description,
          BookingCount = hotel.Rooms
              .SelectMany(room => room.RoomSchedules)
              .Count(a => a.RoomscheduleStatus ==ScheduleStatus.Confirmed)
