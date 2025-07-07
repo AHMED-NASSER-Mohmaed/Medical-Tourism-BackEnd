@@ -20,7 +20,9 @@ namespace Elagy.BL.Mapping
                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
-                              .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.IsActive ? Status.Active : Status.Deactivated));
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.IsActive ? Status.Active : Status.Deactivated))
+                .ForMember(dest => dest.ImageId, opt => opt.MapFrom(src => src.ImageId))
+                .ForMember(dest => dest.ImageURL, opt => opt.MapFrom(src => src.ImageURL));
 
             CreateMap<HospitalAssetImage, RoomImageDto>();
 

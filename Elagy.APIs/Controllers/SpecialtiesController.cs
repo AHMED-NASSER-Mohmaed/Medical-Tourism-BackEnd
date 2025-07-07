@@ -211,6 +211,8 @@ namespace Elagy.APIs.Controllers
         }
 
 
+
+
         [HttpPost("link-to-hospital-admin/{specialtyId}")]
         [Authorize(Roles = "HospitalServiceProvider")]
 
