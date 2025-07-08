@@ -285,7 +285,7 @@ namespace Elagy.BL.Services
  
         public async Task<PagedResponseDto<HotelProviderProfileDto>> GetHotelProvidersForAdminDashboardAsync(PaginationParameters requestParams) 
         {
-            var query = _unitOfWork.ServiceProviders.AsQueryable().OfType<ServiceProvider>().Where(s=>s.Status==Status.Active);
+            var query = _unitOfWork.ServiceProviders.AsQueryable().OfType<ServiceProvider>();
 
              
             query = query.Include(sp => sp.ServiceAsset).ThenInclude(asset => ((HotelAsset)asset).HotelAssetImages);;
