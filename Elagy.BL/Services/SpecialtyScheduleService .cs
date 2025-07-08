@@ -6,33 +6,37 @@ using Elagy.Core.Entities;
 using Elagy.Core.Enums;
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
+using Elagy.Core.Temps;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 
 namespace Elagy.BL.Services
 {
-    public class ScheduleService : ISpecialtyScheduleService
+    public class SpecialtyScheduleService : ISpecialtyScheduleService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly ILogger<ScheduleService> _logger;
+   
 
-        public ScheduleService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<ScheduleService> logger)
+        private readonly ILogger<SpecialtyScheduleService> _logger;
+
+        public SpecialtyScheduleService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<SpecialtyScheduleService> logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+
         }
 
-      
         /// Retrieves a paginated list of all schedules for a specific hospital's admin dashboard
         public async Task<PagedResponseDto<ScheduleResponseDto>> GetAllSchedulesForHospitalAdminAsync(string hospitalId, PaginationParameters paginationParameters)
         {
             try
             {
                 
-                var schedules = await _unitOfWork.Schedules.GetSchedulesByHospitalIdAsync(hospitalId, isActive: null);
+                var schedules = await _unitOfWork.SpecialtySchedule.GetSchedulesByHospitalIdAsync(hospitalId, isActive: null);
 
             
                 var query = schedules.AsQueryable();
@@ -94,7 +98,7 @@ namespace Elagy.BL.Services
             try
             {
                 // Step 1: Get all schedules for the doctor (active only)
-                var schedules = await _unitOfWork.Schedules.GetSchedulesByDoctorIdAsync(doctorId, isActive: true);
+                var schedules = await _unitOfWork.SpecialtySchedule.GetSchedulesByDoctorIdAsync(doctorId, isActive: true);
 
                 // Step 2: Convert to IQueryable for in-memory filtering
                 var query = schedules.AsQueryable();
@@ -156,14 +160,14 @@ namespace Elagy.BL.Services
                 // validate the start and end time and the estimated time for one patient
                 if (createDto.EndTime <= createDto.StartTime) 
                     throw new ArgumentException("End time must be after start time.");
-                if (createDto.TimeSlotSize <= 0) 
+                if (createDto.TimeSlotSize.TotalMinutes<=0) 
                     throw new ArgumentException("Time slot size must be a positive integer.");
 
                 // convert to total minutes to calc the maxcapacity in the period
                 var slotDurationMinutes = (createDto.EndTime - createDto.StartTime).TotalMinutes;
                 // 3. Check for overlapping schedules for the same doctor on the same day (for active schedules)
 
-                var existingSchedules = await _unitOfWork.Schedules.GetSchedulesByDoctorIdAsync(createDto.DoctorId, isActive: true);
+                var existingSchedules = await _unitOfWork.SpecialtySchedule.GetSchedulesByDoctorIdAsync(createDto.DoctorId, isActive: true);
 
 
                 bool isOverlap = existingSchedules.Any(s =>
@@ -181,13 +185,13 @@ namespace Elagy.BL.Services
 
 
                 // 5. Add to repository and persist
-                await _unitOfWork.Schedules.AddAsync(schedule);
+                await _unitOfWork.SpecialtySchedule.AddAsync(schedule);
                 await _unitOfWork.CompleteAsync();
 
                 _logger.LogInformation($"Schedule slot (ID: {schedule.Id}) created successfully for Doctor {createDto.DoctorId} at {createDto.HospitalSpecialtyId}.");
 
 
-                var createdScheduleWithDetails = await _unitOfWork.Schedules.GetScheduleByIdWithDetailsAsync(schedule.Id);
+                var createdScheduleWithDetails = await _unitOfWork.SpecialtySchedule.GetScheduleByIdWithDetailsAsync(schedule.Id);
                 if (createdScheduleWithDetails == null) throw new Exception("Created schedule not found after save.");
 
                 return _mapper.Map<ScheduleResponseDto>(createdScheduleWithDetails);
@@ -204,7 +208,7 @@ namespace Elagy.BL.Services
             try
             {
                 // 1. Retrieve the existing schedule with details
-                var schedule = await _unitOfWork.Schedules.GetScheduleByIdWithDetailsAsync(scheduleId);
+                var schedule = await _unitOfWork.SpecialtySchedule.GetScheduleByIdWithDetailsAsync(scheduleId);
 
                 if (schedule == null) throw new KeyNotFoundException($"Schedule with ID {scheduleId} not found for update.");
 
@@ -214,10 +218,10 @@ namespace Elagy.BL.Services
 
                 // 3. Handle specific updates based on DTO fields validation
                 // MaxCapacity: Cannot be less than BookedSlots
-                if (updateDto.MaxCapacity.HasValue && updateDto.MaxCapacity.Value < schedule.BookedSlots)
-                {
-                    throw new InvalidOperationException($"Max capacity ({updateDto.MaxCapacity.Value}) cannot be less than booked slots ({schedule.BookedSlots}).");
-                }
+                //if (updateDto.MaxCapacity.HasValue && updateDto.MaxCapacity.Value < schedule.BookedSlots)
+                //{
+                //    throw new InvalidOperationException($"Max capacity ({updateDto.MaxCapacity.Value}) cannot be less than booked slots ({schedule.BookedSlots}).");
+                //}
 
                 // 2. Validate DayOfWeek based on the Date
                 if (updateDto.DayOfWeekId < 1 && updateDto.DayOfWeekId > 7)
@@ -236,9 +240,9 @@ namespace Elagy.BL.Services
 
 
                     // Check for overlaps with other active schedules of the same doctor
-                    var existingSchedules = await _unitOfWork.Schedules.GetSchedulesByDoctorIdAsync(schedule.DoctorId, isActive: true);
+                    var existingSchedules = await _unitOfWork.SpecialtySchedule.GetSchedulesByDoctorIdAsync(schedule.DoctorId, isActive: true);
                     bool isOverlap = existingSchedules.Any(s =>
-                        s.Id != schedule.Id && // Exclude current schedule itself
+                        s.Id != schedule.Id && // Exclude current sched ule itself
                         s.DayOfWeekId == proposedDayOfWeedId && // Same day of week
                         (
                             (proposedStartTime < s.EndTime && proposedEndTime > s.StartTime) || // Overlaps
@@ -253,13 +257,13 @@ namespace Elagy.BL.Services
                 _mapper.Map(updateDto, schedule);
 
                 // 5. Update the entity in the repository and save changes
-                _unitOfWork.Schedules.Update(schedule);
+                _unitOfWork.SpecialtySchedule.Update(schedule);
                 await _unitOfWork.CompleteAsync();
 
                 _logger.LogInformation($"Schedule slot (ID: {schedule.Id}) updated successfully for Doctor {schedule.DoctorId}.");
 
                 // 6. Re-fetch the updated schedule with details for comprehensive response DTO
-                var updatedScheduleWithDetails = await _unitOfWork.Schedules.GetScheduleByIdWithDetailsAsync(scheduleId);
+                var updatedScheduleWithDetails = await _unitOfWork.SpecialtySchedule.GetScheduleByIdWithDetailsAsync(scheduleId);
                 if (updatedScheduleWithDetails == null) throw new Exception("Updated schedule not found after save.");
 
                 return _mapper.Map<ScheduleResponseDto>(updatedScheduleWithDetails);
@@ -275,9 +279,9 @@ namespace Elagy.BL.Services
             try
             {
                 // 1. Retrieve the existing schedule with details (to check affiliation and current status)
-                var schedule = await _unitOfWork.Schedules.GetScheduleByIdWithDetailsAsync(scheduleId);
+                var schedule = await _unitOfWork.SpecialtySchedule.GetScheduleByIdWithDetailsAsync(scheduleId);
                 if (schedule == null) throw new KeyNotFoundException($"Schedule with ID {scheduleId} not found for status change.");
-
+                    
                 // 2. Validate schedule's affiliation to the requesting hospital admin
                 if (schedule.HospitalSpecialty.HospitalAssetId != hospitalId) throw new UnauthorizedAccessException($"Schedule with ID {scheduleId} is not affiliated with your hospital.");
 
@@ -290,13 +294,13 @@ namespace Elagy.BL.Services
 
                 // 4. Update the IsActive status
                 schedule.IsActive = newIsActiveStatus;
-                _unitOfWork.Schedules.Update(schedule); // Mark as modified
+                _unitOfWork.SpecialtySchedule.Update(schedule); // Mark as modified
                 await _unitOfWork.CompleteAsync(); // Save changes
 
                 _logger.LogInformation($"Schedule '{scheduleId}' status changed to {newIsActiveStatus} successfully for Hospital {hospitalId}.");
 
                 // 5. Re-fetch for full DTO response (to ensure navigation properties are loaded)
-                var updatedScheduleWithDetails = await _unitOfWork.Schedules.GetScheduleByIdWithDetailsAsync(scheduleId);
+                var updatedScheduleWithDetails = await _unitOfWork.SpecialtySchedule.GetScheduleByIdWithDetailsAsync(scheduleId);
                 if (updatedScheduleWithDetails == null) throw new Exception("Updated schedule not found after save.");
 
                 return _mapper.Map<ScheduleResponseDto>(updatedScheduleWithDetails);
@@ -308,61 +312,53 @@ namespace Elagy.BL.Services
             }
         }
 
-        public async Task<PagedResponseDto<ScheduleResponseDto>> GetAvailablePatientSlotsAsync(PaginationParameters paginationParameters)
+
+        public async Task<List<ScheduleResponseDto>> GetAvailablePatientSlotsAsync(string doctorId)
         {
-            try
+            var query=_unitOfWork.SpecialtySchedule.AsQueryable(); // Ensure the repository is set up for querying
+
+            query= query.Where(s => s.DoctorId == doctorId && s.IsActive)
+                .OrderBy(s => s.DayOfWeekId)
+                .ThenBy(s => s.StartTime);
+
+            List<SpecialtySchedule> schedules = await query.ToListAsync();
+
+            if (schedules == null || schedules.Count == 0)
             {
-                // 1. Start with an IQueryable from the repository for all schedules
-                var query = _unitOfWork.Schedules.AsQueryable();
-
-                // 2. Filter for truly available slots (active and has capacity)
-                query = query.Where(s => s.IsActive == true && s.BookedSlots < s.MaxCapacity);
-
-                // 3. Apply optional filters from PaginationParameters
-
-                // Filter by Specialty (SpecialtyId) - requires Include
-                if (paginationParameters.SpecialtyId.HasValue) // Using SpecialtyId from PaginationParameters
-                {
-                    query = query.Where(s => s.HospitalSpecialty.SpecialtyId == paginationParameters.SpecialtyId.Value);
-                }
-                // Filter by DoctorId
-                if (!string.IsNullOrWhiteSpace(paginationParameters.FilterDoctorId)) // Using FilterDoctorId from PaginationParameters
-                {
-                    query = query.Where(s => s.DoctorId == paginationParameters.FilterDoctorId);
-                }
-                // Filter by DayOfWeekId
-                if (paginationParameters.FilterDayOfWeekId.HasValue)
-                {
-                    query = query.Where(s => s.DayOfWeekId == paginationParameters.FilterDayOfWeekId.Value);
-                }
-                 
-                // 4. Get total count AFTER applying filters
-                var totalCount = await query.CountAsync();
-
-                // 5. Apply pagination and eager load navigation properties for DTO mapping
-                var pagedSchedules = await query
-                    .Include(s => s.Doctor) // Needed for DoctorName, Email
-                    .Include(s => s.HospitalSpecialty) // Needed for HospitalName, SpecialtyName
-                        .ThenInclude(hs => hs.HospitalAsset)
-                    .Include(s => s.HospitalSpecialty)
-                        .ThenInclude(hs => hs.Specialty)
-                    .Include(s => s.DayOfWeek) // Needed for DayOfWeekName, ShortCode
-                    .OrderBy(s => s.StartTime)
-                    .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
-                    .Take(paginationParameters.PageSize)
-                    .ToListAsync();
-
-                // 6. Map to DTOs
-                var scheduleDtos = _mapper.Map<IEnumerable<ScheduleResponseDto>>(pagedSchedules);
-
-                return new PagedResponseDto<ScheduleResponseDto>(scheduleDtos, totalCount, paginationParameters.PageNumber, paginationParameters.PageSize);
+                _logger.LogInformation($"No available schedule slots found for doctor ID: {doctorId}.");
+                throw new KeyNotFoundException($"No available schedule slots found for doctor ID: {doctorId}.");
             }
-            catch (Exception ex)
+
+            var scheduleDtos = _mapper.Map<List<ScheduleResponseDto>>(schedules);
+
+            var scheduleIds = scheduleDtos.Select(s => s.Id).ToList();
+
+            var appointments = await _unitOfWork.SpecialtyAppointments.FindAsync(
+                appointment => scheduleIds.Contains(appointment.SpecialtyScheduleId)  && appointment.Status !=AppointmentStatus.Cancelled
+            );
+
+            var scheduleDic = schedules.ToDictionary(s => s.Id , s => s.MaxCapacity);
+
+            var GroupedAppointments = appointments
+                .GroupBy(a => new { a.Date , a.SpecialtyScheduleId } )
+                .ToDictionary(g => g.Key, g => g.Count() == scheduleDic[g.Key.SpecialtyScheduleId]);
+
+            var GroupedAppointmentsList = GroupedAppointments
+                .Where(g => g.Value == true); 
+            
+            foreach (var scheduleDto in scheduleDtos)
             {
-                _logger.LogError(ex, "Error getting available patient slots.");
-                return new PagedResponseDto<ScheduleResponseDto>(Enumerable.Empty<ScheduleResponseDto>(), 0, paginationParameters.PageNumber, paginationParameters.PageSize);
+                scheduleDto.BlookedDates = GroupedAppointmentsList
+                    .Where(g => g.Key.SpecialtyScheduleId == scheduleDto.Id)
+                    .Select(g=>g.Key.Date)
+                    .ToList();
             }
+
+            return scheduleDtos;
+
         }
+
+         
 
         /// Retrieves a single schedule slot by its ID for detail view.
  
@@ -370,7 +366,7 @@ namespace Elagy.BL.Services
         {
             try
             {
-                var schedule = await _unitOfWork.Schedules.GetScheduleByIdWithDetailsAsync(scheduleId);
+                var schedule = await _unitOfWork.SpecialtySchedule.GetScheduleByIdWithDetailsAsync(scheduleId);
                 if (schedule == null)
                 {
                     _logger.LogInformation($"Schedule with ID {scheduleId} not found.");
@@ -384,5 +380,34 @@ namespace Elagy.BL.Services
                 throw;
             }
         }
+
+   /*     /// <summary>
+        /// you haved to save the changes after booking 
+        /// </summary>
+        /// <param name="SpecialtyScheduleId"></param>
+        /// <returns></returns>
+        public async Task<(bool isAvailable, DateTime? attendDateTimeTim)> GetSpecialtySchedule(int SpecialtyScheduleId)
+        {
+
+            SpecialtySchedule SC = await _unitOfWork.SpecialtySchedule.GetScheduleByIdWithDetailsAsync(SpecialtyScheduleId);
+            if (SC == null)
+            {
+                _logger.LogWarning($"Schedule with ID {SpecialtyScheduleId} not found for booking.");
+                return (false, null); // Schedule not found
+            }
+
+            if (!SC.IsActive)
+            {
+                _logger.LogWarning($"Schedule with ID {SpecialtyScheduleId} is not active and cannot be booked.");
+                return (false, null ); // Schedule is not active
+            }
+             
+
+            return (true, new DateTime( SC.,SC.StartTime.AddMinutes(SC.BookedSlots*SC.TimeSlotSize.Minute))); 
+            // Return true with the start time as the attend time
+        }
+*/
+            
+
     }
 }

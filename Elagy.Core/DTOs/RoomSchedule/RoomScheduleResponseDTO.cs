@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Elagy.Core.DTOs.RoomSchedule
 {
-    public class CreateRoomScheduleResponseDTO
+    public class RoomScheduleResponseDTO
     {
         public int Id { get; set; }
         public decimal Price { get; set; }

@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Elagy.Core.DTOs.CarAppoinment;
+using Elagy.Core.DTOs.RoomAppoinment;
+using Elagy.Core.DTOs.SpecialtyAppointment;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -11,13 +14,12 @@ namespace Elagy.Core.DTOs.Booking
     public class CreateBookingRequest
     {
         [Required]
-        public HospitalAppointmentDTO HospitalAppointment { get; set; }
+        public CreateSpecialtyAppointmentDTO SpecialtiyAppointment { get; set; }
 
-        public CarRentalAppoinmentDTO? CarRentalAppointment { get; set; }
-
-        public HotelAppointmentDTO? HotelAppointment { get; set; }
+        public CreateRoomAppointmentDTO? RoomAppointment { get; set; }
 
 
+        public CarRentalAppoinmentDTO? CarAppointment { get; set; }
 
     }
 }

@@ -1,4 +1,5 @@
-﻿using Elagy.Core.DTOs.Pagination;
+﻿using Elagy.Core.DTOs.Doctor;
+using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.Enums;
 using Elagy.Core.IServices;
 using Microsoft.AspNetCore.Authorization;
@@ -19,6 +20,8 @@ namespace Elagy.APIs.Controllers
         private readonly IDoctorService _doctorService;
         private readonly ISpecialtyScheduleService _scheduleService;
         private readonly ISuperAdminService _superAdminService;
+        private readonly ICarService _carservice;
+
 
         public WebsiteController(
             IHospitalProviderService hospitalProviderService,
@@ -28,7 +31,8 @@ namespace Elagy.APIs.Controllers
             ISpecialtyService specialtyService,
             IDoctorService doctorService,
             ISpecialtyScheduleService scheduleService,
-            ISuperAdminService superAdminService)
+            ISuperAdminService superAdminService,
+            ICarService carservice)
         {
             _hospitalProviderService = hospitalProviderService;
             _carRentalProviderService = carRentalProviderService;
@@ -38,28 +42,9 @@ namespace Elagy.APIs.Controllers
             _doctorService = doctorService;
             _scheduleService = scheduleService;
             _superAdminService = superAdminService;
+            _carservice=carservice;
         }
 
-     
-
-        [HttpGet("hotels")]
-        [AllowAnonymous]
-
-        public async Task<ActionResult<IEnumerable<HotelProviderProfileDto>>> GetHotelProviders(
-         [FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10,
-         [FromQuery] string SearchTerm = null, [FromQuery] Status? UserStatus = null
-        , [FromQuery] int? GovernerateId = null)
-        {
-            var Filter = new PaginationParameters();
-            Filter.PageNumber = PageNumber;
-            Filter.PageSize = PageSize;
-            Filter.SearchTerm = SearchTerm;
-            Filter.UserStatus = UserStatus;
-            Filter.FilterGovernorateId = GovernerateId;
-
-            var providers = await _superAdminService.GetHotelProvidersForAdminDashboardAsync(Filter);
-            return Ok(providers);
-        }
 
         // still needd to maintain
         [HttpGet("CarRentals")]
@@ -77,6 +62,119 @@ namespace Elagy.APIs.Controllers
             var providers = await _superAdminService.GetCarRentalProvidersForAdminDashboardAsync(Filter);
             return Ok(providers);
         }
+        [HttpGet("CarAvailable/{carRentalId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAvailableCarsForWebsite(string carRentalId,
+              [FromQuery] int PageNumber = 1,
+              [FromQuery] int PageSize = 10,
+              [FromQuery] string? SearchTerm = null,
+              [FromQuery] CarType? CarType = null,
+              [FromQuery] decimal? MinPrice = null,
+              [FromQuery] decimal? MaxPrice = null)
+        {
+            if (PageNumber < 1 || PageSize < 1) return BadRequest("PageNumber and PageSize must be greater than 0.");
+
+            try
+            {
+                var paginationParams = new PaginationParameters
+                {
+                    PageNumber = PageNumber,
+                    PageSize = PageSize,
+                    SearchTerm = SearchTerm,
+                    CarType = CarType,
+                    MinPrice = MinPrice,
+                    MaxPrice = MaxPrice
+                };
+
+                var result = await _carservice.GetAvailableCarsForWebsiteAsync(paginationParams, carRentalId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving available cars.");
+            }
+        }
+
+        [HttpGet("hotels")]
+        [AllowAnonymous]
+
+        public async Task<ActionResult<IEnumerable<HotelProviderProfileDto>>> GetHotelProviders(
+         [FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10,
+         [FromQuery] string SearchTerm = null
+        , [FromQuery] int? GovernerateId = null)
+        {
+            var Filter = new PaginationParameters();
+            Filter.PageNumber = PageNumber;
+            Filter.PageSize = PageSize;
+            Filter.SearchTerm = SearchTerm;
+            Filter.FilterGovernorateId = GovernerateId;
+
+            var providers = await _superAdminService.GetHotelProvidersForAdminDashboardAsync(Filter);
+            return Ok(providers);
+        }
+
+        [HttpGet("Rooms-Website/{hotellId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAvailableRoomsForWebsite(string hotellId,
+           [FromQuery] int PageNumber = 1,
+           [FromQuery] int PageSize = 10,
+           [FromQuery] string? SearchTerm = null,
+           [FromQuery] RoomCategory? RoomType = null,
+           [FromQuery] decimal? MinPrice = null,
+           [FromQuery] decimal? MaxPrice = null,
+           [FromQuery] int? MinOccupancy = null,
+           [FromQuery] int? MaxOccupancy = null,
+           [FromQuery] int? FilterGovernorateId = null
+          )
+        {
+            if (PageNumber < 1 || PageSize < 1) return BadRequest("PageNumber and PageSize must be greater than 0.");
+
+            try
+            {
+                var paginationParams = new PaginationParameters
+                {
+                    PageNumber = PageNumber,
+                    PageSize = PageSize,
+                    SearchTerm = SearchTerm,
+                    RoomType = RoomType,
+                    MinPrice = MinPrice,
+                    MaxPrice = MaxPrice,
+                    MinOccupancy = MinOccupancy,
+                    MaxOccupancy = MaxOccupancy,
+                    FilterGovernorateId = FilterGovernorateId
+                };
+
+                var result = await _roomService.GetAvailableRoomsForWebsiteAsync(paginationParams, hotellId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving available rooms.");
+            }
+        }
+
+
+        [HttpGet("Room/{roomId}")]
+        [AllowAnonymous]
+
+        public async Task<IActionResult> GetRoomById(int roomId)
+        {
+            if (roomId <= 0) return BadRequest("Room ID must be a positive integer.");
+            try
+            {
+                var result = await _roomService.GetRoomByIdAsync(roomId);
+                if (result == null) return NotFound($"Room with ID {roomId} not found.");
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving the room.");
+            }
+        }
+
+      
+
+       
 
 
         [HttpGet("Hospitals")]
@@ -139,8 +237,8 @@ namespace Elagy.APIs.Controllers
         }
 
 
-        [HttpGet("Specilties-in-Hospital/{hospitalId}")]
-        public async Task<IActionResult> GetSpecialtiesByHospitalId(
+    [HttpGet("Specilties-in-Hospital/{hospitalId}")]
+    public async Task<IActionResult> GetSpecialtiesByHospitalId(
     string hospitalId,
     [FromQuery] int pageNumber = 1,
     [FromQuery] int pageSize = 10,
@@ -174,86 +272,69 @@ namespace Elagy.APIs.Controllers
         }
 
 
-        [HttpGet("Doctors-in-Specialty/{hospitalSpecialtyId}")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetDoctorsByHospitalSpecialty(
-           int hospitalSpecialtyId,
-           [FromQuery] int PageNumber = 1,
-           [FromQuery] int PageSize = 10,
-           [FromQuery] string? SearchTerm = null,
-           [FromQuery] int? SpecialtyId = null)
+      
 
+        [HttpGet("Doctors-in-Specialty/{specialtyId}/{hospitalId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetDoctorsByHospitalAndSpecialty(
+                    string hospitalId,
+                    int specialtyId,
+                   [FromQuery] int PageNumber = 1,
+                   [FromQuery] int PageSize = 10,
+                   [FromQuery] string? SearchTerm = null)
         {
-            if (hospitalSpecialtyId <= 0 || PageNumber < 1 || PageSize < 1)
+            if (string.IsNullOrWhiteSpace(hospitalId) || specialtyId <= 0 || PageNumber < 1 || PageSize < 1)
             {
-                return BadRequest("Invalid pagination parameters or HospitalSpecialtyId.");
+                return BadRequest("Invalid parameters. Hospital ID, Specialty ID, PageNumber, and PageSize are required.");
             }
             try
             {
                 var paginationParams = new PaginationParameters { PageNumber = PageNumber, PageSize = PageSize, SearchTerm = SearchTerm };
-                var result = await _doctorService.GetAllDoctorsPerHospitalSpecialty(hospitalSpecialtyId, paginationParams);
+                var result = await _doctorService.GetAllDoctorsPerHospitalSpecialty(hospitalId, specialtyId, paginationParams);
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving doctors for the specialty.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving doctors.");
             }
         }
 
-        [HttpGet("specialty/doctors/{specialtyId}")]
-        public async Task<IActionResult> GetDoctorsBySpecialtyIdForAdmin(
-    int specialtyId,
-    [FromQuery] int pageNumber = 1,
-    [FromQuery] int pageSize = 10,
-    [FromQuery] string? searchTerm = null)
-        {
-            var paginationParameters = new PaginationParameters
-            {
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                SearchTerm = searchTerm,
-            };
-
-            var result = await _doctorService.GetDoctorsBySpecialtyIdForAdminDashboardAsync(specialtyId, paginationParameters);
-            return Ok(result);
-        }
-
-   
 
 
 
-     //[HttpGet("schedule/available-slots")]
-     //   [AllowAnonymous] 
-     //   public async Task<IActionResult> GetAvailablePatientSlots(
-     //       [FromQuery] int PageNumber = 1,
-     //       [FromQuery] int PageSize = 10,
-     //       [FromQuery] string? SearchTerm = null,
-     //       [FromQuery] int? SpecialtyId = null,
-     //       [FromQuery] int? FilterDayOfWeekId = null,
-     //       [FromQuery] string? FilterDoctorId = null)
-     //   {
-     //       if (PageNumber < 1 || PageSize < 1) return BadRequest("PageNumber and PageSize must be greater than 0.");
 
-     //       try
-     //       {
-     //           var paginationParams = new PaginationParameters
-     //           {
-     //               PageNumber = PageNumber,
-     //               PageSize = PageSize,
-     //               SearchTerm = SearchTerm,
-     //               SpecialtyId = SpecialtyId,
-     //               FilterDayOfWeekId = FilterDayOfWeekId,
-     //               FilterDoctorId = FilterDoctorId
-     //           };
+        //[HttpGet("schedule/available-slots")]
+        //   [AllowAnonymous] 
+        //   public async Task<IActionResult> GetAvailablePatientSlots(
+        //       [FromQuery] int PageNumber = 1,
+        //       [FromQuery] int PageSize = 10,
+        //       [FromQuery] string? SearchTerm = null,
+        //       [FromQuery] int? SpecialtyId = null,
+        //       [FromQuery] int? FilterDayOfWeekId = null,
+        //       [FromQuery] string? FilterDoctorId = null)
+        //   {
+        //       if (PageNumber < 1 || PageSize < 1) return BadRequest("PageNumber and PageSize must be greater than 0.");
 
-     //           var result = await _scheduleService.GetAvailablePatientSlotsAsync(paginationParams);
-     //           return Ok(result);
-     //       }
-     //       catch (Exception ex)
-     //       {
-     //           return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving available slots.");
-     //       }
-     //   }
+        //       try
+        //       {
+        //           var paginationParams = new PaginationParameters
+        //           {
+        //               PageNumber = PageNumber,
+        //               PageSize = PageSize,
+        //               SearchTerm = SearchTerm,
+        //               SpecialtyId = SpecialtyId,
+        //               FilterDayOfWeekId = FilterDayOfWeekId,
+        //               FilterDoctorId = FilterDoctorId
+        //           };
+
+        //           var result = await _scheduleService.GetAvailablePatientSlotsAsync(paginationParams);
+        //           return Ok(result);
+        //       }
+        //       catch (Exception ex)
+        //       {
+        //           return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving available slots.");
+        //       }
+        //   }
 
 
         [HttpGet("doctors/available-schedules/{doctorId}")]

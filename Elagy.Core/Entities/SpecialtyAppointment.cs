@@ -10,17 +10,18 @@ namespace Elagy.Core.Entities
 {
     public class SpecialtyAppointment: Appointment
     {
-        public SpecialtyAppointmentDeliveryType IsOffile { get; set; } = SpecialtyAppointmentDeliveryType.Onsite;
+        public SpecialtyAppointmentDeliveryType ServiceDeliveryType { get; set; } = SpecialtyAppointmentDeliveryType.Onsite;
 
         public string? MeetingUrl { get; set; }
 
         //calculated from the schedule Time SlotSize
         public TimeOnly ExistingTime {  get; set; } 
+        public DateOnly Date {  get; set; } 
 
-        public int ScheduleId { get; set; }
+        public int SpecialtyScheduleId { get; set; }
         //Navigation properties
 
-        public SpecialtySchedule Schedule { get; set; }
+        public SpecialtySchedule SpecialtySchedule { get; set; }
 
     }
 }

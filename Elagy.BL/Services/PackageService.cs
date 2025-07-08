@@ -1,0 +1,92 @@
+﻿using AutoMapper;
+using Elagy.Core.DTOs.Booking;
+using Elagy.Core.DTOs.Package;
+using Elagy.Core.DTOs.Pagination;
+using Elagy.Core.Entities;
+using Elagy.Core.Enums;
+using Elagy.Core.IRepositories;
+using Elagy.Core.IServices;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Elagy.BL.Services
+{
+    public class PackageService : IPackgeService
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _map  ;
+        public PackageService(IUnitOfWork unitOfWork,IMapper mapper)
+        {
+            _unitOfWork = unitOfWork;
+            _map = mapper;
+        }
+         
+
+        public async Task<Package> CreatePackage(string PatientId)
+        {
+            if (string.IsNullOrEmpty(PatientId))
+            {
+                throw new ArgumentException("Patient ID cannot be null or empty.", nameof(PatientId));
+            }
+
+            var createdPackage = new Package
+            {
+                PatientId = PatientId,
+                CreatedAt = DateTime.UtcNow,
+                //Status = BookingStatus.PendingPayment,
+                Status = BookingStatus.Confirmed,
+
+            };
+
+            await _unitOfWork.Packages.AddAsync(createdPackage);
+
+
+            return createdPackage;
+        }
+
+        public async Task<PagedResponseDto<PackageResponseDTO>> getPackages(string _patientId,PaginationParameters pp)
+        {
+            if (string.IsNullOrEmpty(_patientId))
+            {
+                throw new ArgumentException("Patient ID cannot be null or empty.", nameof(_patientId));
+            }
+
+            var packageQuery = _unitOfWork.Packages.AsQueryable()
+                .Where(p => p.PatientId == _patientId)
+                .Include(p => p.Appointments)
+                .Take(pp.PageSize)
+                .Skip(pp.PageSize*(pp.PageNumber-1));
+                 
+
+            var packageList = await packageQuery.ToListAsync();
+
+
+            if (packageList == null || !packageList.Any())
+            {
+                return new PagedResponseDto<PackageResponseDTO>(
+                    new List<PackageResponseDTO>(),
+                    0,
+                    pp.PageNumber,
+                    pp.PageSize);
+            }
+
+            var PackageResponseDTOList =_map.Map<List<PackageResponseDTO>>(packageList);
+
+
+ 
+
+            return new PagedResponseDto<PackageResponseDTO>(
+                PackageResponseDTOList,
+                await packageQuery.CountAsync(),
+                pp.PageNumber,
+                pp.PageSize);
+             
+        }
+    
+    
+    }
+}

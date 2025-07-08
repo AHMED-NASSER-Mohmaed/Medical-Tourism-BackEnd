@@ -20,6 +20,7 @@ namespace Elagy.DAL.Configurations
             builder.Property(d => d.DriveLicenseLicenseNumberId).IsRequired().HasMaxLength(255); // Corresponds to file ID
             builder.Property(d => d.YearsOfExperience).IsRequired();
 
+
             // Configure DriverStatus enum as string
 
             // Relationship: Driver (Many) to CarRentalAsset (One) - Driver belongs to one CarRentalAsset
@@ -28,7 +29,7 @@ namespace Elagy.DAL.Configurations
                    .HasForeignKey(d => d.CarRentalAssetId)
                    .OnDelete(DeleteBehavior.Restrict); // Prevent deleting CarRentalAsset if drivers are associated
             builder.Property(d => d.DriverStatus)
-       .HasConversion<string>() // stores as string (e.g., "Available")
+       .HasConversion<int>() 
        .IsRequired();
 
         }

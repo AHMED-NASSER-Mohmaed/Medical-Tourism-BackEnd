@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Elagy.Core.DTOs.Room;
+using Elagy.Core.DTOs.RoomAppoinment;
 using Elagy.Core.DTOs.RoomSchedule;
 using Elagy.Core.Entities;
 using System;
@@ -38,9 +39,14 @@ namespace Elagy.BL.Mapping
             CreateMap<CreateRoomScheduleDTO, RoomSchedule>();
 
             // RoomSchedule to CreateRoomScheduleResponseDTO
-            CreateMap<RoomSchedule, CreateRoomScheduleResponseDTO>();
-                 
+            CreateMap<RoomSchedule, RoomScheduleResponseDTO>();
 
+
+
+
+            // RoomAppointment to RoomAppointmentResponseDTO
+            CreateMap<RoomAppointment, RoomAppointmentResponseDTO>();
+                
 
         }
     }

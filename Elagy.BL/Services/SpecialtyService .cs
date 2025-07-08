@@ -293,8 +293,8 @@ namespace Elagy.BL.Services
                 // Apply SearchTerm filter
                 if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
-                    string term = paginationParameters.SearchTerm.Trim().ToLower();
-                    query = query.Where(s => s.Name.ToLower().Contains(term) || (s.Description != null && s.Description.ToLower().Contains(term)));
+                    string term = paginationParameters.SearchTerm.Trim();
+                    query = query.Where(s => s.Name.Contains(term) || (s.Description != null && s.Description.Contains(term)));
                 }
 
                 // Apply FilterIsActive (for the Specialty entity itself, not the link status)

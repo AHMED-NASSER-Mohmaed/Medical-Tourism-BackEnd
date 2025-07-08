@@ -1,5 +1,7 @@
 ﻿using Elagy.Core.DTOs.Files;
+using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.User;
+using Elagy.Core.Entities;
 using Elagy.Core.IServices;
 using Microsoft.AspNetCore.Authorization; // For [Authorize] attribute
 using Microsoft.AspNetCore.Mvc;
@@ -13,14 +15,16 @@ namespace Elagy.APIs.Controllers
     {
         private readonly IPatientService _patientService;
         private readonly IImageProfile _pofileImageService;
- 
+        private readonly IPackgeService _packageService;
+        
 
 
-        public PatientController(IPatientService patientService, IImageProfile pofileImageService,ILogger<PatientController>logger)
+        public PatientController(IPatientService patientService, IImageProfile pofileImageService,ILogger<PatientController>logger,IPackgeService packge)
         :base(pofileImageService,logger)
         {
             _patientService = patientService;
             _pofileImageService = pofileImageService;
+            _packageService = packge;
         }
 
  
@@ -57,9 +61,49 @@ namespace Elagy.APIs.Controllers
             }
             return Ok(updatedProfile);
         }
-    
-    
-    
-    
+
+
+        [HttpGet("profile/history")]
+        public async Task<ActionResult> GetPackages( int pageNumber  = 1 , int pageSize = 10)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null) return Unauthorized();
+            try
+            {
+                var package = await _packageService.getPackages(userId, new PaginationParameters { PageNumber=pageNumber,PageSize=pageSize} );
+                return Ok(package);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        //[HttpPost("profile/history/details")]
+        //public async Task<ActionResult> GetPackageDetails(Guid packageId)
+        //{
+        //    var userId = GetCurrentUserId();
+        //    if (userId == null) return Unauthorized();
+        //    if (packageId.Equals(null) || packageId.Equals(Guid.Empty))
+        //    {
+        //        return BadRequest("Invalid package details request.");
+        //    }
+        //    try
+        //    {
+        //        var packageDetails = await _packageService.GetPackageDetails(userId, request.PackageId);
+        //        //if (packageDetails == null)
+        //        //{
+        //        //    return NotFound("Package details not found.");
+        //        //}
+        //        //return Ok(packageDetails);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Internal server error: {ex.Message}");
+        //    }
+        //}
+
+
     }
 }

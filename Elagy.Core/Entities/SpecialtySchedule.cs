@@ -8,18 +8,11 @@ namespace Elagy.Core.Entities
 {
     public class SpecialtySchedule
     {
-  
         public int Id { get; set; }
-
         public TimeOnly StartTime { get; set; }
-
         public TimeOnly EndTime { get; set; }
-        public int TimeSlotSize {  get; set; }
+        public TimeSpan TimeSlotSize {  get; set; }
         public int MaxCapacity { get; set; }
-        public int BookedSlots { get; set; } = 0;
-
-        //added by nasser ya mahdy
-        public int CancelledSlots { get; set; } = 0;
         public decimal Price { get; set; }
         public bool IsActive { get; set; } = true;
         public string DoctorId { get; set; }

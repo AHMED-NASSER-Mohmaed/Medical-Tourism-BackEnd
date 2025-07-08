@@ -18,7 +18,7 @@ namespace Elagy.Core.DTOs.Schedule
 
         [Required] public TimeOnly StartTime { get; set; }
         [Required] public TimeOnly EndTime { get; set; }
-        [Required] public int TimeSlotSize { get; set; }
+        [Required] public TimeSpan TimeSlotSize { get; set; }
 
         [Required][Range(1, int.MaxValue)] public int MaxCapacity { get; set; } = 1;
         [Required][Range(0.01, (double)decimal.MaxValue)] public decimal Price { get; set; }

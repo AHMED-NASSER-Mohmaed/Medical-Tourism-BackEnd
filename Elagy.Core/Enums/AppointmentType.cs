@@ -8,6 +8,6 @@ namespace Elagy.Core.Enums
 {
     public enum AppointmentType
     {
-        Hospital , Hotel , CarRental
+        Specialty , Room , Car
     }
 }

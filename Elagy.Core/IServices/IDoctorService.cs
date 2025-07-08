@@ -27,7 +27,7 @@ namespace Elagy.Core.IServices
 
         // MODIFIED: Added doctorId as a separate parameter, hospitalId from token
         Task<DoctorProfileDto> UpdateDoctorAsync(string doctorId, DoctorUpdateDto updateDto, string hospitalId, IFormFile? newLicenseDocumentFile = null, IFormFile? newProfileImageFile = null);
-
+        Task<PagedResponseDto<DoctorProfileDto>> GetAllDoctorsPerHospitalSpecialty(string hospitalId, int specialtyId, PaginationParameters paginationParameters);
         // hospital id is token from [jwt token], doctor id from params
         Task<DoctorProfileDto> DeleteDoctorAsync(string doctorId, string hospitalId);
         Task<DoctorProfileDto?> GetDoctorByIdAsync(string doctorId);

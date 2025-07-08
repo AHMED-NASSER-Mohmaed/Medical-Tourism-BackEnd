@@ -13,14 +13,13 @@ namespace Elagy.BL.Mapping
     {
         public ScheduleProfile()
         {
-            CreateMap<Core.Entities.DayOfWeek, DayOfWeekDto>()
-               .ForMember(dest => dest.Code, opt => opt.MapFrom(src => src.ShortCode));
+            
 
 
             CreateMap<CreateScheduleSlotDto, SpecialtySchedule>()
                     .ForMember(dest => dest.Id, opt => opt.Ignore())
-                    .ForMember(dest => dest.BookedSlots, opt => opt.MapFrom(src => 0))
-                    .ForMember(dest => dest.CancelledSlots, opt => opt.MapFrom(src => 0))
+                    //.ForMember(dest => dest.BookedSlots, opt => opt.MapFrom(src => 0))
+                    //.ForMember(dest => dest.CancelledSlots, opt => opt.MapFrom(src => 0))
                     .ForMember(dest => dest.TimeSlotSize, opt => opt.MapFrom(src => src.TimeSlotSize))
                     .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true))
                     .ForMember(dest => dest.DoctorId, opt => opt.MapFrom(src => src.DoctorId))
@@ -35,8 +34,8 @@ namespace Elagy.BL.Mapping
 
             CreateMap<UpdateScheduleDto, SpecialtySchedule>()
               .ForMember(dest => dest.Id, opt => opt.Ignore())
-              .ForMember(dest => dest.BookedSlots, opt => opt.Ignore()) 
-              .ForMember(dest => dest.CancelledSlots, opt => opt.Ignore()) 
+              //.ForMember(dest => dest.BookedSlots, opt => opt.Ignore()) 
+              //.ForMember(dest => dest.CancelledSlots, opt => opt.Ignore()) 
               .ForMember(dest => dest.DoctorId, opt => opt.Ignore())
               .ForMember(dest => dest.HospitalSpecialtyId, opt => opt.Ignore())
               .ForMember(dest => dest.Doctor, opt => opt.Ignore())
@@ -54,8 +53,8 @@ namespace Elagy.BL.Mapping
                .ForMember(dest => dest.HospitalSpecialtyId, opt => opt.MapFrom(src => src.HospitalSpecialtyId))
                .ForMember(dest => dest.Hospital, opt => opt.MapFrom(src => src.HospitalSpecialty.HospitalAsset.Name))
                .ForMember(dest => dest.Specialty, opt => opt.MapFrom(src => src.HospitalSpecialty.Specialty.Name))
-               .ForMember(dest => dest.HospitalAssetId, opt => opt.MapFrom(src => src.HospitalSpecialty.HospitalAssetId))
-               .ForMember(dest => dest.DayOfWeek, opt => opt.MapFrom(src => src.DayOfWeek));
+               .ForMember(dest => dest.HospitalAssetId, opt => opt.MapFrom(src => src.HospitalSpecialty.HospitalAssetId));
+
         }
     }
 }

@@ -18,6 +18,7 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Stripe;
+using Stripe.Checkout;
 using ReportProPDF;
 using Elagy.DAL.Repositories;
 
@@ -87,8 +88,26 @@ builder.Services.AddScoped<ICountryService, CountryService>();
 
 builder.Services.AddScoped<ISpecialtyService, SpecialtyService>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
-builder.Services.AddScoped<ISpecialtyScheduleService, ScheduleService>();
+builder.Services.AddScoped<ISpecialtyScheduleService, SpecialtyScheduleService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
+builder.Services.AddScoped<ICarService, CarService>();
+builder.Services.AddScoped<IDriverService, DriverService>();
+builder.Services.AddScoped<ICarDriverAssignmentService, CarDriverAssignmentService>();
+
+
+
+
+builder.Services.AddScoped<IPackgeService, PackageService>();
+builder.Services.AddScoped<ISpecialtyAppointmentService, SpecialtyAppointmentServcie>();
+builder.Services.AddScoped<IBookingService, BookingService>();
+
+builder.Services.AddScoped<IRoomScheduleService, RoomScheduleService>();
+
+builder.Services.AddScoped<IRoomAppointmentService, RoomAppointmentService>();
+
+builder.Services.AddScoped<SessionService>();
+
+
 
 
 
@@ -254,9 +273,10 @@ using (var scope = app.Services.CreateScope())
         await appContext.Database.MigrateAsync();
         logger.LogInformation("Database migrations applied.");
 
-       await DbInitializer.SeedRoles(userManager, roleManager, logger);
-        await DbInitializer.SeedSuperAdminAsync(userManager, roleManager, logger);
-        await DbInitializer.SeedStaticDataAsync(appContext, logger);
+        //Execute seeding methods in a logical order
+        //await DbInitializer.SeedRoles(userManager, roleManager, logger);
+        //await DbInitializer.SeedSuperAdminAsync(userManager, roleManager, logger);
+        //await DbInitializer.SeedStaticDataAsync(appContext, logger);
 
         logger.LogInformation("Database seeding completed successfully.");
     }

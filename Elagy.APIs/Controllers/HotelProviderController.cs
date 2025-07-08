@@ -108,51 +108,7 @@ namespace Elagy.APIs.Controllers
             }
         }
 
-        [HttpGet("Rooms-Website/{hotellId}")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetAvailableRoomsForWebsite(string hotellId,
-           [FromQuery] int PageNumber = 1,
-           [FromQuery] int PageSize = 10,
-           [FromQuery] string? SearchTerm = null,
-           [FromQuery] string? HotelAssetId = null,
-           [FromQuery] RoomCategory? RoomType = null,
-           [FromQuery] RoomStatus? RoomStatus = null, 
-           [FromQuery] decimal? MinPrice = null,
-           [FromQuery] decimal? MaxPrice = null,
-           [FromQuery] int? MinOccupancy = null,
-           [FromQuery] int? MaxOccupancy = null,
-           [FromQuery] int? FilterGovernorateId = null
-          )
-        {
-            if (PageNumber < 1 || PageSize < 1) return BadRequest("PageNumber and PageSize must be greater than 0.");
-
-            try
-            {
-                var paginationParams = new PaginationParameters
-                {
-                    PageNumber = PageNumber,
-                    PageSize = PageSize,
-                    SearchTerm = SearchTerm,
-                    HotelAssetId = HotelAssetId, 
-                    RoomType = RoomType,
-                    RoomStatus = RoomStatus, 
-                    MinPrice = MinPrice,
-                    MaxPrice = MaxPrice,
-                    MinOccupancy = MinOccupancy,
-                    MaxOccupancy = MaxOccupancy,
-                    FilterGovernorateId = FilterGovernorateId
-                };
-
-                _logger.LogInformation($"Received request for available rooms for website. Page: {PageNumber}, Size: {PageSize}.");
-                var result = await _roomService.GetAvailableRoomsForWebsiteAsync(paginationParams,  hotellId);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting available rooms for website.");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving available rooms.");
-            }
-        }
+      
 
         [HttpPost("Room")]
         public async Task<IActionResult> CreateRoom([FromForm] RoomCreateDto createDto, [FromForm] IFormFile[]? imageFiles)

@@ -514,5 +514,48 @@ namespace Elagy.BL.Services
                 return new PagedResponseDto<DoctorProfileDto>(Enumerable.Empty<DoctorProfileDto>(), 0, paginationParameters.PageNumber, paginationParameters.PageSize);
             }
         }
+
+
+
+        public async Task<PagedResponseDto<DoctorProfileDto>> GetAllDoctorsPerHospitalSpecialty(string hospitalId, int specialtyId, PaginationParameters paginationParameters)
+        {
+            try
+            {
+                var hospitalSpecialty = await _unitOfWork.HospitalSpecialties.GetByHospitalAndSpecialtyIdAsync(hospitalId, specialtyId);
+                if (hospitalSpecialty == null || !hospitalSpecialty.IsActive)
+                {
+                    _logger.LogWarning($"Doctor search failed: Hospital Specialty link for Hospital {hospitalId} and Specialty {specialtyId} not found or is inactive.");
+                    return new PagedResponseDto<DoctorProfileDto>(Enumerable.Empty<DoctorProfileDto>(), 0, paginationParameters.PageNumber, paginationParameters.PageSize);
+                }
+
+                var doctors = await _unitOfWork.Doctors.GetDoctorsByHospitalSpecialtyIdAsync(hospitalSpecialty.Id); // Only active doctors
+
+                IQueryable<Doctor> query = doctors.AsQueryable();
+                if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
+                {
+                    string term = paginationParameters.SearchTerm.Trim();
+                    query = query.Where(d =>
+                        d.FirstName.Contains(term) ||
+                        d.LastName.Contains(term)
+                    );
+                }
+
+                var totalCount = query.Count();
+
+                var pagedDoctors =  query
+                    .OrderBy(d => d.LastName) // Default sorting
+                    .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+                    .Take(paginationParameters.PageSize)
+                    .ToList();
+
+                var doctorDtos = _mapper.Map<IEnumerable<DoctorProfileDto>>(pagedDoctors);
+                return new PagedResponseDto<DoctorProfileDto>(doctorDtos, totalCount, paginationParameters.PageNumber, paginationParameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting doctors per Hospital {hospitalId} and Specialty {specialtyId}.");
+                return new PagedResponseDto<DoctorProfileDto>(Enumerable.Empty<DoctorProfileDto>(), 0, paginationParameters.PageNumber, paginationParameters.PageSize);
+            }
+        }
     }
 }

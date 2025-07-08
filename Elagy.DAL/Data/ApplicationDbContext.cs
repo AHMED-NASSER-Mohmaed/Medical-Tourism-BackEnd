@@ -38,6 +38,8 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
     public DbSet<Driver> Drivers { get; set; }
     public DbSet<CarDriver> CarDrivers { get; set; }
     public DbSet<CarRentalAssetImage> CarRentalAssetImages { get; set; }
+    public DbSet<HospitalAssetImage> HospitalAssetImages { get; set; }
+    public DbSet<HotelAssetImage> HotelAssetImages { get; set; }
 
     public DbSet<Disbursement> disbursements { get; set; }
 
@@ -63,7 +65,7 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
         builder.ApplyConfiguration(new HospitalSpecialtyConfiguration());
         builder.ApplyConfiguration(new DoctorConfiguration());
         builder.ApplyConfiguration(new DayOfWeekConfiguration());
-        builder.ApplyConfiguration(new ScheduleConfiguration());
+        builder.ApplyConfiguration(new SpecialtyScheduleConfiguration());
         builder.ApplyConfiguration(new RoomConfiguration());
         builder.ApplyConfiguration(new RoomImageConfiguration());
         builder.ApplyConfiguration(new CarConfiguration());
@@ -82,6 +84,9 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
         builder.ApplyConfiguration(new PackageConfiguration());
         builder.ApplyConfiguration(new PaymentIntentConfiguration());
         builder.ApplyConfiguration(new CarRentalScheduleConfiguration());
+
+        builder.ApplyConfiguration(new HotelAssetImageConfiguration());
+        builder.ApplyConfiguration(new HospitalAssetConfiguration());
 
 
         // builder.ApplyConfiguration(new ImageKitTempFileConfiguration()); // If you still have this entity

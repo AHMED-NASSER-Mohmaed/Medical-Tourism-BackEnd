@@ -33,9 +33,13 @@ namespace Elagy.DAL
         public IHospitalRepository Hospitals { get; private set; }
         public IHospitalSpecialtyRepository HospitalSpecialties { get; private set; }
 
-      
 
-        public IScheduleRepository Schedules {  get; private set; }
+
+        public IGenericRepository<SpecialtyAppointment> SpecialtyAppointments { get; private set; }
+
+
+
+        public IScheduleRepository SpecialtySchedule {  get; private set; }
 
         public IGenericRepository<Core.Entities.DayOfWeek> DayOfWeeks { get; private set; }
 
@@ -47,6 +51,7 @@ namespace Elagy.DAL
 
         public ICarDriverRepository CarDrivers { get; private set; }
 
+        public IGenericRepository<Package> Packages { get; private set; }
         //public IGenericRepository<Disbursement> Disbursements { get; private set; }
 
         public IDisbursementRepository Disbursements {get; private set; }
@@ -72,7 +77,7 @@ namespace Elagy.DAL
             Specialties = new SpecialtyRepository(_context);
             Doctors = new DoctorRepository(_context);
             Hospitals = new HospitalRepository(_context);
-            Schedules = new ScheduleRepository(_context);
+            SpecialtySchedule = new ScheduleRepository(_context);
             Rooms = new RoomRepository(_context);
             Cars = new CarRepository(_context);
             Drivers =new DriverRepository(_context);
@@ -81,6 +86,11 @@ namespace Elagy.DAL
             RoomSchedule = new GenericRepository<RoomSchedule>(_context);
 
             CarSchedule = new GenericRepository<CarSchedule>(_context);
+
+            SpecialtyAppointments = new GenericRepository<SpecialtyAppointment>(_context);
+
+            Packages = new GenericRepository<Package>(_context);
+
 
             Disbursements = new DisbursementRepository(_context);
         }

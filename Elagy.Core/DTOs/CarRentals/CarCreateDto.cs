@@ -40,8 +40,6 @@ namespace Elagy.Core.DTOs.CarRentals
         [Required(ErrorMessage = "Fuel type is required.")]
         public FuelType FuelType { get; set; }
 
-        public int CurrentMileage { get; set; } = 0; 
-
         public bool IsAvailable { get; set; } = true;
         public CarStatus Status { get; set; } = CarStatus.Available;
         [StringLength(1000, ErrorMessage = "Description cannot exceed 1000 characters.")]

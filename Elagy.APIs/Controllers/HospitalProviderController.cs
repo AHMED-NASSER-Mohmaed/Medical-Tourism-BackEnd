@@ -209,33 +209,14 @@ namespace Elagy.APIs.Controllers
         }
 
 
-        // --- PUBLIC/WEBSITE SCHEDULE DISPLAY ENDPOINTS ---
         [HttpGet("schedule/available-slots")]
-        [AllowAnonymous] // Publicly accessible
+        [AllowAnonymous]
         public async Task<IActionResult> GetAvailablePatientSlots(
-            [FromQuery] int PageNumber = 1,
-            [FromQuery] int PageSize = 10,
-            [FromQuery] string? SearchTerm = null,
-            [FromQuery] int? SpecialtyId = null,
-            [FromQuery] int? FilterDayOfWeekId = null,
-            [FromQuery] string? FilterDoctorId = null)
+            [FromQuery] string FilterDoctorId)
         {
-            if (PageNumber < 1 || PageSize < 1) return BadRequest("PageNumber and PageSize must be greater than 0.");
-
             try
             {
-                var paginationParams = new PaginationParameters
-                {
-                    PageNumber = PageNumber,
-                    PageSize = PageSize,
-                    SearchTerm = SearchTerm,
-                    SpecialtyId = SpecialtyId,
-                    FilterDayOfWeekId = FilterDayOfWeekId,
-                    FilterDoctorId = FilterDoctorId
-                };
-
-                _logger.LogInformation($"Received request for available patient slots. Page: {PageNumber}, Size: {PageSize}.");
-                var result = await _scheduleService.GetAvailablePatientSlotsAsync(paginationParams);
+                var result = await _scheduleService.GetAvailablePatientSlotsAsync(FilterDoctorId);
                 return Ok(result);
             }
             catch (Exception ex)

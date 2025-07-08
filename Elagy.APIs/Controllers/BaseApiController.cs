@@ -32,6 +32,11 @@ namespace Elagy.APIs.Controllers
             return User.FindFirstValue(ClaimTypes.NameIdentifier);
         }
 
+        protected string GetCurrentUserEmial()
+        {
+            return User.FindFirstValue(ClaimTypes.Email);
+        }
+
 
         /// <summary>
         /// Validates uploaded files for count and size.

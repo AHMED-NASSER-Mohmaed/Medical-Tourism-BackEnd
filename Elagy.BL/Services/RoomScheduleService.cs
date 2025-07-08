@@ -34,7 +34,7 @@ namespace Elagy.BL.Services
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
 
-        public async Task<CreateRoomScheduleResponseDTO> CreateRoomSchedule(CreateRoomScheduleDTO roomScheduleDTO)
+        public async Task<RoomScheduleResponseDTO> CreateRoomSchedule(CreateRoomScheduleDTO roomScheduleDTO)
         {
             Room room=await _unitOfWork.Rooms.GetRoomByIdWithDetailsAsync(roomScheduleDTO.RoomId);
             if (room == null)
@@ -55,6 +55,9 @@ namespace Elagy.BL.Services
 
             await _unitOfWork.RoomSchedule.AddAsync(roomSchedule);
 
+            await _unitOfWork.CompleteAsync();
+
+
 
             var query = _unitOfWork.RoomSchedule.AsQueryable();
 
@@ -64,7 +67,7 @@ namespace Elagy.BL.Services
 
            RoomSchedule  createdRoomSchedule =await query.FirstOrDefaultAsync();
 
-            return _map.Map<CreateRoomScheduleResponseDTO>(createdRoomSchedule);
+            return _map.Map<RoomScheduleResponseDTO>(createdRoomSchedule);
         }
 
         public async Task<bool> IsAvilable(DateOnly StartDate, DateOnly EndDate , int roomId)
@@ -76,9 +79,9 @@ namespace Elagy.BL.Services
 
             var result = await query.ToListAsync();
 
-            return result.Count()!=0?true:false;
+            return result.Count()==0?true:false;
         }
 
-        
+        //////////////////////////////////////////////////////////////////////////////////////////////////
     }
 }

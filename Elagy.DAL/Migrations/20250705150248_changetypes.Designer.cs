@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Elagy.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250704133549_TotalPrice")]
-    partial class TotalPrice
+    [Migration("20250705150248_changetypes")]
+    partial class changetypes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -163,10 +163,9 @@ namespace Elagy.DAL.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("FuelType")
-                        .IsRequired()
+                    b.Property<int>("FuelType")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
@@ -185,20 +184,17 @@ namespace Elagy.DAL.Migrations
                     b.Property<decimal>("PricePerDay")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
+                    b.Property<int>("Status")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("int");
 
-                    b.Property<string>("Transmission")
-                        .IsRequired()
+                    b.Property<int>("Transmission")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("int");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
+                    b.Property<int>("Type")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -1303,6 +1299,9 @@ namespace Elagy.DAL.Migrations
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("DriverStatus")
+                        .HasColumnType("int");
 
                     b.Property<int>("YearsOfExperience")
                         .HasColumnType("int");
