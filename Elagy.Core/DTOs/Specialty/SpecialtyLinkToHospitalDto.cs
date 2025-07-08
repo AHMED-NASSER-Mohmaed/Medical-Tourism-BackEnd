@@ -16,6 +16,7 @@ namespace Elagy.Core.DTOs.Specialty
         public string HospitalId { get; set; }
         public Status Status { get; set; }
         public string SpecialtyName { get; set; }
+        public string? ImageUrl { get; set; }
         public string? SpecialtyDesc { get; set; }
 
     }

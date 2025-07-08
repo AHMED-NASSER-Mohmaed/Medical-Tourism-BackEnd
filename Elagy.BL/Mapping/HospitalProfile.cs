@@ -20,9 +20,9 @@ namespace Elagy.BL.Mapping
                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.IsActive ? Status.Active : Status.Deactivated));
-                //.ForMember(dest => dest.ImageId, opt => opt.MapFrom(src => src.ImageId))
-                //.ForMember(dest => dest.ImageURL, opt => opt.MapFrom(src => src.ImageURL));
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.IsActive ? Status.Active : Status.Deactivated))
+                .ForMember(dest => dest.ImageId, opt => opt.MapFrom(src => src.ImageId))
+                .ForMember(dest => dest.ImageURL, opt => opt.MapFrom(src => src.ImageURL));
 
             CreateMap<HospitalAssetImage, RoomImageDto>();
 
@@ -41,6 +41,8 @@ namespace Elagy.BL.Mapping
             CreateMap<HospitalSpecialty, SpecialtyLinkToHospitalDto>()
                .ForMember(dest => dest.SpecialtyId, opt => opt.MapFrom(src => src.SpecialtyId))
                .ForMember(dest => dest.HospitalId, opt => opt.MapFrom(src => src.HospitalAssetId))
+               .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Specialty.ImageURL))
+
                // Map related entity properties (requires .Include for Specialty in repository query):
                .ForMember(dest => dest.SpecialtyName, opt => opt.MapFrom(src => src.Specialty.Name))
                .ForMember(dest => dest.SpecialtyDesc, opt => opt.MapFrom(src => src.Specialty.Description))

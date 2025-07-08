@@ -185,7 +185,7 @@ namespace Elagy.APIs.Controllers
 
         [HttpPost("SuperAdmin")]
         [Authorize(Roles = "SuperAdmin")]
-        public async Task<IActionResult> CreateSpecialty([FromBody] SpecialtyCreateDto createDto, IFormFile? SpecialtyImageFile)
+        public async Task<IActionResult> CreateSpecialty([FromForm] SpecialtyCreateDto createDto, IFormFile? SpecialtyImageFile)
         {
             if (!ModelState.IsValid)
             {

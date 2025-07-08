@@ -68,8 +68,10 @@ namespace Elagy.BL.Services
                         Id = s.Id,
                         Name = s.Name,
                         Description = s.Description,
-                        IsActive = s.IsActive // Include if needed, even if not directly mapped to DTO
-                        // Do NOT include navigation properties like HospitalSpecialties here
+                        IsActive = s.IsActive,
+                        ImageURL= s.ImageURL,
+                        ImageId=s.ImageId,
+                       
                     })
                     .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
                     .Take(paginationParameters.PageSize)
@@ -92,7 +94,7 @@ namespace Elagy.BL.Services
                 if (specialtyImageFile != null)
                 {
                     // Use UploadSingleFileAsync for one image
-                    var uploadResult = await _fileStorageService.UploadSingleFileAsync(specialtyImageFile, $"specialties/{createDto.Name.Replace(" ", "").ToLower()}");
+                    var uploadResult = await _fileStorageService.UploadSingleFileAsync(specialtyImageFile);
                     if (uploadResult.Success) { imageUrl = uploadResult.Url; imageId = uploadResult.Id; }
                     else { throw new InvalidOperationException($"Failed to upload specialty image: {uploadResult.Message}"); }
                 }
@@ -171,20 +173,20 @@ namespace Elagy.BL.Services
                     _logger.LogWarning($"Update failed: Specialty with ID {specialtyId} not found or is inactive.");
                     throw new KeyNotFoundException($"Specialty with ID {specialtyId} not found or is inactive.");
                 }
-                //if (newSpecialtyImageFile != null)
-                //{
-                   
-                //    if (!string.IsNullOrEmpty(specialtyToUpdate.ImageId))
-                //    {
-                //        var deleteResult = await _fileStorageService.DeleteFileAsync(specialtyToUpdate.ImageId);
-                //        if (!deleteResult) _logger.LogWarning($"Failed to delete old image {specialtyToUpdate.ImageId} for specialty {specialtyId}.");
-                //    }
-                    
-                //    var uploadResult = await _fileStorageService.UploadSingleFileAsync(newSpecialtyImageFile, $"specialties/{specialtyToUpdate.Name.Replace(" ", "").ToLower()}");
-                //    if (uploadResult.Success) { specialtyToUpdate.ImageURL = uploadResult.Url; specialtyToUpdate.ImageId = uploadResult.Id; }
-                //    else { throw new InvalidOperationException($"Failed to upload new specialty image: {uploadResult.Message}"); }
-                //}
-                // 2. Implement Business Logic / Validation
+                if (newSpecialtyImageFile != null)
+                {
+
+                    if (!string.IsNullOrEmpty(specialtyToUpdate.ImageId))
+                    {
+                        var deleteResult = await _fileStorageService.DeleteFileAsync(specialtyToUpdate.ImageId);
+                        if (!deleteResult) _logger.LogWarning($"Failed to delete old image {specialtyToUpdate.ImageId} for specialty {specialtyId}.");
+                    }
+
+                    var uploadResult = await _fileStorageService.UploadSingleFileAsync(newSpecialtyImageFile, $"specialties/{specialtyToUpdate.Name.Replace(" ", "").ToLower()}");
+                    if (uploadResult.Success) { specialtyToUpdate.ImageURL = uploadResult.Url; specialtyToUpdate.ImageId = uploadResult.Id; }
+                    else { throw new InvalidOperationException($"Failed to upload new specialty image: {uploadResult.Message}"); }
+                }
+          
 
                 if (!string.Equals(specialtyToUpdate.Name, updateDto.Name, StringComparison.OrdinalIgnoreCase))
                 {
@@ -199,7 +201,6 @@ namespace Elagy.BL.Services
                     }
                 }
 
-                // 3. Map DTO properties to the existing entity.
                 _mapper.Map(updateDto, specialtyToUpdate);
 
 
@@ -411,8 +412,9 @@ namespace Elagy.BL.Services
                 {
                     Id = s.Id,
                     Name = s.Name,
-                    Description = null // Explicitly set to null as per the service method's comment
-                   ,
+                    Description = null, // Explicitly set to null as per the service method's comment,
+                    ImageId= s.ImageId,
+                    ImageURL=s.ImageURL,
                     Status = s.IsActive ? Status.Active : Status.Deactivated
 
                 }).ToList();
@@ -535,6 +537,7 @@ namespace Elagy.BL.Services
                {
                    SpecialtyId = specialty.Id,
                    SpecialtyName = specialty.Name,
+                   IconUrl=specialty.ImageURL,
                    BookingCount = specialty.HospitalSpecialties
                        .SelectMany(hs => hs.Doctors)
                        .SelectMany(d => d.Schedules)
