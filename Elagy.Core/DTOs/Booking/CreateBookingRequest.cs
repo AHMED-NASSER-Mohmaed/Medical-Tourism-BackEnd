@@ -16,7 +16,7 @@ namespace Elagy.Core.DTOs.Booking
         [Required]
         public CreateSpecialtyAppointmentDTO SpecialtiyAppointment { get; set; }
 
-        public RoomAppointmentResponseDTO? RoomAppointment { get; set; }
+        public CreateRoomAppointmentDTO? RoomAppointment { get; set; }
 
 
         public CarRentalAppoinmentDTO? CarAppointment { get; set; }

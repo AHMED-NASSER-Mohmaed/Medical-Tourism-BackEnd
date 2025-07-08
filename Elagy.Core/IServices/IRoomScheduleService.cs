@@ -11,6 +11,6 @@ namespace Elagy.Core.IServices
     public interface IRoomScheduleService
     {
         Task<bool> IsAvilable(DateOnly Start, DateOnly End,int roomId);
-        Task<CreateRoomScheduleResponseDTO> CreateRoomSchedule(CreateRoomScheduleDTO roomScheduleDTO);
+        Task<RoomScheduleResponseDTO> CreateRoomSchedule(CreateRoomScheduleDTO roomScheduleDTO);
     }
 }

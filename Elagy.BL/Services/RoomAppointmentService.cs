@@ -23,12 +23,12 @@ namespace Elagy.BL.Services
             _unitOfWork = unitOfWork;
         }
     
-        public async Task<Package> BookAppointment(Package createdPacakge, RoomAppointmentResponseDTO radto)
+        public async Task<Package> BookAppointment(Package createdPacakge, CreateRoomAppointmentDTO radto)
         {
 
             try
             {
-                CreateRoomScheduleResponseDTO rs = await _roomScheduleService.CreateRoomSchedule(new CreateRoomScheduleDTO
+                RoomScheduleResponseDTO rs = await _roomScheduleService.CreateRoomSchedule(new CreateRoomScheduleDTO
                 {
                     StartDate=radto.CheckInDate,
                     EndDate = radto.CheckOutDate,

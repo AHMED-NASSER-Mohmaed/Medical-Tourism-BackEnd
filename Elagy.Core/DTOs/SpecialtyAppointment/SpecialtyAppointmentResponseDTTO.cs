@@ -10,17 +10,11 @@ namespace Elagy.Core.DTOs.SpecialtyAppointment
 {
     public class SpecialtyAppointmentResponseDTTO
     {
-
         public int Id { get; set; }
-
         //if price changed at the clinic
         public decimal price { get; set; }
-
         //------ Hospital ---- Hotle ----- CarRental
-        
-        public AppointmentType Type { get; set; }
-
-        public AppointmentStatus Status { get; set; } = AppointmentStatus.Pending;
+        public AppointmentStatus Status { get; set; }
 
         public Guid PackageId { get; set; }
         public SpecialtyAppointmentDeliveryType ServiceDeliveryType { get; set; } = SpecialtyAppointmentDeliveryType.Onsite;
@@ -30,9 +24,6 @@ namespace Elagy.Core.DTOs.SpecialtyAppointment
         //calculated from the schedule Time SlotSize
         public TimeOnly ExistingTime { get; set; }
         public DateOnly Date { get; set; }
-
         public int SpecialtyScheduleId { get; set; }
-        //Navigation properties
-
     }
 }
