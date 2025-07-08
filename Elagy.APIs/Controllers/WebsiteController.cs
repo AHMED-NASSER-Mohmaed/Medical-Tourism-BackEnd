@@ -21,8 +21,6 @@ namespace Elagy.APIs.Controllers
         private readonly ISpecialtyService _specialtyService;
         private readonly IDoctorService _doctorService;
         private readonly ISpecialtyScheduleService _scheduleService;
-        private readonly ISuperAdminService _superAdminService;
-
         private readonly ICarService _carservice;
         private readonly IRoomScheduleService _RoomscheduleService;
         private readonly IServiceProvidersWebsiteService _serviceproviderwebsite;
@@ -40,7 +38,7 @@ namespace Elagy.APIs.Controllers
 
             ICarService carservice,
             IRoomScheduleService roomscheduleService,
-            IServiceProvidersWebsiteService serviceproviderwebsite,ISuperAdminService superAdminService)
+            IServiceProvidersWebsiteService serviceproviderwebsite)
         {
             _hospitalProviderService = hospitalProviderService;
             _carRentalProviderService = carRentalProviderService;
@@ -52,10 +50,7 @@ namespace Elagy.APIs.Controllers
             _carservice = carservice;
             _RoomscheduleService = roomscheduleService;
             _serviceproviderwebsite = serviceproviderwebsite;
-            _superAdminService= superAdminService;
         }
-
-      
 
 
         // still needd to maintain
@@ -73,7 +68,7 @@ namespace Elagy.APIs.Controllers
             Filter.UserStatus = UserStatus;
             Filter.FilterGovernorateId = governertaeId;
 
-            var providers = await _superAdminService.GetCarRentalProvidersForAdminDashboardAsync(Filter);
+            var providers = await _serviceproviderwebsite.GetCarRentalProvidersForAdminDashboardAsync(Filter);
             return Ok(providers);
         }
 
@@ -140,7 +135,7 @@ namespace Elagy.APIs.Controllers
             Filter.SearchTerm = SearchTerm;
             Filter.FilterGovernorateId = GovernerateId;
 
-            var providers = await _superAdminService.GetHotelProvidersForAdminDashboardAsync(Filter);
+            var providers = await _serviceproviderwebsite.GetHotelProvidersForAdminDashboardAsync(Filter);
             return Ok(providers);
         }
 
@@ -242,7 +237,7 @@ namespace Elagy.APIs.Controllers
 
         public async Task<ActionResult<IEnumerable<HotelProviderProfileDto>>> GetHospitalProviders(
       [FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10,
-      [FromQuery] string SearchTerm = null, [FromQuery] Status? UserStatus=null,
+      [FromQuery] string SearchTerm = null, [FromQuery] Status? UserStatus = Status.Active,
       [FromQuery] int? specialtyId = null,
       [FromQuery] int? GovernerateId = null)
         {
@@ -255,7 +250,7 @@ namespace Elagy.APIs.Controllers
             Filter.FilterGovernorateId = GovernerateId;
 
 
-            var providers = await _superAdminService.GetHospitalProvidersForAdminDashboardAsync(Filter);
+            var providers = await _serviceproviderwebsite.GetHospitalProvidersForAdminDashboardAsync(Filter);
             return Ok(providers);
         }
 
