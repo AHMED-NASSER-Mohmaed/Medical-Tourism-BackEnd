@@ -16,6 +16,6 @@ namespace Elagy.Core.Entities
         public int CarId { get; set; } // Foreign key for the car associated with this schedule
         public Car Car { get; set; } // Navigation property to the Car entity
         public ScheduleStatus Status { get; set; } = ScheduleStatus.Pending; // Status of the schedule (e.g., Active, Completed, Cancelled)
-        public List<CarRentalAppointment> CarRentalAppointments { get; set; } = new List<CarRentalAppointment>();
     }
+
 }

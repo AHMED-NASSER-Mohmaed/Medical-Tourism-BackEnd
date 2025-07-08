@@ -379,8 +379,8 @@ namespace Elagy.BL.Services
                     Make = car.FactoryMake,
                     Model = car.ModelName,
                     Year = car.ModelYear,
-                    RentalCount = car.carRentalSchedules.SelectMany(s => s.CarRentalAppointments)
-                    .Count(s => s.Status != AppointmentStatus.Cancelled)
+                    RentalCount = car.CarRentalAsset.Cars.SelectMany(s => s.carRentalSchedules)
+                    .Count(s => s.Status != ScheduleStatus.Cancelled)
 
                 }).ToListAsync();
         }
