@@ -39,6 +39,8 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
     public DbSet<CarDriver> CarDrivers { get; set; }
     public DbSet<CarRentalAssetImage> CarRentalAssetImages { get; set; }
 
+    public DbSet<Disbursement> disbursements { get; set; }
+
 
 
 

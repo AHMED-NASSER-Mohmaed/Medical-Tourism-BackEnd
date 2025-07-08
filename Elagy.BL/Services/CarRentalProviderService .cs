@@ -11,7 +11,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore; // Crucial for .Include() and .SingleOrDefaultAsync()
 using ServiceProvider = Elagy.Core.Entities.ServiceProvider; // Ensure this is the correct namespace for ServiceProvider
 
-using Microsoft.Extensions.Logging; // Add this line if it's missing
+using Microsoft.Extensions.Logging;
+using Elagy.Core.DTOs.Pagination;
+using Elagy.Core.DTOs.Disbursement; // Add this line if it's missing
 namespace Elagy.BL.Services
 {
     public class CarRentalProviderService : ICarRentalProviderService
@@ -128,6 +130,16 @@ namespace Elagy.BL.Services
 
             _logger.LogInformation($"Car Rental Provider {serviceProvider.Email} added by admin with asset.");
             return new AuthResultDto { Success = true, Message = "Car Rental Provider account and asset created successfully by admin." };
+        }
+
+        public Task<PagedResponseDto<DisplayCarRentalDisbursement>> GetAllDisbursement(string providerId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<DisplayCarRentalDisbursement> GetDisbursementWithDetails(int id, string ProviderId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

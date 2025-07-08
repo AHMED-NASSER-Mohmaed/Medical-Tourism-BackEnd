@@ -36,6 +36,9 @@ namespace Elagy.DAL.Repositories
                 .Select(hs => hs.HospitalAsset)
                 .Distinct(); 
         }
+
+
+
     }
     }
 

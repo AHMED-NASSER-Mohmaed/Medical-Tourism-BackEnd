@@ -18,6 +18,8 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Stripe;
+using ReportProPDF;
+using Elagy.DAL.Repositories;
 
 
 
@@ -26,6 +28,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
@@ -226,7 +229,8 @@ builder.Services.AddRateLimiter(rateLimiterOptions =>
 });
 
 
-
+// build Report Service
+builder.Services.AddReportProPDF();
 
 var app = builder.Build();
 

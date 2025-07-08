@@ -1,4 +1,5 @@
 ﻿using Elagy.Core.DTOs.Auth;
+using Elagy.Core.DTOs.Disbursement;
 using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Shared;
 using Elagy.Core.DTOs.Specialty;
@@ -12,6 +13,8 @@ namespace Elagy.Core.IServices
         Task<HospitalProviderProfileDto> GetHospitalProviderProfileAsync(string providerId);
         Task<HospitalProviderProfileDto> UpdateHospitalProviderProfileAsync(string providerId, HospitalProviderProfileUpdateDto model);
         Task<AuthResultDto> AddHospitalProviderByAdminAsync(HospitalAssetRegistrationRequestDto model);
+        Task<PagedResponseDto<DisplayDisbursement>> GetDisbursement(string ProviderId, PaginationParameters paginationParams);
+        Task<DisplayDisbursement> GetDisbursementWithDetails(int disbursementId, string ProviderId);
 
     }
 }

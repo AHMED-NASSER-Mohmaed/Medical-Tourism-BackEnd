@@ -47,7 +47,9 @@ namespace Elagy.DAL
 
         public ICarDriverRepository CarDrivers { get; private set; }
 
+        //public IGenericRepository<Disbursement> Disbursements { get; private set; }
 
+        public IDisbursementRepository Disbursements {get; private set; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -79,6 +81,8 @@ namespace Elagy.DAL
             RoomSchedule = new GenericRepository<RoomSchedule>(_context);
 
             CarSchedule = new GenericRepository<CarSchedule>(_context);
+
+            Disbursements = new DisbursementRepository(_context);
         }
 
         public async Task<int> CompleteAsync()

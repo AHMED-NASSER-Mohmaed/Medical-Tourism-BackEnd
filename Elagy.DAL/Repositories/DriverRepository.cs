@@ -26,7 +26,7 @@ namespace Elagy.DAL.Repositories
                 .Include(d => d.CarRentalAsset) 
                 .Include(d => d.CarDrivers) 
                     .ThenInclude(cd => cd.Car); 
-        }
+        } 
 
         public async Task<IEnumerable<Driver>> GetDriversByCarRentalAssetIdAsync(string carRentalAssetId, Status? driverStatus = null)
         {

@@ -2,6 +2,8 @@
 using Elagy.Core.DTOs.Auth;
 using Elagy.Core.DTOs.Shared;
 using Elagy.Core.DTOs.User;
+using Elagy.Core.DTOs.Disbursement;
+
 using Elagy.Core.Entities;
 using Elagy.Core.Enums;
 using Elagy.Core.Helpers;
@@ -11,7 +13,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore; // Crucial for .Include() and .SingleOrDefaultAsync()
 using ServiceProvider = Elagy.Core.Entities.ServiceProvider; // Ensure this is the correct namespace for ServiceProvider
 using Microsoft.Extensions.Logging;
-using Elagy.Core.DTOs.Pagination; // Add this line if it's missing
+using Elagy.Core.DTOs.Pagination;
+using QuestPDF.Fluent;
+using Microsoft.CodeAnalysis.Operations; // Add this line if it's missing
 namespace Elagy.BL.Services
 {
     public class HospitalProviderService : IHospitalProviderService
@@ -55,6 +59,7 @@ namespace Elagy.BL.Services
                                             .Include(sp => sp.ServiceAsset)
                                             .SingleOrDefaultAsync(sp => sp.Id == providerId);
 
+            
             if (provider == null || provider.ServiceAsset == null || provider.ServiceAsset.AssetType != AssetType.Hospital)
             {
                 _logger.LogWarning($"Failed to update: Hospital Provider with ID {providerId} or its asset not found/invalid type.");
@@ -130,7 +135,64 @@ namespace Elagy.BL.Services
             return new AuthResultDto { Success = true, Message = "Hospital Provider account and asset created successfully by admin." };
         }
 
+        public async Task<PagedResponseDto<DisplayDisbursement>> GetDisbursement(string ProviderId,PaginationParameters paginationParams)
+        {
+            Console.WriteLine("inside Service");
+            var provider = await _unitOfWork.ServiceProviders.AsQueryable()
+                                            .Include(sp => sp.ServiceAsset)
+                                            .SingleOrDefaultAsync(sp => sp.Id == ProviderId);
 
+            if (provider == null) 
+            {
+                _logger.LogWarning($"Hospital Provider with ID {ProviderId} not found.");
+                return new PagedResponseDto<DisplayDisbursement>(Enumerable.Empty<DisplayDisbursement>(), 0, paginationParams.PageNumber, paginationParams.PageSize);
+            }
+            
+            var disbursements = await _unitOfWork.Disbursements.GetAllHospitalDisbursement(provider.AssetId.ToString());
+
+
+            var totalCount = disbursements.Count();
+            var pagedDisbursements = await disbursements
+                                    .Include(d => d.Asset)
+                                    .Include(d => d.DisbursementItems)
+                                        .ThenInclude(di => di.Appointment)
+                                    .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
+                                    .Take(paginationParams.PageSize)
+                                    .ToListAsync();
+            var DisbursementDtos = _mapper.Map<IEnumerable<DisplayDisbursement>>(pagedDisbursements);
+            return new PagedResponseDto<DisplayDisbursement>(
+                DisbursementDtos,
+                    totalCount,
+                    paginationParams.PageNumber,
+                    paginationParams.PageSize
+                    );
+
+
+        }
+        public async Task<DisplayDisbursement> GetDisbursementWithDetails(int disbursementId, string ProviderId) 
+        {
+            try
+            {
+                var provider = await _unitOfWork.ServiceProviders.AsQueryable()
+                                            .Include(sp => sp.ServiceAsset)
+                                            .SingleOrDefaultAsync(sp => sp.Id == ProviderId);
+
+                if (provider == null)
+                {
+                    _logger.LogWarning($"Hospital Provider with ID {ProviderId} not found.");
+                    return new DisplayDisbursement();
+                }
+                var disbursement = await _unitOfWork.Disbursements.GetHospitalDisbursementById(disbursementId);
+
+                var disbursementDto = _mapper.Map<DisplayDisbursement>(disbursement);
+
+                return disbursementDto;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
 
 
     }
