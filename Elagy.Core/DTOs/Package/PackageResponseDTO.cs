@@ -1,4 +1,6 @@
-﻿using Elagy.Core.DTOs.SpecialtyAppointment;
+﻿using Elagy.Core.DTOs.CarAppointment;
+using Elagy.Core.DTOs.RoomAppoinment;
+using Elagy.Core.DTOs.SpecialtyAppointment;
 using Elagy.Core.Entities;
 using Elagy.Core.Enums;
 using System;
@@ -11,7 +13,7 @@ namespace Elagy.Core.DTOs.Package
 {
     public class PackageResponseDTO
     {
-        public Guid Id{ get; set; }
+        public Guid Id { get; set; }
 
         public DateTime CreatedAt { get; set; }
         public DateTime? PaymentConfirmedAt { get; set; }//when hock is called and payment is confirmed
@@ -21,7 +23,10 @@ namespace Elagy.Core.DTOs.Package
 
         public string PatientId { get; set; }
 
-        public SpecialtyAppointmentResponseDTTO SpecialtyAppoinment{ get; set; } 
+        public SpecialtyAppointmentResponseDTTO SpecialtyAppoinment { get; set; }
 
+        public RoomAppointmentResponseDTO? RoomAppointment { get; set; } 
+
+        public CarAppointmentResponseDTO? CarAppointment { get; set; } //if any car appointment is booked
     }
 }

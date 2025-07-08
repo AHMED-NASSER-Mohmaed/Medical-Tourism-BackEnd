@@ -110,7 +110,7 @@ namespace Elagy.BL.Services
                 .ToListAsync();
 
             var carAppointments =  _unitOfWork.CarRentalAppointments.AsQueryable()
-       .Where(ca => ca.CarRentalSchedule.CarId == carId &&
+       .Where(ca => ca.CarScheduleId == carId &&
                     ca.Status != AppointmentStatus.Cancelled &&
                     DateOnly.FromDateTime(ca.EndingDateTime) >= today)
        .ToListAsync();

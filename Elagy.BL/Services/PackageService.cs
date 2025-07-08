@@ -1,9 +1,12 @@
-﻿using Elagy.Core.DTOs.Booking;
+﻿using AutoMapper;
+using Elagy.Core.DTOs.Booking;
 using Elagy.Core.DTOs.Package;
+using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.Entities;
 using Elagy.Core.Enums;
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +18,11 @@ namespace Elagy.BL.Services
     public class PackageService : IPackgeService
     {
         private readonly IUnitOfWork _unitOfWork;
-        public PackageService(IUnitOfWork unitOfWork)
+        private readonly IMapper _map  ;
+        public PackageService(IUnitOfWork unitOfWork,IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _map = mapper;
         }
          
 
@@ -42,8 +47,46 @@ namespace Elagy.BL.Services
 
             return createdPackage;
         }
-        
+
+        public async Task<PagedResponseDto<PackageResponseDTO>> getPackages(string _patientId,PaginationParameters pp)
+        {
+            if (string.IsNullOrEmpty(_patientId))
+            {
+                throw new ArgumentException("Patient ID cannot be null or empty.", nameof(_patientId));
+            }
+
+            var packageQuery = _unitOfWork.Packages.AsQueryable()
+                .Where(p => p.PatientId == _patientId)
+                .Include(p => p.Appointments)
+                .Take(pp.PageSize)
+                .Skip(pp.PageSize*(pp.PageNumber-1));
+                 
+
+            var packageList = await packageQuery.ToListAsync();
 
 
+            if (packageList == null || !packageList.Any())
+            {
+                return new PagedResponseDto<PackageResponseDTO>(
+                    new List<PackageResponseDTO>(),
+                    0,
+                    pp.PageNumber,
+                    pp.PageSize);
+            }
+
+            var PackageResponseDTOList =_map.Map<List<PackageResponseDTO>>(packageList);
+
+
+ 
+
+            return new PagedResponseDto<PackageResponseDTO>(
+                PackageResponseDTOList,
+                await packageQuery.CountAsync(),
+                pp.PageNumber,
+                pp.PageSize);
+             
+        }
+    
+    
     }
 }

@@ -62,7 +62,7 @@ namespace Elagy.BL.Services
                 _packageResponseDTO.SpecialtyAppoinment=_specialtyResponseDto;
 
 
-                if(request.RoomAppointment!=null)
+                if (request.RoomAppointment!=null)
                 {
                     await _roomApointmentService.BookAppointment(CreatedPackage, request.RoomAppointment);
                 }

@@ -13,8 +13,7 @@ namespace Elagy.BL.Mapping
     {
         public ScheduleProfile()
         {
-            CreateMap<Core.Entities.DayOfWeek, DayOfWeekDto>()
-               .ForMember(dest => dest.Code, opt => opt.MapFrom(src => src.ShortCode));
+            
 
 
             CreateMap<CreateScheduleSlotDto, SpecialtySchedule>()
@@ -54,8 +53,8 @@ namespace Elagy.BL.Mapping
                .ForMember(dest => dest.HospitalSpecialtyId, opt => opt.MapFrom(src => src.HospitalSpecialtyId))
                .ForMember(dest => dest.Hospital, opt => opt.MapFrom(src => src.HospitalSpecialty.HospitalAsset.Name))
                .ForMember(dest => dest.Specialty, opt => opt.MapFrom(src => src.HospitalSpecialty.Specialty.Name))
-               .ForMember(dest => dest.HospitalAssetId, opt => opt.MapFrom(src => src.HospitalSpecialty.HospitalAssetId))
-               .ForMember(dest => dest.DayOfWeek, opt => opt.MapFrom(src => src.DayOfWeek));
+               .ForMember(dest => dest.HospitalAssetId, opt => opt.MapFrom(src => src.HospitalSpecialty.HospitalAssetId));
+
         }
     }
 }

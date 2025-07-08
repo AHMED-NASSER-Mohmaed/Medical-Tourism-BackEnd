@@ -11,7 +11,7 @@ namespace Elagy.Core.IServices
     public interface IRoomAppointmentService
     {
 
-        Task<Package> BookAppointment(Package createdPackage, RoomAppointmentResponseDTO rdto);
+        Task<Package> BookAppointment(Package createdPackage, CreateRoomAppointmentDTO rdto);
 
     }
 }
