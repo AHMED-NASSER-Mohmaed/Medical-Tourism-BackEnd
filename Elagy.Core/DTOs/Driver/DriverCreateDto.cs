@@ -22,7 +22,7 @@ namespace Elagy.Core.DTOs.Driver
         public string? Address { get; set; }
         public string? City { get; set; }
         [Required] public int UserGovernorateId { get; set; }
-        [Required] public int UserCountryId { get; set; }
+        public int UserCountryId { get; set; }
         public DateTime? DateOfBirth { get; set; }
 
         [Required(ErrorMessage = "Years of experience are required.")]

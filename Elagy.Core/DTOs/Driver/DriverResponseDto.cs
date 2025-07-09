@@ -20,8 +20,11 @@ namespace Elagy.Core.DTOs.Driver
         public Gender Gender { get; set; }
         public string? Address { get; set; }
         public string? City { get; set; }
-        public Governorate? UserGovernorate { get; set; } // Direct object for display
-        public Country? UserCountry { get; set; } // Direct object for display
+        public int? governerateId { get; set; } // Direct object for display
+        public int? countryId { get; set; } // Direct object for display
+        public string GovernarteName { get; set; }
+        public string CountryName { get; set; }
+
         public DateTime? DateOfBirth { get; set; }
         public bool EmailConfirmed { get; set; }
         public Status Status { get; set; } // User's general account status

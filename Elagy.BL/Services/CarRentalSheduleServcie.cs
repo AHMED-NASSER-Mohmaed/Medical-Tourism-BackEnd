@@ -55,7 +55,7 @@ namespace Elagy.BL.Services
 
            
             int numberOfDays = carScheduleDTO.EndingDate.DayNumber - carScheduleDTO.StartingDate.DayNumber + 1;
-            carSchedule.TotalPrice = car.Price * numberOfDays;
+            carSchedule.TotalPrice = car.PricePerDay * numberOfDays;
 
             carSchedule.Car = car;
 

@@ -126,7 +126,8 @@ namespace Elagy.BL.Services
                 driver.EmailConfirmed = true;
                 driver.PhoneNumberConfirmed = true;
                 driver.Status = Status.Active;
-                driver.UserType = UserType.Driver; 
+                driver.UserType = UserType.Driver;
+                
 
                 // 7. Create user with IdentityUserManager
                 var result = await _userManager.CreateAsync(driver, createDto.Password);
