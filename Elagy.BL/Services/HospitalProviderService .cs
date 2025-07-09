@@ -142,6 +142,8 @@ namespace Elagy.BL.Services
                                             .Include(sp => sp.ServiceAsset)
                                             .SingleOrDefaultAsync(sp => sp.Id == ProviderId);
 
+            Console.WriteLine("after get Provider"); 
+
             if (provider == null) 
             {
                 _logger.LogWarning($"Hospital Provider with ID {ProviderId} not found.");
@@ -149,13 +151,10 @@ namespace Elagy.BL.Services
             }
             
             var disbursements = await _unitOfWork.Disbursements.GetAllHospitalDisbursement(provider.AssetId.ToString());
-
+            Console.WriteLine("After get Disbursements");
 
             var totalCount = disbursements.Count();
             var pagedDisbursements = await disbursements
-                                    .Include(d => d.Asset)
-                                    .Include(d => d.DisbursementItems)
-                                        .ThenInclude(di => di.Appointment)
                                     .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
                                     .Take(paginationParams.PageSize)
                                     .ToListAsync();

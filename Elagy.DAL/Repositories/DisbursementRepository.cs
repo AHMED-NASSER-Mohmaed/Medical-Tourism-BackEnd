@@ -16,8 +16,18 @@ namespace Elagy.DAL.Repositories
         
         public async Task<IQueryable<Disbursement>> GetAllHospitalDisbursement(string AssetId)
         {
+            Console.WriteLine("inside Repo");
             
-            return  _dbSet.Where(d=> d.AssetId==AssetId);
+            return  _dbSet.Where(d=> d.AssetId==AssetId).Select(d => new Disbursement
+            {
+                Id = d.Id,
+                DisbursementDateMonth = d.DisbursementDateMonth,
+                TotalAmount = d.TotalAmount,
+                GeneratedAt = d.GeneratedAt,
+                PaymentMethod = d.PaymentMethod,
+                 
+
+            });
         }
 
        
@@ -26,7 +36,7 @@ namespace Elagy.DAL.Repositories
         {
             return await _dbSet.Include(d => d.DisbursementItems)
                         .ThenInclude(item => item.Appointment )
-                            .ThenInclude(a => (a as SpecialtyAppointment).Schedule)
+                            .ThenInclude(a => (a as SpecialtyAppointment).SpecialtySchedule)
                     .FirstOrDefaultAsync(d => d.Id == disbursementId);
         }
         public Task<IQueryable<Disbursement>> GetAllHotelDisbursement(string AssetId)
