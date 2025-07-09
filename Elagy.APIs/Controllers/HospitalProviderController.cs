@@ -96,6 +96,60 @@ namespace Elagy.APIs.Controllers
             }
         }
 
+        [HttpPost("upload-hospital-images")]
+        public async Task<ActionResult<List<AssetImageResponseDto>>> UploadHospitalImages([FromForm] List<IFormFile> hospitalImages)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var hospitalId = GetCurrentUserId();
+
+            try
+            {
+                var result = await _hospitalProviderService.UploadHospitalAssetImages(hospitalId, hospitalImages);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+            catch (ApplicationException ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+        [HttpDelete("delete-hospital-images")]
+        public async Task<ActionResult<List<AssetImageResponseDto>>> DeleteSelectedHospitalImages( [FromBody] List<string> imageIds)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var hospitalId = GetCurrentUserId();
+
+            try
+            {
+                var result = await _hospitalProviderService.DeleteHospitalAssetImagesByIds(hospitalId, imageIds);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+            catch (ApplicationException ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
         // POST: api/Schedules
         [HttpPost("schedule")]
         public async Task<IActionResult> CreateSchedule([FromBody] CreateScheduleSlotDto createDto)

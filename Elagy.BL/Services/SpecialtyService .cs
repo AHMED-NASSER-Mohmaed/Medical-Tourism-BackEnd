@@ -31,7 +31,6 @@ namespace Elagy.BL.Services
             _fileStorageService = fileStorageService;
         }
         #region Supper Admin Dashboard CRUD
-
         public async Task<PagedResponseDto<SpecialtyResponseDto>> GetAllSpecialties(PaginationParameters paginationParameters)
         {
             try
@@ -82,8 +81,6 @@ namespace Elagy.BL.Services
             }
             catch (Exception ex) { _logger.LogError(ex, "Error retrieving paginated specialties for Super Admin Dashboard."); throw; }
         }
-
-
         public async Task<SpecialtyResponseDto> CreateSpecialty(SpecialtyCreateDto createDto, IFormFile? specialtyImageFile)
         {
             try
@@ -231,12 +228,7 @@ namespace Elagy.BL.Services
                 throw;
             }
         }
-
-
-
         #endregion
-
-        
         public async Task<SpecialtyLinkToHospitalDto?> LinkSpecialtyToHospital(int specialtyId, string hospitalId)
         {
             try
@@ -299,10 +291,6 @@ namespace Elagy.BL.Services
                 throw;
             }
         }
-
-     
-        /// Retrieves all active specialties linked to a specific hospital.
-       
         public async Task<PagedResponseDto<SpecialtyResponseDto>> GetAllSpecialtiesForHospital(string hospitalId, PaginationParameters paginationParameters)
         {
             try
@@ -345,7 +333,6 @@ namespace Elagy.BL.Services
             }
             catch (Exception ex) { _logger.LogError(ex, $"Error retrieving specialties for Hospital ID: {hospitalId} with filters."); throw; }
         }
-
         public async Task<PagedResponseDto<SpecialtyLinkToHospitalDto>> GetHospitalSpecialtiesWithLinks(
     string hospitalId,
     PaginationParameters paginationParameters)
@@ -393,10 +380,6 @@ namespace Elagy.BL.Services
                 paginationParameters.PageSize
             );
         }
-
-
-        /// Retrieves active global specialties that are not yet linked to a specific hospital.
-        /// The description field is explicitly omitted in the response DTO.
         public async Task<IEnumerable<SpecialtyResponseDto>> GetAvailableGlobalSpecialtiesToLinkAsync(string hospitalId)
         {
             try
@@ -428,7 +411,6 @@ namespace Elagy.BL.Services
                 return Enumerable.Empty<SpecialtyResponseDto>();
             }
         }
-
         public async Task<SpecialtyResponseDto?> GetSpecialtyIdAsync(int id)
         {
             try
@@ -448,7 +430,6 @@ namespace Elagy.BL.Services
                 throw;
             }
         }
-
         public async Task<SpecialtyResponseDto?> ChangeSpecialtyStatusAsync(int id, bool newIsActiveStatus)
         {
             try
@@ -481,7 +462,6 @@ namespace Elagy.BL.Services
                 throw;
             }
         }
-
         public async Task<SpecialtyLinkToHospitalDto?> ChangeSpecificHospitalSpecialtyStatusAsync(
             string hospitalId,
             int specialtyId,
@@ -529,7 +509,6 @@ namespace Elagy.BL.Services
                 throw;
             }
         }
-
         public async Task<IEnumerable<TopSpecialtyDto>> GetTopSpecialtiesByBookings()
         {
             return await _unitOfWork.Specialties.AsQueryable()

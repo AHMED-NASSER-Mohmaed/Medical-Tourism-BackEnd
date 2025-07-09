@@ -56,10 +56,65 @@ namespace Elagy.APIs.Controllers
             return Ok(updatedProfile);
         }
 
+        [HttpDelete("delete-Rental-images")]
+        public async Task<ActionResult<List<AssetImageResponseDto>>> DeleteSelectedCarRentalImages([FromBody] List<string> imageIds)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var carRentalId = GetCurrentUserId();
+            try
+            {
+
+                var result = await _carRentalProviderService.DeleteCarRentalAssetImagesByIds(carRentalId, imageIds);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+            catch (ApplicationException ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
+        [HttpPost("upload-rental-images")]
+        public async Task<ActionResult<List<AssetImageResponseDto>>> UploadCarRentalImages([FromForm] List<IFormFile> carRentalImages)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var carRentalId = GetCurrentUserId();
+            try
+            {
+                var result = await _carRentalProviderService.UploadCarRentalAssetImages(carRentalId, carRentalImages);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+            catch (ApplicationException ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
 
         [HttpPost]
         public async Task<IActionResult> AssignDriverToCar([FromBody] CarDriverCreateDto createDto)
         {
+
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var carRentalAssetId = GetCurrentUserId();

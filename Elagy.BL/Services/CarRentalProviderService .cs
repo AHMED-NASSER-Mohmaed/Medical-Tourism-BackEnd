@@ -11,7 +11,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore; // Crucial for .Include() and .SingleOrDefaultAsync()
 using ServiceProvider = Elagy.Core.Entities.ServiceProvider; // Ensure this is the correct namespace for ServiceProvider
 
-using Microsoft.Extensions.Logging; // Add this line if it's missing
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http; // Add this line if it's missing
 namespace Elagy.BL.Services
 {
     public class CarRentalProviderService : ICarRentalProviderService
@@ -21,15 +22,18 @@ namespace Elagy.BL.Services
         private readonly ILogger<CarRentalProviderService> _logger;
         private readonly UserManager<User> _userManager;
         private readonly IEmailService _emailService;
+        private readonly IFileStorageService _filestorageservice;
+
 
         public CarRentalProviderService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<CarRentalProviderService> logger,
-                                        UserManager<User> userManager, IEmailService emailService)
+                                        UserManager<User> userManager, IEmailService emailService, IFileStorageService filestorageservice)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _userManager = userManager;
             _emailService = emailService;
+            _filestorageservice = filestorageservice;
         }
 
         public async Task<CarRentalProviderProfileDto> GetCarRentalProviderProfileAsync(string providerId)
@@ -128,6 +132,72 @@ namespace Elagy.BL.Services
 
             _logger.LogInformation($"Car Rental Provider {serviceProvider.Email} added by admin with asset.");
             return new AuthResultDto { Success = true, Message = "Car Rental Provider account and asset created successfully by admin." };
+        }
+
+        public async Task<List<AssetImageResponseDto>> DeleteCarRentalAssetImagesByIds(string carRentalId, List<string> imageIds)
+        {
+            if (imageIds == null || !imageIds.Any())
+                throw new ArgumentException("No image IDs provided.");
+
+            var carRental = await _unitOfWork.CarRentalAssets.GetByIdAsync(carRentalId);
+            if (carRental == null)
+                throw new KeyNotFoundException($"Car Rental Asset with ID {carRentalId} not found");
+
+            var imagesToDelete = await _unitOfWork.CarRentalAssetImages
+                .FindAsync(img => imageIds.Contains(img.ImageId) && img.CarRentalAssetId == carRentalId);
+
+            if (!imagesToDelete.Any())
+                throw new KeyNotFoundException("No matching images found for deletion.");
+
+            var imageUrls = imagesToDelete.Select(img => img.ImageURL).ToList();
+            var deleteResult = await _filestorageservice.DeleteMultipleFilesAsync(imageUrls);
+
+            if (!deleteResult.OverallSuccess)
+            {
+                var errorMessages = deleteResult.DeletionResults
+                    .Where(r => !r.Success)
+                    .Select(r => r.ErrorDetails);
+                throw new ApplicationException($"File deletion failed: {string.Join(", ", errorMessages)}");
+            }
+
+            _unitOfWork.CarRentalAssetImages.RemoveRange(imagesToDelete);
+            await _unitOfWork.CompleteAsync();
+
+            return _mapper.Map<List<AssetImageResponseDto>>(imagesToDelete);
+        }
+
+        public async Task<List<AssetImageResponseDto>> UploadCarRentalAssetImages(string carRentalId, List<IFormFile> carRentalImages)
+        {
+            if (carRentalImages == null || !carRentalImages.Any())
+                throw new ArgumentException("No images provided for upload");
+
+            var carRental = await _unitOfWork.CarRentalAssets.GetByIdAsync(carRentalId);
+            if (carRental == null)
+                throw new KeyNotFoundException($"Car Rental Asset with ID {carRentalId} not found");
+
+            var uploadResult = await _filestorageservice.UploadMultipleFilesAsync(carRentalImages);
+
+            if (!uploadResult.OverallSuccess)
+            {
+                var errorMessages = uploadResult.UploadResults
+                    .Where(r => !r.Success)
+                    .Select(r => r.Error);
+                throw new ApplicationException($"Image upload failed: {string.Join(", ", errorMessages)}");
+            }
+
+            var images = uploadResult.UploadResults
+                .Where(r => r.Success)
+                .Select(r => new CarRentalAssetImage
+                {
+                    ImageId = r.Id,
+                    ImageURL = r.Url,
+                    CarRentalAssetId = carRentalId
+                }).ToList();
+
+            await _unitOfWork.CarRentalAssetImages.AddRangeAsync(images);
+            await _unitOfWork.CompleteAsync();
+
+            return _mapper.Map<List<AssetImageResponseDto>>(images);
         }
     }
 }

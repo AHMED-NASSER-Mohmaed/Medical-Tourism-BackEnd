@@ -60,6 +60,66 @@ namespace Elagy.APIs.Controllers
 
         // Add other Hotel Provider specific actions here (e.g., managing rooms, bookings, availability)
 
+        [HttpPost("upload-hotel-images")]
+        public async Task<ActionResult<List<AssetImageResponseDto>>> UploadHotelImages(
+        [FromForm] List<IFormFile> hotelImages)
+        {
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var hotelId = GetCurrentUserId();
+
+            try
+            {
+                var result = await _hotelProviderService.UploadHotelAssetImages(hotelId, hotelImages);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+            catch (ApplicationException ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
+        [HttpDelete("delete-selected-images")]
+        public async Task<ActionResult<List<AssetImageResponseDto>>> DeletedHotelImages([FromBody] List<string> imageIds)
+        {
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var hoteId = GetCurrentUserId();
+
+            try
+            {
+
+                var result = await _hotelProviderService.DeleteHotelAssetImagesByIds(hoteId, imageIds);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+            catch (ApplicationException ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
         [HttpGet("Rooms")]
 
         public async Task<IActionResult> GetMyHotelRooms(
@@ -75,7 +135,7 @@ namespace Elagy.APIs.Controllers
             [FromQuery] int? MaxOccupancy = null,
             [FromQuery] int? FilterGovernorateId = null)
         {
-            var hotelAssetId = GetCurrentUserId(); // Get hotel ID from authenticated user's token
+            var hotelAssetId = GetCurrentUserId();
             if (hotelAssetId == null) return Unauthorized("Hotel ID could not be determined from your token.");
 
             if (PageNumber < 1 || PageSize < 1) return BadRequest("PageNumber and PageSize must be greater than 0.");

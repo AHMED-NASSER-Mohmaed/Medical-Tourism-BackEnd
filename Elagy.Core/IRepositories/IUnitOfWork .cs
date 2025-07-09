@@ -43,7 +43,11 @@ namespace Elagy.Core.IRepositories
         IGenericRepository<Package> Packages{ get; }
          IGenericRepository<RoomAppointment> RoomAppointments { get;  }
          IGenericRepository<CarRentalAppointment> CarRentalAppointments { get;  }
-        
+        IGenericRepository<HotelAssetImage> HotelAssetImages { get; }
+        IGenericRepository<HospitalAssetImage> HospitalAssetImages { get; }
+        IGenericRepository<CarRentalAssetImage> CarRentalAssetImages { get; }
+
+
 
 
 

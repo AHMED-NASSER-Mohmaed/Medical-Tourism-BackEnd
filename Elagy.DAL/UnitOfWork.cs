@@ -55,6 +55,13 @@ namespace Elagy.DAL
         public IGenericRepository<RoomAppointment> RoomAppointments { get; private set; }
 
         public IGenericRepository<CarRentalAppointment> CarRentalAppointments { get; private set; }
+
+        public IGenericRepository<HotelAssetImage> HotelAssetImages { get; private set; }
+
+        public IGenericRepository<HospitalAssetImage> HospitalAssetImages { get; private set; }
+
+        public IGenericRepository<CarRentalAssetImage> CarRentalAssetImages { get; private set; }
+
         public UnitOfWork(ApplicationDbContext context)
         {
             //IRepo injection
@@ -89,6 +96,9 @@ namespace Elagy.DAL
             SpecialtyAppointments = new GenericRepository<SpecialtyAppointment>(_context);
 
             Packages = new GenericRepository<Package>(_context);
+            HotelAssetImages=new GenericRepository<HotelAssetImage>(_context);
+            HospitalAssetImages=new GenericRepository<HospitalAssetImage>(_context);
+            CarRentalAssetImages = new GenericRepository<CarRentalAssetImage>(_context);
 
         }
 

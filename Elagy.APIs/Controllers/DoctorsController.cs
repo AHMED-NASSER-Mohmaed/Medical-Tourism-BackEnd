@@ -100,9 +100,9 @@ namespace Elagy.APIs.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            catch (InvalidOperationException ex) // For email already exists, inactive specialty, Identity creation failures etc.
+            catch (InvalidOperationException ex)
             {
-                return Conflict(ex.Message); // 409 Conflict for resource conflicts or business rule violations
+                return Conflict(ex.Message);
             }
             catch (Exception ex)
             {
