@@ -8,7 +8,8 @@ namespace Elagy.Core.Entities
     {
 
         public FuelType[] FuelTypes { get; set; } 
-        public string[] Models { get; set; } 
+        public string[] Models { get; set; }
+        public int? StarRating { get; set; }
 
         public TransmissionType Transmission { get; set; }   // "Automatic", "Manual"
         public string[] RentalPolicies { get; set; } // (e.g., age restrictions, insurance requirements, mileage limits)

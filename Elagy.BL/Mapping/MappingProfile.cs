@@ -74,9 +74,9 @@ namespace Elagy.BL.Mapping
                 .ForMember(dest => dest.Models, opt => opt.MapFrom(src => (src.ServiceAsset as CarRentalAsset).Models))
                 .ForMember(dest => dest.Transmission, opt => opt.MapFrom(src => (src.ServiceAsset as CarRentalAsset).Transmission))
                 .ForMember(dest => dest.FuelTypes, opt => opt.MapFrom(src => (src.ServiceAsset as CarRentalAsset).FuelTypes))
-                .ForMember(dest => dest.RentalPolicies, opt => opt.MapFrom(src => (src.ServiceAsset as CarRentalAsset).RentalPolicies)).
-                   ForMember(dest => dest.AssetImages, opt => opt.MapFrom(src =>
-                    (src.ServiceAsset as CarRentalAsset).CarRentalAssetImages));
+                .ForMember(dest => dest.RentalPolicies, opt => opt.MapFrom(src => (src.ServiceAsset as CarRentalAsset).RentalPolicies))
+                .ForMember(dest => dest.StarRating, opt => opt.MapFrom(src => (src.ServiceAsset as CarRentalAsset).StarRating))
+                .ForMember(dest => dest.AssetImages, opt => opt.MapFrom(src =>(src.ServiceAsset as CarRentalAsset).CarRentalAssetImages));
 
             #endregion
 

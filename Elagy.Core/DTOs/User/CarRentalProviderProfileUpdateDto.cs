@@ -9,7 +9,8 @@ namespace Elagy.Core.DTOs.User
 {
     public class CarRentalProviderProfileUpdateDto : BaseServiceProviderProfileUpdateDto
     {
-         //public Governorate[] OperationalAreas { get; set; }  
+        //public Governorate[] OperationalAreas { get; set; }  
+        public int? StarRating { get; set; }
 
         public FuelType[] FuelTypes { get; set; }
 

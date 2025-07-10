@@ -21,12 +21,10 @@ namespace Elagy.APIs.Controllers
         private readonly ISpecialtyService _specialtyService;
         private readonly IDoctorService _doctorService;
         private readonly ISpecialtyScheduleService _scheduleService;
+
         private readonly ICarService _carservice;
         private readonly IRoomScheduleService _RoomscheduleService;
         private readonly IServiceProvidersWebsiteService _serviceproviderwebsite;
-
-
-
         public WebsiteController(
             IHospitalProviderService hospitalProviderService,
             ICarRentalProviderService carRentalProviderService,

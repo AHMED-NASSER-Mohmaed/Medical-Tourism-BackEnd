@@ -102,11 +102,11 @@ namespace Elagy.BL.Services
 
                 var totalCount = query.Count();
 
-                var pagedCars = await query
+                var pagedCars =  query
                     .OrderBy(c => c.ModelName) // Default sorting by model name
                     .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
                     .Take(paginationParameters.PageSize)
-                    .ToListAsync();
+                    .ToList();
 
                 var carDtos = _mapper.Map<IEnumerable<CarResponseDto>>(pagedCars);
                 return new PagedResponseDto<CarResponseDto>(carDtos, totalCount, paginationParameters.PageNumber, paginationParameters.PageSize);

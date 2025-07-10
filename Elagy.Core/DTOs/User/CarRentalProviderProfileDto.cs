@@ -4,6 +4,7 @@ using Elagy.Core.Enums;
 public class CarRentalProviderProfileDto : BaseServiceProviderProfileDto
 {
     //public Governorate[] OperationalAreas { get; set; } // Geographic areas where car rental operates
+    public int? StarRating { get; set; }
 
     public FuelType[] FuelTypes { get; set; }
 

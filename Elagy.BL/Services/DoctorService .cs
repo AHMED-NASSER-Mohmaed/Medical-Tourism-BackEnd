@@ -530,8 +530,9 @@ namespace Elagy.BL.Services
                 }
 
                 var doctors = await _unitOfWork.Doctors.GetDoctorsByHospitalSpecialtyIdAsync(hospitalSpecialty.Id); // Only active doctors
+                var filteredDoctors = doctors.Where(d => d.Schedules != null && d.Schedules.Any());
 
-                IQueryable<Doctor> query = doctors.AsQueryable();
+                IQueryable<Doctor> query = filteredDoctors.AsQueryable();
                 if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
                     string term = paginationParameters.SearchTerm.Trim();
@@ -540,7 +541,7 @@ namespace Elagy.BL.Services
                         d.LastName.Contains(term)
                     );
                 }
-
+                
                 var totalCount = query.Count();
 
                 var pagedDoctors =  query

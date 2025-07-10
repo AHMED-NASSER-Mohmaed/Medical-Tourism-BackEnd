@@ -24,6 +24,7 @@ namespace Elagy.Core.DTOs.CarRentals
         [Required(ErrorMessage = "Car type is required.")]
         public CarType Type { get; set; }
 
+
         [Required(ErrorMessage = "Capacity is required.")]
         [Range(1, 10, ErrorMessage = "Capacity must be between 1 and 10 passengers.")]
         public int Capacity { get; set; }

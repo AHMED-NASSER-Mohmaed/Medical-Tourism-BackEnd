@@ -13,7 +13,6 @@ namespace Elagy.Core.DTOs.Driver
         public DateOnly? ReleaseDate { get; set; }
         public bool IsAssignedCurrent { get; set; }
         public int CarId { get; set; }
-        public string CarPlateNumber { get; set; } 
         public string CarMake { get; set; }
         public string CarModelName { get; set; }
 

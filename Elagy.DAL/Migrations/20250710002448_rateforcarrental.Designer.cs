@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Elagy.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250710002448_rateforcarrental")]
+    partial class rateforcarrental
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -195,7 +198,7 @@ namespace Elagy.DAL.Migrations
 
                     b.HasIndex("CarRentalAssetId");
 
-                    b.ToTable("Cars", (string)null);
+                    b.ToTable("Cars");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.CarDriver", b =>
@@ -235,7 +238,7 @@ namespace Elagy.DAL.Migrations
                     b.HasIndex("CarId", "DriverId")
                         .IsUnique();
 
-                    b.ToTable("CarDrivers", (string)null);
+                    b.ToTable("CarDrivers");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.CarImage", b =>
@@ -263,7 +266,7 @@ namespace Elagy.DAL.Migrations
 
                     b.HasIndex("CarId");
 
-                    b.ToTable("CarImages", (string)null);
+                    b.ToTable("CarImages");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.CarRentalAssetImage", b =>
@@ -292,7 +295,7 @@ namespace Elagy.DAL.Migrations
 
                     b.HasIndex("CarRentalAssetId");
 
-                    b.ToTable("CarRentalAssetImages", (string)null);
+                    b.ToTable("CarRentalAssetImages");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.CarSchedule", b =>
@@ -339,7 +342,7 @@ namespace Elagy.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Countries", (string)null);
+                    b.ToTable("Countries");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.DayOfWeek", b =>
@@ -362,7 +365,7 @@ namespace Elagy.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DayOfWeeks", (string)null);
+                    b.ToTable("DayOfWeeks");
 
                     b.HasData(
                         new
@@ -488,7 +491,7 @@ namespace Elagy.DAL.Migrations
 
                     b.HasIndex("CountryId");
 
-                    b.ToTable("Governaties", (string)null);
+                    b.ToTable("Governaties");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.HospitalAssetImage", b =>
@@ -517,7 +520,7 @@ namespace Elagy.DAL.Migrations
 
                     b.HasIndex("HospitalAssetId");
 
-                    b.ToTable("HospitalAssetImages", (string)null);
+                    b.ToTable("HospitalAssetImages");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.HospitalSpecialty", b =>
@@ -574,7 +577,7 @@ namespace Elagy.DAL.Migrations
 
                     b.HasIndex("HotelAssetId");
 
-                    b.ToTable("HotelAssetImages", (string)null);
+                    b.ToTable("HotelAssetImages");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.Package", b =>
@@ -803,7 +806,7 @@ namespace Elagy.DAL.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.ToTable("RoomImages", (string)null);
+                    b.ToTable("RoomImages");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.RoomSchedule", b =>
@@ -833,7 +836,7 @@ namespace Elagy.DAL.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.ToTable("RoomSchedule", (string)null);
+                    b.ToTable("RoomSchedule");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.Specialty", b =>
@@ -912,7 +915,7 @@ namespace Elagy.DAL.Migrations
 
                     b.HasIndex("HospitalSpecialtyId");
 
-                    b.ToTable("Schedules", (string)null);
+                    b.ToTable("Schedules");
                 });
 
             modelBuilder.Entity("Elagy.Core.Entities.User", b =>
@@ -1332,7 +1335,7 @@ namespace Elagy.DAL.Migrations
 
                     b.HasIndex("HospitalSpecialtyId");
 
-                    b.ToTable("AspNetUsers", null, t =>
+                    b.ToTable("AspNetUsers", t =>
                         {
                             t.Property("YearsOfExperience")
                                 .HasColumnName("Doctor_YearsOfExperience");
