@@ -21,6 +21,8 @@ namespace Elagy.APIs.Controllers
         private readonly ISpecialtyService _specialtyService;
         private readonly IDoctorService _doctorService;
         private readonly ISpecialtyScheduleService _scheduleService;
+        private readonly ICarScheduleService _carScheduleService;
+
 
         private readonly ICarService _carservice;
         private readonly IRoomScheduleService _RoomscheduleService;
@@ -36,7 +38,8 @@ namespace Elagy.APIs.Controllers
 
             ICarService carservice,
             IRoomScheduleService roomscheduleService,
-            IServiceProvidersWebsiteService serviceproviderwebsite)
+            IServiceProvidersWebsiteService serviceproviderwebsite,
+            ICarScheduleService carScheduleService)
         {
             _hospitalProviderService = hospitalProviderService;
             _carRentalProviderService = carRentalProviderService;
@@ -48,6 +51,7 @@ namespace Elagy.APIs.Controllers
             _carservice = carservice;
             _RoomscheduleService = roomscheduleService;
             _serviceproviderwebsite = serviceproviderwebsite;
+            _carScheduleService = carScheduleService;
         }
 
 
@@ -116,6 +120,20 @@ namespace Elagy.APIs.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("unavailable-dates/{carId}")]
+        public async Task<IActionResult> GetUnavailableDatesForCar(int carId)
+        {
+            try
+            {
+                var result = await _carScheduleService.GetAvailableCarsSchedules(carId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
         }
 
