@@ -1,6 +1,7 @@
 ﻿using Elagy.Core.DTOs.Doctor;
 using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Specialty;
+using Elagy.Core.DTOs.TOP;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -31,6 +32,8 @@ namespace Elagy.Core.IServices
         // hospital id is token from [jwt token], doctor id from params
         Task<DoctorProfileDto> DeleteDoctorAsync(string doctorId, string hospitalId);
         Task<DoctorProfileDto?> GetDoctorByIdAsync(string doctorId);
+
+        Task<IEnumerable<DoctorBookingCountDto>> GetTop3DoctorsByBookings();
 
 
     }

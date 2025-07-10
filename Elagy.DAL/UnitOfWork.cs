@@ -52,6 +52,15 @@ namespace Elagy.DAL
         public ICarDriverRepository CarDrivers { get; private set; }
 
         public IGenericRepository<Package> Packages { get; private set; }
+        public IGenericRepository<RoomAppointment> RoomAppointments { get; private set; }
+
+        public IGenericRepository<CarRentalAppointment> CarRentalAppointments { get; private set; }
+
+        public IGenericRepository<HotelAssetImage> HotelAssetImages { get; private set; }
+
+        public IGenericRepository<HospitalAssetImage> HospitalAssetImages { get; private set; }
+
+        public IGenericRepository<CarRentalAssetImage> CarRentalAssetImages { get; private set; }
         //public IGenericRepository<Disbursement> Disbursements { get; private set; }
 
         public IDisbursementRepository Disbursements {get; private set; }
@@ -70,8 +79,8 @@ namespace Elagy.DAL
             CarRentalAssets = new GenericRepository<CarRentalAsset>(_context);
             Countries = new GenericRepository<Country>(_context);
             Governates = new GenericRepository<Governorate>(_context);
-
-
+            CarRentalAppointments=new GenericRepository<CarRentalAppointment>(_context);
+            RoomAppointments =new GenericRepository<RoomAppointment>(_context);
             DayOfWeeks=new GenericRepository<DayOfWeek>(_context);
             HospitalSpecialties = new HospitalSpecialtyRepository(_context);
             Specialties = new SpecialtyRepository(_context);
@@ -90,6 +99,9 @@ namespace Elagy.DAL
             SpecialtyAppointments = new GenericRepository<SpecialtyAppointment>(_context);
 
             Packages = new GenericRepository<Package>(_context);
+            HotelAssetImages=new GenericRepository<HotelAssetImage>(_context);
+            HospitalAssetImages=new GenericRepository<HospitalAssetImage>(_context);
+            CarRentalAssetImages = new GenericRepository<CarRentalAssetImage>(_context);
 
 
             Disbursements = new DisbursementRepository(_context);

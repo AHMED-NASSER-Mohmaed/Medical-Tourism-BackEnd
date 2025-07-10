@@ -7,10 +7,11 @@ using Elagy.Core.Enums;
 using Elagy.Core.Helpers;
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
+using Microsoft.AspNetCore.Http; // Add this line if it's missing
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore; // Crucial for .Include() and .SingleOrDefaultAsync()
+using Microsoft.Extensions.Logging;
 using ServiceProvider = Elagy.Core.Entities.ServiceProvider; // Ensure this is the correct namespace for ServiceProvider
-using Microsoft.Extensions.Logging; // Add this line if it's missing
 
 namespace Elagy.BL.Services
 {
@@ -21,15 +22,18 @@ namespace Elagy.BL.Services
         private readonly ILogger<HotelProviderService> _logger;
         private readonly UserManager<User> _userManager;
         private readonly IEmailService _emailService;
+        private readonly IFileStorageService _filestorageservice;
+
 
         public HotelProviderService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<HotelProviderService> logger,
-                                    UserManager<User> userManager, IEmailService emailService)
+                                    UserManager<User> userManager, IEmailService emailService, IFileStorageService filestorageservice)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _userManager = userManager;
             _emailService = emailService;
+            _filestorageservice = filestorageservice;
         }
 
         public async Task<HotelProviderProfileDto> GetHotelProviderProfileAsync(string providerId)
@@ -128,6 +132,82 @@ namespace Elagy.BL.Services
 
             _logger.LogInformation($"Hotel Provider {serviceProvider.Email} added by admin with asset.");
             return new AuthResultDto { Success = true, Message = "Hotel Provider account and asset created successfully by admin." };
+        }
+
+        public async Task<List<AssetImageResponseDto>> UploadHotelAssetImages(string hotelId, List<IFormFile> HotelImages)
+        {
+            if (HotelImages == null || !HotelImages.Any())
+            {
+                throw new ArgumentException("No images provided for upload");
+            }
+
+  
+            var hotel = await _unitOfWork.HotelAssets.GetByIdAsync(hotelId);
+            if (hotel == null)
+            {
+                throw new KeyNotFoundException($"Hotel with ID {hotelId} not found");
+            }
+
+            var uploadResult = await _filestorageservice.UploadMultipleFilesAsync(HotelImages);
+
+
+            if (!uploadResult.OverallSuccess)
+            {
+                var errorMessages = uploadResult.UploadResults
+                    .Where(r => !r.Success)
+                    .Select(r => r.Error);
+                throw new ApplicationException($"Image upload failed: {string.Join(", ", errorMessages)}");
+            }
+
+            var images = new List<HotelAssetImage>();
+            foreach (var result in uploadResult.UploadResults.Where(r => r.Success))
+            {
+                images.Add(new HotelAssetImage
+                {
+                    ImageId = result.Id,
+                    ImageURL = result.Url, 
+                    HotelAssetId = hotelId 
+                });
+            }
+
+            await _unitOfWork.HotelAssetImages.AddRangeAsync(images);
+            await _unitOfWork.CompleteAsync();
+
+            var imagesResponse = _mapper.Map<List<AssetImageResponseDto>>(images);
+            return imagesResponse;
+        }
+
+        public async Task<List<AssetImageResponseDto>> DeleteHotelAssetImagesByIds(string hotelId, List<string> imageIds)
+        {
+            if (imageIds == null || !imageIds.Any())
+                throw new ArgumentException("No image IDs provided.");
+
+            var hotel = await _unitOfWork.HotelAssets.GetByIdAsync(hotelId);
+            if (hotel == null)
+                throw new KeyNotFoundException($"Hotel with ID {hotelId} not found");
+
+            var imagesToDelete = await _unitOfWork.HotelAssetImages
+                .FindAsync(img => imageIds.Contains(img.ImageId) && img.HotelAssetId == hotelId.ToString());
+
+            if (!imagesToDelete.Any())
+                throw new KeyNotFoundException("No matching images found for deletion.");
+
+            var imageUrls = imagesToDelete.Select(img => img.ImageURL).ToList();
+            var deleteResult = await _filestorageservice.DeleteMultipleFilesAsync(imageUrls);
+
+            if (!deleteResult.OverallSuccess)
+            {
+                var errorMessages = deleteResult.DeletionResults
+                    .Where(r => !r.Success)
+                    .Select(r => r.ErrorDetails);
+                throw new ApplicationException($"File deletion failed: {string.Join(", ", errorMessages)}");
+            }
+
+            _unitOfWork.HotelAssetImages.RemoveRange(imagesToDelete);
+            await _unitOfWork.CompleteAsync();
+
+            var deletedImageDtos = _mapper.Map<List<AssetImageResponseDto>>(imagesToDelete);
+            return deletedImageDtos;
         }
     }
 }

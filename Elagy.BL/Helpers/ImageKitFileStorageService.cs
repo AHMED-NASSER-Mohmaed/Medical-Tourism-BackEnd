@@ -41,7 +41,7 @@ namespace Elagy.BL.Helpers
             }
 
             // Set default Authorization header for this HttpClient instance using _imageKitSettings.PrivateKey
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                 "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_imageKitSettings.PrivateKey}:")));
         }
         /// <summary>

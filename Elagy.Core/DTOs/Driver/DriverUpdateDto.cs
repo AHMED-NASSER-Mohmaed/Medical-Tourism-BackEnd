@@ -23,7 +23,6 @@ namespace Elagy.Core.DTOs.Driver
         public DateTime? DateOfBirth { get; set; }
         public Status? Status { get; set; } // User's general account status
         [Range(0, 70)] public int? YearsOfExperience { get; set; }
-        [Range(0.0f, 5.0f)] public float? Rating { get; set; }
         public DriverStatus? DriverStatus { get; set; } // Driver's specific availability status
     }
 }

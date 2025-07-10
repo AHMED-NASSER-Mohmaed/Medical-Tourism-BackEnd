@@ -23,10 +23,13 @@ namespace Elagy.DAL.Repositories
         private IQueryable<Driver> GetDriversWithAllDetails()
         {
             return _dbSet
-                .Include(d => d.CarRentalAsset) 
-                .Include(d => d.CarDrivers) 
-                    .ThenInclude(cd => cd.Car); 
-        } 
+                .Include(d => d.CarRentalAsset)
+                .Include(d => d.CarDrivers)
+                    .ThenInclude(cd => cd.Car).
+                    Include(d => d.CarDrivers).
+                    Include(s=>s.Governorate).
+                    ThenInclude(s=>s.Country); 
+        }
 
         public async Task<IEnumerable<Driver>> GetDriversByCarRentalAssetIdAsync(string carRentalAssetId, Status? driverStatus = null)
         {

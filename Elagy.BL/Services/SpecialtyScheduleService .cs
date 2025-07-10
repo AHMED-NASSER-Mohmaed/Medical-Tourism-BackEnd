@@ -18,15 +18,17 @@ namespace Elagy.BL.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-   
+        private readonly ISpecialtyAppointmentService _specialtyAppointmentServcie;
 
         private readonly ILogger<SpecialtyScheduleService> _logger;
+  
 
-        public SpecialtyScheduleService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<SpecialtyScheduleService> logger)
+        public SpecialtyScheduleService(ISpecialtyAppointmentService specialtyAppointmentServcie, IUnitOfWork unitOfWork, IMapper mapper, ILogger<SpecialtyScheduleService> logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _specialtyAppointmentServcie = specialtyAppointmentServcie;
 
         }
 
@@ -216,12 +218,6 @@ namespace Elagy.BL.Services
                 if (schedule.HospitalSpecialty.HospitalAssetId != hospitalId) 
                     throw new UnauthorizedAccessException($"Schedule with ID {scheduleId} is not affiliated with your hospital.");
 
-                // 3. Handle specific updates based on DTO fields validation
-                // MaxCapacity: Cannot be less than BookedSlots
-                //if (updateDto.MaxCapacity.HasValue && updateDto.MaxCapacity.Value < schedule.BookedSlots)
-                //{
-                //    throw new InvalidOperationException($"Max capacity ({updateDto.MaxCapacity.Value}) cannot be less than booked slots ({schedule.BookedSlots}).");
-                //}
 
                 // 2. Validate DayOfWeek based on the Date
                 if (updateDto.DayOfWeekId < 1 && updateDto.DayOfWeekId > 7)
@@ -315,7 +311,7 @@ namespace Elagy.BL.Services
 
         public async Task<List<ScheduleResponseDto>> GetAvailablePatientSlotsAsync(string doctorId)
         {
-            var query=_unitOfWork.SpecialtySchedule.AsQueryable(); // Ensure the repository is set up for querying
+            var query=_unitOfWork.SpecialtySchedule.AsQueryable().Include(s=>s.DayOfWeek).AsQueryable(); // Ensure the repository is set up for querying
 
             query= query.Where(s => s.DoctorId == doctorId && s.IsActive)
                 .OrderBy(s => s.DayOfWeekId)
@@ -381,33 +377,33 @@ namespace Elagy.BL.Services
             }
         }
 
-   /*     /// <summary>
-        /// you haved to save the changes after booking 
-        /// </summary>
-        /// <param name="SpecialtyScheduleId"></param>
-        /// <returns></returns>
-        public async Task<(bool isAvailable, DateTime? attendDateTimeTim)> GetSpecialtySchedule(int SpecialtyScheduleId)
-        {
+        /*     /// <summary>
+             /// you haved to save the changes after booking 
+             /// </summary>
+             /// <param name="SpecialtyScheduleId"></param>
+             /// <returns></returns>
+             public async Task<(bool isAvailable, DateTime? attendDateTimeTim)> GetSpecialtySchedule(int SpecialtyScheduleId)
+             {
 
-            SpecialtySchedule SC = await _unitOfWork.SpecialtySchedule.GetScheduleByIdWithDetailsAsync(SpecialtyScheduleId);
-            if (SC == null)
-            {
-                _logger.LogWarning($"Schedule with ID {SpecialtyScheduleId} not found for booking.");
-                return (false, null); // Schedule not found
-            }
+                 SpecialtySchedule SC = await _unitOfWork.SpecialtySchedule.GetScheduleByIdWithDetailsAsync(SpecialtyScheduleId);
+                 if (SC == null)
+                 {
+                     _logger.LogWarning($"Schedule with ID {SpecialtyScheduleId} not found for booking.");
+                     return (false, null); // Schedule not found
+                 }
 
-            if (!SC.IsActive)
-            {
-                _logger.LogWarning($"Schedule with ID {SpecialtyScheduleId} is not active and cannot be booked.");
-                return (false, null ); // Schedule is not active
-            }
-             
+                 if (!SC.IsActive)
+                 {
+                     _logger.LogWarning($"Schedule with ID {SpecialtyScheduleId} is not active and cannot be booked.");
+                     return (false, null ); // Schedule is not active
+                 }
 
-            return (true, new DateTime( SC.,SC.StartTime.AddMinutes(SC.BookedSlots*SC.TimeSlotSize.Minute))); 
-            // Return true with the start time as the attend time
-        }
-*/
-            
+
+                 return (true, new DateTime( SC.,SC.StartTime.AddMinutes(SC.BookedSlots*SC.TimeSlotSize.Minute))); 
+                 // Return true with the start time as the attend time
+             }
+     */
+
 
     }
 }

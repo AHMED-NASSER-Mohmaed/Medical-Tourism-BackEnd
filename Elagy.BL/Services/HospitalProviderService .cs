@@ -14,6 +14,8 @@ using Microsoft.EntityFrameworkCore; // Crucial for .Include() and .SingleOrDefa
 using ServiceProvider = Elagy.Core.Entities.ServiceProvider; // Ensure this is the correct namespace for ServiceProvider
 using Microsoft.Extensions.Logging;
 using Elagy.Core.DTOs.Pagination;
+using Microsoft.AspNetCore.Http; // Add this line if it's missing
+using Elagy.Core.DTOs.Pagination;
 using QuestPDF.Fluent;
 using Microsoft.CodeAnalysis.Operations; // Add this line if it's missing
 namespace Elagy.BL.Services
@@ -25,15 +27,18 @@ namespace Elagy.BL.Services
         private readonly ILogger<HospitalProviderService> _logger;
         private readonly UserManager<User> _userManager;
         private readonly IEmailService _emailService;
+        private readonly IFileStorageService _filestorageservice;
+
 
         public HospitalProviderService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<HospitalProviderService> logger,
-                                       UserManager<User> userManager, IEmailService emailService)
+                                       UserManager<User> userManager, IEmailService emailService, IFileStorageService filestorageservice)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _userManager = userManager;
             _emailService = emailService;
+            _filestorageservice = filestorageservice;
         }
 
         public async Task<HospitalProviderProfileDto> GetHospitalProviderProfileAsync(string providerId)
@@ -135,6 +140,71 @@ namespace Elagy.BL.Services
             return new AuthResultDto { Success = true, Message = "Hospital Provider account and asset created successfully by admin." };
         }
 
+        public async Task<List<AssetImageResponseDto>> UploadHospitalAssetImages(string hospitalId, List<IFormFile> hospitalImages)
+        {
+            if (hospitalImages == null || !hospitalImages.Any())
+                throw new ArgumentException("No images provided for upload");
+
+            var hospital = await _unitOfWork.HospitalAssets.GetByIdAsync(hospitalId);
+            if (hospital == null)
+                throw new KeyNotFoundException($"Hospital with ID {hospitalId} not found");
+
+            var uploadResult = await _filestorageservice.UploadMultipleFilesAsync(hospitalImages);
+
+            if (!uploadResult.OverallSuccess)
+            {
+                var errorMessages = uploadResult.UploadResults
+                    .Where(r => !r.Success)
+                    .Select(r => r.Error);
+                throw new ApplicationException($"Image upload failed: {string.Join(", ", errorMessages)}");
+            }
+
+            var images = uploadResult.UploadResults
+                .Where(r => r.Success)
+                .Select(r => new HospitalAssetImage
+                {
+                    ImageId = r.Id,
+                    ImageURL = r.Url,
+                    HospitalAssetId = hospitalId
+                }).ToList();
+
+            await _unitOfWork.HospitalAssetImages.AddRangeAsync(images);
+            await _unitOfWork.CompleteAsync();
+
+            return _mapper.Map<List<AssetImageResponseDto>>(images);
+        }
+
+        public async Task<List<AssetImageResponseDto>> DeleteHospitalAssetImagesByIds(string hospitalId, List<string> imageIds)
+        {
+            if (imageIds == null || !imageIds.Any())
+                throw new ArgumentException("No image IDs provided.");
+
+            var hospital = await _unitOfWork.HospitalAssets.GetByIdAsync(hospitalId);
+            if (hospital == null)
+                throw new KeyNotFoundException($"Hospital with ID {hospitalId} not found");
+
+            var imagesToDelete = await _unitOfWork.HospitalAssetImages
+                .FindAsync(img => imageIds.Contains(img.ImageId) && img.HospitalAssetId == hospitalId.ToString());
+
+            if (!imagesToDelete.Any())
+                throw new KeyNotFoundException("No matching images found for deletion.");
+
+            var imageUrls = imagesToDelete.Select(img => img.ImageURL).ToList();
+            var deleteResult = await _filestorageservice.DeleteMultipleFilesAsync(imageUrls);
+
+            if (!deleteResult.OverallSuccess)
+            {
+                var errorMessages = deleteResult.DeletionResults
+                    .Where(r => !r.Success)
+                    .Select(r => r.ErrorDetails);
+                throw new ApplicationException($"File deletion failed: {string.Join(", ", errorMessages)}");
+            }
+
+            _unitOfWork.HospitalAssetImages.RemoveRange(imagesToDelete);
+            await _unitOfWork.CompleteAsync();
+
+            return _mapper.Map<List<AssetImageResponseDto>>(imagesToDelete);
+        }
         public async Task<PagedResponseDto<DisplayDisbursement>> GetDisbursement(string ProviderId,PaginationParameters paginationParams)
         {
             Console.WriteLine("inside Service");

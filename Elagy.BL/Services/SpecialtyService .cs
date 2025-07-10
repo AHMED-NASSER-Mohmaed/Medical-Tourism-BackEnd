@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
 using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Specialty;
+using Elagy.Core.DTOs.TOP;
 using Elagy.Core.Entities;
 using Elagy.Core.Enums;
+using Elagy.Core.Helpers;
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -14,18 +17,20 @@ namespace Elagy.BL.Services
 {
     public class SpecialtyService : ISpecialtyService
     {
+
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IFileStorageService _fileStorageService;
         private readonly IMapper _mapper;
         private readonly ILogger<SpecialtyService> _logger;
 
-        public SpecialtyService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<SpecialtyService> logger)
+        public SpecialtyService(IFileStorageService fileStorageService,IUnitOfWork unitOfWork, IMapper mapper, ILogger<SpecialtyService> logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _fileStorageService = fileStorageService;
         }
         #region Supper Admin Dashboard CRUD
-
         public async Task<PagedResponseDto<SpecialtyResponseDto>> GetAllSpecialties(PaginationParameters paginationParameters)
         {
             try
@@ -62,8 +67,10 @@ namespace Elagy.BL.Services
                         Id = s.Id,
                         Name = s.Name,
                         Description = s.Description,
-                        IsActive = s.IsActive // Include if needed, even if not directly mapped to DTO
-                        // Do NOT include navigation properties like HospitalSpecialties here
+                        IsActive = s.IsActive,
+                        ImageURL= s.ImageURL,
+                        ImageId=s.ImageId,
+                       
                     })
                     .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
                     .Take(paginationParameters.PageSize)
@@ -74,12 +81,20 @@ namespace Elagy.BL.Services
             }
             catch (Exception ex) { _logger.LogError(ex, "Error retrieving paginated specialties for Super Admin Dashboard."); throw; }
         }
-
-
-        public async Task<SpecialtyResponseDto> CreateSpecialty(SpecialtyCreateDto createDto)
+        public async Task<SpecialtyResponseDto> CreateSpecialty(SpecialtyCreateDto createDto, IFormFile? specialtyImageFile)
         {
             try
             {
+
+                string imageUrl = null;
+                string imageId = null;
+                if (specialtyImageFile != null)
+                {
+                    // Use UploadSingleFileAsync for one image
+                    var uploadResult = await _fileStorageService.UploadSingleFileAsync(specialtyImageFile);
+                    if (uploadResult.Success) { imageUrl = uploadResult.Url; imageId = uploadResult.Id; }
+                    else { throw new InvalidOperationException($"Failed to upload specialty image: {uploadResult.Message}"); }
+                }
                 if (string.IsNullOrWhiteSpace(createDto.Name))
                 {
                     _logger.LogWarning("Specialty creation failed: Name is required.");
@@ -141,7 +156,7 @@ namespace Elagy.BL.Services
             }
         }
 
-        public async Task<SpecialtyResponseDto> UpdateSpecialty(int specialtyId, SpecialtyUpdateDto updateDto)
+        public async Task<SpecialtyResponseDto> UpdateSpecialty(int specialtyId, SpecialtyUpdateDto updateDto, IFormFile? newSpecialtyImageFile)
         {
             try
             {
@@ -155,9 +170,21 @@ namespace Elagy.BL.Services
                     _logger.LogWarning($"Update failed: Specialty with ID {specialtyId} not found or is inactive.");
                     throw new KeyNotFoundException($"Specialty with ID {specialtyId} not found or is inactive.");
                 }
+                if (newSpecialtyImageFile != null)
+                {
 
-                // 2. Implement Business Logic / Validation
- 
+                    if (!string.IsNullOrEmpty(specialtyToUpdate.ImageId))
+                    {
+                        var deleteResult = await _fileStorageService.DeleteFileAsync(specialtyToUpdate.ImageId);
+                        if (!deleteResult) _logger.LogWarning($"Failed to delete old image {specialtyToUpdate.ImageId} for specialty {specialtyId}.");
+                    }
+
+                    var uploadResult = await _fileStorageService.UploadSingleFileAsync(newSpecialtyImageFile, $"specialties/{specialtyToUpdate.Name.Replace(" ", "").ToLower()}");
+                    if (uploadResult.Success) { specialtyToUpdate.ImageURL = uploadResult.Url; specialtyToUpdate.ImageId = uploadResult.Id; }
+                    else { throw new InvalidOperationException($"Failed to upload new specialty image: {uploadResult.Message}"); }
+                }
+          
+
                 if (!string.Equals(specialtyToUpdate.Name, updateDto.Name, StringComparison.OrdinalIgnoreCase))
                 {
                     _logger.LogInformation($"Specialty name changed from '{specialtyToUpdate.Name}' to '{updateDto.Name}'. Checking for uniqueness.");
@@ -171,7 +198,6 @@ namespace Elagy.BL.Services
                     }
                 }
 
-                // 3. Map DTO properties to the existing entity.
                 _mapper.Map(updateDto, specialtyToUpdate);
 
 
@@ -202,12 +228,7 @@ namespace Elagy.BL.Services
                 throw;
             }
         }
-
-
-
         #endregion
-
-        
         public async Task<SpecialtyLinkToHospitalDto?> LinkSpecialtyToHospital(int specialtyId, string hospitalId)
         {
             try
@@ -270,10 +291,6 @@ namespace Elagy.BL.Services
                 throw;
             }
         }
-
-     
-        /// Retrieves all active specialties linked to a specific hospital.
-       
         public async Task<PagedResponseDto<SpecialtyResponseDto>> GetAllSpecialtiesForHospital(string hospitalId, PaginationParameters paginationParameters)
         {
             try
@@ -316,7 +333,6 @@ namespace Elagy.BL.Services
             }
             catch (Exception ex) { _logger.LogError(ex, $"Error retrieving specialties for Hospital ID: {hospitalId} with filters."); throw; }
         }
-
         public async Task<PagedResponseDto<SpecialtyLinkToHospitalDto>> GetHospitalSpecialtiesWithLinks(
     string hospitalId,
     PaginationParameters paginationParameters)
@@ -364,10 +380,6 @@ namespace Elagy.BL.Services
                 paginationParameters.PageSize
             );
         }
-
-
-        /// Retrieves active global specialties that are not yet linked to a specific hospital.
-        /// The description field is explicitly omitted in the response DTO.
         public async Task<IEnumerable<SpecialtyResponseDto>> GetAvailableGlobalSpecialtiesToLinkAsync(string hospitalId)
         {
             try
@@ -383,8 +395,9 @@ namespace Elagy.BL.Services
                 {
                     Id = s.Id,
                     Name = s.Name,
-                    Description = null // Explicitly set to null as per the service method's comment
-                   ,
+                    Description = null, // Explicitly set to null as per the service method's comment,
+                    ImageId= s.ImageId,
+                    ImageURL=s.ImageURL,
                     Status = s.IsActive ? Status.Active : Status.Deactivated
 
                 }).ToList();
@@ -398,7 +411,6 @@ namespace Elagy.BL.Services
                 return Enumerable.Empty<SpecialtyResponseDto>();
             }
         }
-
         public async Task<SpecialtyResponseDto?> GetSpecialtyIdAsync(int id)
         {
             try
@@ -418,7 +430,6 @@ namespace Elagy.BL.Services
                 throw;
             }
         }
-
         public async Task<SpecialtyResponseDto?> ChangeSpecialtyStatusAsync(int id, bool newIsActiveStatus)
         {
             try
@@ -451,7 +462,6 @@ namespace Elagy.BL.Services
                 throw;
             }
         }
-
         public async Task<SpecialtyLinkToHospitalDto?> ChangeSpecificHospitalSpecialtyStatusAsync(
             string hospitalId,
             int specialtyId,
@@ -498,6 +508,27 @@ namespace Elagy.BL.Services
                 _logger.LogError(ex, $"Error changing status of specialty link {specialtyId}");
                 throw;
             }
+        }
+        public async Task<IEnumerable<TopSpecialtyDto>> GetTopSpecialtiesByBookings()
+        {
+            return await _unitOfWork.Specialties.AsQueryable()
+               .Select(specialty => new TopSpecialtyDto
+               {
+                   SpecialtyId = specialty.Id,
+                   SpecialtyName = specialty.Name,
+                   IconUrl=specialty.ImageURL,
+                   BookingCount = specialty.HospitalSpecialties
+                       .SelectMany(hs => hs.Doctors)
+                       .SelectMany(d => d.Schedules)
+                       .SelectMany(s => s.Appointments)
+                       .Count(a => a.Status != AppointmentStatus.Cancelled),
+                   DoctorCount = specialty.HospitalSpecialties
+                       .SelectMany(hs => hs.Doctors)
+                       .Count()
+               })
+               .OrderByDescending(dto => dto.BookingCount)
+               .Take(4)
+               .ToListAsync();
         }
     }
  }

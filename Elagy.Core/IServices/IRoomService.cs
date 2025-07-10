@@ -1,5 +1,6 @@
 ﻿using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Room;
+using Elagy.Core.DTOs.TOP;
 using Elagy.Core.Enums;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -23,6 +24,8 @@ namespace Elagy.Core.IServices
         Task<RoomResponseDto> ChangeRoomInternalStatusAsync(int roomId, RoomStatus newInternalStatus, string hotelAssetId);
         Task<PagedResponseDto<RoomResponseDto>> GetAvailableRoomsForWebsiteAsync(PaginationParameters paginationParameters, string hotellId);
         Task<RoomResponseDto?> GetRoomByIdAsync(int roomId);
-        
+        Task<IEnumerable<HotelBookingCountDto>> GetTopHotelsByBookings();
+
+
     }
 }

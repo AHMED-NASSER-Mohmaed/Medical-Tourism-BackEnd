@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Elagy.Core.DTOs.RoomSchedule;
 using Elagy.Core.Entities;
+using Elagy.Core.Enums;
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
 using Microsoft.EntityFrameworkCore;
@@ -70,6 +71,7 @@ namespace Elagy.BL.Services
             return _map.Map<RoomScheduleResponseDTO>(createdRoomSchedule);
         }
 
+     
         public async Task<bool> IsAvilable(DateOnly StartDate, DateOnly EndDate , int roomId)
         {
             IQueryable<RoomSchedule>  query = _unitOfWork.RoomSchedule.AsQueryable();
@@ -83,5 +85,67 @@ namespace Elagy.BL.Services
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////
+        ///
+
+        public async Task<UnavailableDatesDTO> GetAvailableRoomsSchedules(int RoomId)
+        {
+
+      var room = await _unitOfWork.Rooms.AsQueryable().Include(r => r.HotelAsset).FirstOrDefaultAsync(r => r.Id == RoomId);
+
+            if (room == null || !room.IsAvailable || room.Status==RoomStatus.UnderMaintenance )
+            {
+                throw new ArgumentException("The specified room is not available.");
+            }
+
+            var today = DateOnly.FromDateTime(DateTime.Today);
+
+           
+            var roomSchedules = await _unitOfWork.RoomSchedule.AsQueryable()
+                .Where(rs => rs.RoomId == RoomId &&
+                             rs.RoomscheduleStatus == ScheduleStatus.Confirmed &&
+                             rs.EndDate >= today) //bring uavailable the roomschedules after from today
+                .ToListAsync();
+
+
+            var roomAppointments = await _unitOfWork.RoomAppointments.AsQueryable()
+                .Where(ra => ra.RoomId == RoomId &&
+                             ra.Status != AppointmentStatus.Cancelled &&
+                             ra.CheckOutDate >= today) 
+                .ToListAsync();
+
+
+            var unavailableDates = new HashSet<DateOnly>();
+
+            foreach (var schedule in roomSchedules)
+            {
+                var startDate = schedule.StartDate < today ? today : schedule.StartDate;
+
+                for (var date = startDate; date <= schedule.EndDate; date = date.AddDays(1))
+                {
+                    unavailableDates.Add(date);
+                }
+            }
+
+
+            foreach (var appointment in roomAppointments)
+            {
+                var startDate = appointment.CheckInDate < today ? today : appointment.CheckInDate;
+
+                for (var date = startDate; date <= appointment.CheckOutDate; date = date.AddDays(1))
+                {
+                    unavailableDates.Add(date);
+                }
+            }
+
+            return new UnavailableDatesDTO
+            {
+                RoomId=RoomId,
+                HotelId=room.HotelAsset.Id,
+                HotelName=room.HotelAsset.Name,
+                UnavailableDates=unavailableDates.Where(date=>date>today).OrderBy(date=>date).ToList(),
+            };
+
+        }
+
     }
 }

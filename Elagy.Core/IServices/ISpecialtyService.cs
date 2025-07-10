@@ -1,6 +1,8 @@
 ﻿using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Specialty;
+using Elagy.Core.DTOs.TOP;
 using Elagy.Core.Enums;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +17,9 @@ namespace Elagy.Core.IServices
 
         #region Supper Admin Dashboard CRUD
         Task<PagedResponseDto<SpecialtyResponseDto>> GetAllSpecialties(PaginationParameters paginationParameters);
-        Task<SpecialtyResponseDto> CreateSpecialty(SpecialtyCreateDto createDto);
+        Task<SpecialtyResponseDto> CreateSpecialty(SpecialtyCreateDto createDto, IFormFile? specialtyImageFile);
         Task<SpecialtyResponseDto> DeleteSpecialtyAsync(int id);
-        Task<SpecialtyResponseDto> UpdateSpecialty(int specialtyId,SpecialtyUpdateDto updateDto);
+        Task<SpecialtyResponseDto> UpdateSpecialty(int specialtyId, SpecialtyUpdateDto updateDto, IFormFile? specialtyImageFile);
         #endregion
         Task<SpecialtyResponseDto?> ChangeSpecialtyStatusAsync(int id, bool newIsActiveStatus);
         Task<SpecialtyResponseDto?> GetSpecialtyIdAsync(int id);
@@ -36,5 +38,8 @@ namespace Elagy.Core.IServices
     string hospitalId,
     PaginationParameters paginationParameters);
 
+
+
+        Task<IEnumerable<TopSpecialtyDto>> GetTopSpecialtiesByBookings();
     }
 }

@@ -9,9 +9,9 @@ public class CarRentalAppointmentConfiguration : IEntityTypeConfiguration<CarRen
         builder.Property(c => c.StartingDateTime).IsRequired();
         builder.Property(c => c.EndingDateTime).IsRequired();
 
-        builder.HasOne(c => c.CarRentalSchedule)
-               .WithMany(c => c.CarRentalAppointments)
-               .HasForeignKey(c => c.CarRentalScheduleId)
+        builder.HasOne(c => c.CarSchedule)
+              .WithMany()
+               .HasForeignKey(c => c.CarScheduleId)
                .OnDelete(DeleteBehavior.Restrict); // ✅
     }
 }

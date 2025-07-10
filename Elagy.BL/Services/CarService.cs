@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Elagy.Core.DTOs.CarRentals;
 using Elagy.Core.DTOs.Pagination;
+using Elagy.Core.DTOs.TOP;
 using Elagy.Core.Entities;
 using Elagy.Core.Enums;
 using Elagy.Core.Helpers;
@@ -263,11 +264,6 @@ namespace Elagy.BL.Services
                     if (car.Status == CarStatus.OnRide) throw new InvalidOperationException($"Car {carId} cannot go 'Under Maintenance' while it is 'On Ride'. It must return from ride first.");
                     car.IsAvailable = false;
                 }
-                else if (newInternalStatus == CarStatus.Unavailable)
-                {
-                    if (car.Status == CarStatus.OnRide) throw new InvalidOperationException($"Car {carId} cannot go 'Unavailable' while it is 'On Ride'.");
-                    car.IsAvailable = false; 
-                }
 
                 car.Status = newInternalStatus;
                 _unitOfWork.Cars.Update(car);
@@ -368,6 +364,25 @@ namespace Elagy.BL.Services
                 return _mapper.Map<CarResponseDto>(car);
             }
             catch (Exception ex) { _logger.LogError(ex, $"Error getting car by ID: {carId}."); throw; }
+        }
+
+        public async Task<IEnumerable<CarBookingCountDto>> GetTopCarsByRentals()
+        {
+            return await _unitOfWork.Cars.AsQueryable()
+                .Where(s => s.IsAvailable && s.Status != CarStatus.UnderMaintenance)
+                .Select(car => new CarBookingCountDto
+                {
+                    CarId = car.Id,
+                    CarRentalId = car.CarRentalAssetId,
+                    CarRentalName = car.CarRentalAsset.ServiceProvider.ServiceAsset.Name,
+                    ImageUrl = car.CarImages.FirstOrDefault().ImageURL,
+                    Make = car.FactoryMake,
+                    Model = car.ModelName,
+                    Year = car.ModelYear,
+                    RentalCount = car.CarRentalAsset.Cars.SelectMany(s => s.carRentalSchedules)
+                    .Count(s => s.Status != ScheduleStatus.Cancelled)
+
+                }).ToListAsync();
         }
     }
 }

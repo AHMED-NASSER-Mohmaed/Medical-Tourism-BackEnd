@@ -18,8 +18,6 @@ namespace Elagy.Core.Entities
         [Required] public CarType Type { get; set; } 
         [Required] public int Capacity { get; set; } 
 
-        public decimal Price { get; set; } 
-
         [Required] public decimal PricePerDay { get; set; } 
         [Required] public TransmissionType Transmission { get; set; }
         [Required] public FuelType FuelType { get; set; }

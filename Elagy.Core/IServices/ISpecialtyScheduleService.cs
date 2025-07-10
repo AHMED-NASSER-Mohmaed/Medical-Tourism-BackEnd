@@ -33,7 +33,6 @@ namespace Elagy.Core.IServices
 
         /// Retrieves a single schedule slot by its ID, typically for detail view.
         Task<ScheduleResponseDto?> GetScheduleByIdAsync(int scheduleId);
-        
         //Task<(bool isAvailable, DateTime attendTime)> BookSpecialtySchedule(int SpecialtyScheduleId);
 
     }

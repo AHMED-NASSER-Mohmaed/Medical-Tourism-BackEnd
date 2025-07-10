@@ -8,8 +8,9 @@ namespace Elagy.Core.Enums
 {
     public enum DriverStatus 
     {
-        Available = 0,       
-        OnDrive = 1,                
-        Unavailable = 2
+        Unavailable = 0,       
+        Available = 1,
+        OnDrive = 2,
+
     }
 }

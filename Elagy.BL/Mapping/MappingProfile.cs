@@ -57,12 +57,16 @@ namespace Elagy.BL.Mapping
                 .IncludeBase<Elagy.Core.Entities.ServiceProvider, BaseServiceProviderProfileDto>()
                 .ForMember(dest => dest.StarRating, opt => opt.MapFrom(src => (src.ServiceAsset as HotelAsset).StarRating))
                 .ForMember(dest => dest.HasPool, opt => opt.MapFrom(src => (src.ServiceAsset as HotelAsset).HasPool))
-                .ForMember(dest => dest.HasRestaurant, opt => opt.MapFrom(src => (src.ServiceAsset as HotelAsset).HasRestaurant));
+                .ForMember(dest => dest.HasRestaurant, opt => opt.MapFrom(src => (src.ServiceAsset as HotelAsset).HasRestaurant))
+                   .ForMember(dest => dest.AssetImages, opt => opt.MapFrom(src =>
+                    (src.ServiceAsset as HotelAsset).HotelAssetImages));
 
             CreateMap<Elagy.Core.Entities.ServiceProvider, HospitalProviderProfileDto>()
                 .IncludeBase<Elagy.Core.Entities.ServiceProvider, BaseServiceProviderProfileDto>()
                 .ForMember(dest => dest.NumberOfDepartments, opt => opt.MapFrom(src => (src.ServiceAsset as HospitalAsset).NumberOfDepartments))
-                .ForMember(dest => dest.EmergencyServices, opt => opt.MapFrom(src => (src.ServiceAsset as HospitalAsset).EmergencyServices));
+                .ForMember(dest => dest.EmergencyServices, opt => opt.MapFrom(src => (src.ServiceAsset as HospitalAsset).EmergencyServices))
+                  .ForMember(dest => dest.AssetImages, opt => opt.MapFrom(src =>
+                    (src.ServiceAsset as HospitalAsset).HospitalAssetImages));
 
             CreateMap<Elagy.Core.Entities.ServiceProvider, CarRentalProviderProfileDto>()
                 .IncludeBase<Elagy.Core.Entities.ServiceProvider, BaseServiceProviderProfileDto>()
@@ -70,7 +74,9 @@ namespace Elagy.BL.Mapping
                 .ForMember(dest => dest.Models, opt => opt.MapFrom(src => (src.ServiceAsset as CarRentalAsset).Models))
                 .ForMember(dest => dest.Transmission, opt => opt.MapFrom(src => (src.ServiceAsset as CarRentalAsset).Transmission))
                 .ForMember(dest => dest.FuelTypes, opt => opt.MapFrom(src => (src.ServiceAsset as CarRentalAsset).FuelTypes))
-                .ForMember(dest => dest.RentalPolicies, opt => opt.MapFrom(src => (src.ServiceAsset as CarRentalAsset).RentalPolicies));
+                .ForMember(dest => dest.RentalPolicies, opt => opt.MapFrom(src => (src.ServiceAsset as CarRentalAsset).RentalPolicies)).
+                   ForMember(dest => dest.AssetImages, opt => opt.MapFrom(src =>
+                    (src.ServiceAsset as CarRentalAsset).CarRentalAssetImages));
 
             #endregion
 

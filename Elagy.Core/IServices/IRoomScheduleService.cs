@@ -1,4 +1,5 @@
 ﻿using Elagy.Core.DTOs.RoomSchedule;
+using Elagy.Core.DTOs.TOP;
 using Elagy.Core.Entities;
 using System;
 using System.Collections.Generic;
@@ -12,5 +13,8 @@ namespace Elagy.Core.IServices
     {
         Task<bool> IsAvilable(DateOnly Start, DateOnly End,int roomId);
         Task<RoomScheduleResponseDTO> CreateRoomSchedule(CreateRoomScheduleDTO roomScheduleDTO);
+        Task<UnavailableDatesDTO> GetAvailableRoomsSchedules(int RoomId);
+
     }
+
 }

@@ -2,6 +2,7 @@
 using AutoMapper;
 using Elagy.Core.DTOs.Doctor;
 using Elagy.Core.DTOs.Pagination;
+using Elagy.Core.DTOs.TOP;
 using Elagy.Core.Entities; 
 using Elagy.Core.Enums;
 using Elagy.Core.Helpers;
@@ -556,6 +557,25 @@ namespace Elagy.BL.Services
                 _logger.LogError(ex, $"Error getting doctors per Hospital {hospitalId} and Specialty {specialtyId}.");
                 return new PagedResponseDto<DoctorProfileDto>(Enumerable.Empty<DoctorProfileDto>(), 0, paginationParameters.PageNumber, paginationParameters.PageSize);
             }
+        }
+
+        public async Task<IEnumerable<DoctorBookingCountDto>> GetTop3DoctorsByBookings()
+        {
+            return await _unitOfWork.Doctors.AsQueryable().
+                Where(s => s.HospitalSpecialty != null)
+                .Select(doctor => new DoctorBookingCountDto
+                {
+                    DoctorId = doctor.Id,
+                    FullName = doctor.FirstName + " " + doctor.LastName,
+                    ImageUrl = doctor.ImageURL,
+                    HospitalName = doctor.HospitalSpecialty.HospitalAsset.ServiceProvider.ServiceAsset.Name,
+                    HospitalId = doctor.HospitalSpecialty.HospitalAssetId,
+                    YearsOfExperience = doctor.YearsOfExperience,
+                    Bio = doctor.Bio,
+                    BookingCount = doctor.Schedules.SelectMany(s => s.Appointments).Count(s => s.Status != AppointmentStatus.Cancelled)
+                }
+                ).OrderBy(count => count.BookingCount)
+                .Take(3).ToListAsync();
         }
     }
 }

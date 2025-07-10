@@ -4,6 +4,7 @@ using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Shared;
 using Elagy.Core.DTOs.Specialty;
 using Elagy.Core.DTOs.User;
+using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 
 namespace Elagy.Core.IServices
@@ -13,6 +14,8 @@ namespace Elagy.Core.IServices
         Task<HospitalProviderProfileDto> GetHospitalProviderProfileAsync(string providerId);
         Task<HospitalProviderProfileDto> UpdateHospitalProviderProfileAsync(string providerId, HospitalProviderProfileUpdateDto model);
         Task<AuthResultDto> AddHospitalProviderByAdminAsync(HospitalAssetRegistrationRequestDto model);
+        Task<List<AssetImageResponseDto>> UploadHospitalAssetImages(string hospitalId, List<IFormFile> hospitalImages);
+        Task<List<AssetImageResponseDto>> DeleteHospitalAssetImagesByIds(string hospitalId, List<string> imageIds);
         Task<PagedResponseDto<DisplayDisbursement>> GetDisbursement(string ProviderId, PaginationParameters paginationParams);
         Task<DisplayDisbursement> GetDisbursementWithDetails(int disbursementId, string ProviderId);
 
