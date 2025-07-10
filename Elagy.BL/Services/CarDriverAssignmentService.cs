@@ -31,19 +31,14 @@ namespace Elagy.BL.Services
         {
             try
             {
-
                 var car = await _unitOfWork.Cars.GetCarByIdWithDetailsAsync(createDto.CarId);
                 if (car == null) throw new ArgumentException($"Car with ID {createDto.CarId} not found.");
 
                 var driver = await _unitOfWork.Drivers.GetDriverByIdWithDetailsAsync(createDto.DriverId);
                 if (driver == null) throw new ArgumentException($"Driver with ID {createDto.DriverId} not found.");
 
-
-
                 if (car.CarRentalAssetId != carRentalAssetId) throw new UnauthorizedAccessException($"Car {createDto.CarId} is not affiliated with your Car Rental Asset.");
                 if (driver.CarRentalAssetId != carRentalAssetId) throw new UnauthorizedAccessException($"Driver {createDto.DriverId} is not affiliated with your Car Rental Asset.");
-
-
 
                 var currentDriverAssignment = await _unitOfWork.Drivers.GetCurrentCarAssignmentForDriverAsync(createDto.DriverId);
                 if (currentDriverAssignment != null)
@@ -51,41 +46,53 @@ namespace Elagy.BL.Services
                     throw new InvalidOperationException($"Driver {createDto.DriverId} is currently assigned to car {currentDriverAssignment.Car.FactoryMake} {currentDriverAssignment.Car.ModelName} (ID: {currentDriverAssignment.CarId}). Release them first.");
                 }
 
-
-                if (car.Status != CarStatus.Available)
+                if (car.Status != CarStatus.Available || car.IsAvailable == false)
                 {
                     throw new InvalidOperationException($"Car {createDto.CarId} is not 'Available' for assignment. Current status: {car.Status}.");
                 }
 
+                var existingAssignment = await _unitOfWork.CarDrivers.FindAsync(
+                    cd => cd.CarId == createDto.CarId && cd.DriverId == createDto.DriverId && cd.IsAssignedCurrent == false
+                ).ContinueWith(t => t.Result.FirstOrDefault()); // Materialize for checking
 
+                CarDriver assignmentToPersist;
 
+                if (existingAssignment != null)
+                {
+                    _logger.LogInformation($"Reactivating existing assignment ID {existingAssignment.Id} for Car {createDto.CarId} and Driver {createDto.DriverId}.");
+                    assignmentToPersist = existingAssignment;
+                    assignmentToPersist.IsAssignedCurrent = true;
+                    assignmentToPersist.AssignmentDate = DateOnly.FromDateTime(DateTime.Now); 
+                    assignmentToPersist.ReleaseDate = null;
+                    _unitOfWork.CarDrivers.Update(assignmentToPersist); 
+                }
+                else
+                {
+                    // If no existing record, create a new one.
+                    _logger.LogInformation($"Creating new assignment for Car {createDto.CarId} and Driver {createDto.DriverId}.");
+                    assignmentToPersist = _mapper.Map<CarDriver>(createDto);
+                    assignmentToPersist.CarRentalAssetId = carRentalAssetId;
+                    assignmentToPersist.AssignmentDate = DateOnly.FromDateTime(DateTime.Now);
+                    assignmentToPersist.IsAssignedCurrent = true;
+                    assignmentToPersist.ReleaseDate = null; 
+                    await _unitOfWork.CarDrivers.AddAsync(assignmentToPersist); 
+                }
 
-                var newAssignment = _mapper.Map<CarDriver>(createDto);
-                newAssignment.CarRentalAssetId = carRentalAssetId;
-                newAssignment.AssignmentDate = DateOnly.FromDateTime(DateTime.Now);
-                newAssignment.IsAssignedCurrent = true;
-                newAssignment.ReleaseDate = null;
+                await _unitOfWork.CompleteAsync(); 
 
-
-
-                await _unitOfWork.CarDrivers.AddAsync(newAssignment);
-                await _unitOfWork.CompleteAsync();
-
-
-
+               
                 car.Status = CarStatus.OnRide;
                 driver.DriverStatus = DriverStatus.OnDrive;
                 _unitOfWork.Cars.Update(car);
                 _unitOfWork.Drivers.Update(driver);
-                await _unitOfWork.CompleteAsync();
+                await _unitOfWork.CompleteAsync(); 
 
-                _logger.LogInformation($"Driver {createDto.DriverId} assigned to Car {createDto.CarId} for Car Rental Asset {carRentalAssetId}. Assignment ID: {newAssignment.Id}");
+                _logger.LogInformation($"Driver {createDto.DriverId} assigned to Car {createDto.CarId} for Car Rental Asset {carRentalAssetId}. Assignment ID: {assignmentToPersist.Id}");
 
+                var finalAssignmentWithDetails = await _unitOfWork.CarDrivers.GetCarDriverByIdWithDetailsAsync(assignmentToPersist.Id);
+                if (finalAssignmentWithDetails == null) throw new Exception("Final assignment not found after save.");
 
-                var createdAssignmentWithDetails = await _unitOfWork.CarDrivers.GetCarDriverByIdWithDetailsAsync(newAssignment.Id);
-                if (createdAssignmentWithDetails == null) throw new Exception("Created assignment not found after save.");
-
-                return _mapper.Map<CarDriverResponseDto>(createdAssignmentWithDetails);
+                return _mapper.Map<CarDriverResponseDto>(finalAssignmentWithDetails);
             }
             catch (Exception ex)
             {
@@ -99,6 +106,7 @@ namespace Elagy.BL.Services
             {
 
                 var assignment = await _unitOfWork.CarDrivers.GetAssignmentsByCarIdAsync(carId, isCurrent: true);
+
                 var specificAssignment = assignment.FirstOrDefault(a => a.DriverId == driverId);
 
                 if (specificAssignment == null) throw new KeyNotFoundException($"Active assignment not found for Car {carId} and Driver {driverId}.");

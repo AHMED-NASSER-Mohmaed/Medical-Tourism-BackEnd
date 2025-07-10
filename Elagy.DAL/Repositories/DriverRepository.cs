@@ -26,7 +26,6 @@ namespace Elagy.DAL.Repositories
                 .Include(d => d.CarRentalAsset)
                 .Include(d => d.CarDrivers)
                     .ThenInclude(cd => cd.Car).
-                    Include(d => d.CarDrivers).
                     Include(s=>s.Governorate).
                     ThenInclude(s=>s.Country); 
         }
@@ -52,7 +51,7 @@ namespace Elagy.DAL.Repositories
         public async Task<CarDriver?> GetCurrentCarAssignmentForDriverAsync(string driverId)
         {
             return await _context.CarDrivers // Access DbSet directly for CarDriver
-                .Include(cd => cd.Car) // Include the Car details
+                .Include(cd => cd.Car).Include(s=>s.CarRentalAsset).Include(s=>s.Driver) // Include the Car details
                 .Where(cd => cd.DriverId == driverId && cd.IsAssignedCurrent == true && cd.ReleaseDate == null)
                 .FirstOrDefaultAsync();
         }

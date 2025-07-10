@@ -19,7 +19,7 @@ namespace Elagy.DAL.Repositories
         // Helper to include necessary navigation properties for CarDriver details
         private IQueryable<CarDriver> GetCarDriverDetails()
         {
-            return _dbSet
+            return _dbSet.Include(s=>s.CarRentalAsset)
                 .Include(cd => cd.Car)
                 .Include(cd => cd.Driver);
         }
