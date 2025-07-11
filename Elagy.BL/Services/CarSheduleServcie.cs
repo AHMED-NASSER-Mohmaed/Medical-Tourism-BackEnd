@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using Elagy.Core.DTOs.CarlSchedule;
 
 namespace Elagy.BL.Services
 {
@@ -115,11 +116,11 @@ namespace Elagy.BL.Services
                              cs.StartingDate >= today)
                 .ToListAsync();
 
-            var carAppointments =  _unitOfWork.CarRentalAppointments.AsQueryable()
-       .Where(ca => ca.CarScheduleId == carId &&
-                    ca.Status != AppointmentStatus.Cancelled &&
-                    (ca.EndingDate) >= today)
-       .ToListAsync();
+            var carAppointments = await _unitOfWork.CarRentalAppointments.AsQueryable()
+                                   .Where(ca => ca.CarScheduleId == carId &&
+                                                ca.Status != AppointmentStatus.Cancelled &&
+                                                (ca.EndingDate) >= today)
+                                   .ToListAsync();
 
             // 4. Collect all unavailable dates from both schedules and appointments
             var unavailableDates = new HashSet<DateOnly>();
@@ -136,8 +137,8 @@ namespace Elagy.BL.Services
             // From appointments
             foreach (var appointment in carAppointments)
             {
-                var start = DateOnly.FromDateTime(appointment.StartingDateTime);
-                var end = DateOnly.FromDateTime(appointment.EndingDateTime);
+                var start = appointment.StartingDate;
+                var end = appointment.EndingDate;
 
                 for (var date = start; date <= end; date = date.AddDays(1))
                 {
