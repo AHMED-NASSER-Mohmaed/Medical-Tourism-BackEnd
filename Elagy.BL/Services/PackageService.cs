@@ -193,15 +193,15 @@ namespace Elagy.BL.Services
                 throw new ArgumentException("Patient ID cannot be null or empty.", nameof(_patientId));
             }
 
-
             var query=_unitOfWork.Packages.AsQueryable()
                 .Where(p => p.PatientId == _patientId)
                 .Include(p => p.Appointments);
 
             int TotalCount = await query.CountAsync();
+            var SkippedPages = pp.PageSize * (pp.PageNumber - 1);
 
-            var packageQuery = query.Take(pp.PageSize)
-                .Skip(pp.PageSize*(pp.PageNumber-1));
+            var packageQuery = query.Skip(SkippedPages)
+                .Take(pp.PageSize);
                  
 
             var packageList = await packageQuery.ToListAsync();
@@ -222,10 +222,11 @@ namespace Elagy.BL.Services
  
 
             return new PagedResponseDto<PackageResponseDTO>(
-                PackageResponseDTOList,
-                TotalCount/pp.PageSize,
-                pp.PageNumber,
-                pp.PageSize);
+            PackageResponseDTOList,
+            TotalCount,
+            pp.PageNumber,
+            pp.PageSize
+            );
              
         }
     

@@ -66,7 +66,7 @@ namespace Elagy.APIs.Controllers
                     PaymentMethodTypes = new List<string> { "card" },
                     LineItems = lineItems,
                     Mode = "payment",
-                    SuccessUrl = "https://yourdomain.com/payment-success?session_id={CHECKOUT_SESSION_ID}&bookingId=123",
+                    SuccessUrl = "http://localhost:4200/payment-success={CHECKOUT_SESSION_ID}&bookingId=123",
                      CancelUrl = "https://yourdomain.com/payment-cancelled?bookingId=123",
 
                     //$"{_successUrl}?session_id={{CHECKOUT_SESSION_ID}}&bookingId={booking.Id}",

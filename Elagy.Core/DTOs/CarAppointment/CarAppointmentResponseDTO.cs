@@ -19,8 +19,8 @@ namespace Elagy.Core.DTOs.CarAppointment
         public AppointmentStatus Status { get; set; }
         public Guid PackageId { get; set; }
 
-        public DateTime StartingDateTime { get; set; }
-        public DateTime EndingDateTime { get; set; }
+        public DateOnly  StartingDate { get; set; }
+        public DateOnly EndingDate { get; set; }
 
         public float Latitude { get; set; }
         public float Longitude { get; set; }

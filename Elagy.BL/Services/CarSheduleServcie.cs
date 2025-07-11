@@ -1,8 +1,6 @@
-﻿using AutoMapper;
-using Elagy.Core.DTOs.CarlSchedule;
-using Elagy.Core.DTOs.CarRentalSchedule;
-using Elagy.Core.DTOs.RoomSchedule;
+﻿using Elagy.Core.DTOs.CarRentalSchedule;
 using Elagy.Core.Entities;
+using Elagy.Core.DTOs.RoomSchedule;
 using Elagy.Core.Enums;
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
@@ -12,17 +10,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 
 namespace Elagy.BL.Services
 {
-    public class CarRentalSheduleServcie : ICarScheduleService
+    public class CarSheduleServcie : ICarScheduleService
     {
 
 
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _map;
 
-        public CarRentalSheduleServcie(IUnitOfWork unitOfWork, IMapper mapper)
+        public CarSheduleServcie(IUnitOfWork unitOfWork,IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _map = mapper;
@@ -63,20 +62,21 @@ namespace Elagy.BL.Services
             carSchedule.CarId = car.Id;
 
             await _unitOfWork.CarSchedule.AddAsync(carSchedule);
+            await _unitOfWork.CompleteAsync();
 
 
             var query = _unitOfWork.CarSchedule.AsQueryable();
 
+            query = query.Where(cs => cs.Id == carSchedule.Id);
 
 
-            query = query.Where(cs => cs.CarId == carScheduleDTO.CarId && cs.StartingDate == carScheduleDTO.StartingDate &&
-                cs.EndingDate == cs.EndingDate);
+            
+            CarSchedule  createdCarSchedule  = await query.FirstOrDefaultAsync();
 
+            var res= _map.Map<CarSheduleResponseDTO>(createdCarSchedule);
 
-
-            CarSchedule createdCarSchedule = await query.FirstOrDefaultAsync();
-
-            return _map.Map<CarSheduleResponseDTO>(createdCarSchedule);
+            res.price = car.PricePerDay;
+            return res;
         }
 
 
@@ -90,7 +90,7 @@ namespace Elagy.BL.Services
 
             var result = await query.ToListAsync();
 
-            return result.Count() != 0 ? true : false;
+            return result.Count() == 0 ? true : false;
         }
 
 
@@ -115,12 +115,11 @@ namespace Elagy.BL.Services
                              cs.StartingDate >= today)
                 .ToListAsync();
 
-            // 3. Get all car appointments that are not cancelled
-            var carAppointments = await _unitOfWork.CarRentalAppointments.AsQueryable()
-                .Where(ca => ca.CarSchedule.CarId == carId &&
-                             ca.Status != AppointmentStatus.Cancelled &&
-                             DateOnly.FromDateTime(ca.EndingDateTime) >= today)
-                .ToListAsync();
+            var carAppointments =  _unitOfWork.CarRentalAppointments.AsQueryable()
+       .Where(ca => ca.CarScheduleId == carId &&
+                    ca.Status != AppointmentStatus.Cancelled &&
+                    (ca.EndingDate) >= today)
+       .ToListAsync();
 
             // 4. Collect all unavailable dates from both schedules and appointments
             var unavailableDates = new HashSet<DateOnly>();

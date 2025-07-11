@@ -6,8 +6,8 @@ public class CarRentalAppointmentConfiguration : IEntityTypeConfiguration<CarRen
 {
     public void Configure(EntityTypeBuilder<CarRentalAppointment> builder)
     {
-        builder.Property(c => c.StartingDateTime).IsRequired();
-        builder.Property(c => c.EndingDateTime).IsRequired();
+        builder.Property(c => c.StartingDate).IsRequired();
+        builder.Property(c => c.EndingDate).IsRequired();
 
         builder.HasOne(c => c.CarSchedule)
               .WithMany()
