@@ -14,14 +14,14 @@ using System.Threading.Tasks;
 
 namespace Elagy.BL.Services
 {
-    public class CarRentalSheduleServcie : ICarScheduleService
+    public class CarSheduleServcie : ICarScheduleService
     {
  
 
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _map;
 
-        public CarRentalSheduleServcie(IUnitOfWork unitOfWork,IMapper mapper)
+        public CarSheduleServcie(IUnitOfWork unitOfWork,IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _map = mapper;

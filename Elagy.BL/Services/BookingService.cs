@@ -69,8 +69,11 @@ namespace Elagy.BL.Services
 
                 if(request.CarAppointment != null)
                 {
-                    // Handle lab appointment booking logic here
-                    // This part is not implemented in the original code, so you may need to add it based on your requirements.
+                     
+
+
+
+
                 }
 
 

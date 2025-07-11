@@ -9,8 +9,8 @@ namespace Elagy.Core.Entities
 {
     public class CarRentalAppointment:Appointment
     {
-        public DateTime StartingDateTime { get; set; }
-        public DateTime EndingDateTime { get; set; }
+        public DateOnly StartingDate { get; set; }
+        public DateOnly EndingDate { get; set; }
 
         //pickup location
         public float Latitude { get; set; }
