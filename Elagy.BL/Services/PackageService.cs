@@ -295,6 +295,8 @@ namespace Elagy.BL.Services
                 returnObj.rentalCompanyName = ResultOfCar?.CarRentalAssetName ?? string.Empty;
                 returnObj.CarPrice = PacakgeDTO.CarAppointment.price;
                 returnObj.DriverId = ResultOfCar.DriverId;
+                returnObj.CarStartingDate = PacakgeDTO.CarAppointment.StartingDate;
+                returnObj.EndingStartingDate = PacakgeDTO.CarAppointment.EndingDate;
                 returnObj.DriverName = ResultOfCar?.DriverName ?? string.Empty;
                 returnObj.DriverImageUrl = ResultOfCar?.DriverImageURl ?? string.Empty;
 

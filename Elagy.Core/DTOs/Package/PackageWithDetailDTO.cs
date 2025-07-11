@@ -40,10 +40,9 @@ namespace Elagy.Core.DTOs.Package
         public string CarModel { get; set; }
         public string CarImageUrl { get; set; }
         public string rentalCompanyName { get; set; }
-        public DateOnly PickupDate { get; set; }
-        public DateTime PickupTime { get; set; }
+        public DateOnly  CarStartingDate { get; set; }
+        public DateOnly  EndingStartingDate { get; set; }
         public decimal CarPrice { get; set; }
-
         public string DriverId { get; set; }
         public string DriverName { get; set; }
         public string DriverPhone { get; set; }
