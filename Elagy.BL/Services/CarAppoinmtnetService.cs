@@ -20,34 +20,30 @@ namespace Elagy.BL.Services
         }
         public async Task<Package> BookAppointment(Package createdPackage, createCarRentalAppoinmentDTO CRADTO)
         {
-
-
             if (createdPackage == null)
             {
                 throw new ArgumentNullException(nameof(createdPackage), "Package cannot be null");
             }
-
             CarSheduleResponseDTO cretedSchedue =await _carScheduleService.CreateCarSchedule(new CreateCarScheduleDTO
             {
                 CarId = CRADTO.CarId,
                 StartingDate = CRADTO.StartingDate,
                 EndingDate = CRADTO.EndingDate,
             });
-
-
-            //here you can add logic to save the appointment details to the database 
-
-            //var CarAppointment = new CarRentalAppointment
-            //{
-            //    PackageId = createdPackage.Id, // Assuming the package has an Id property
-            //    StartingDate = CRADTO.StartingDate,
-            //    EndingDate = CRADTO.EndingDate,
-            //    price = ,
-            //};
-
-
-
-            throw new NotImplementedException();
+            createdPackage.Appointments.Add( new CarRentalAppointment
+            {
+                PackageId = createdPackage.Id,  
+                StartingDate = CRADTO.StartingDate,
+                EndingDate = CRADTO.EndingDate,
+                price = cretedSchedue.price,
+                Latitude = CRADTO.Latitude,
+                Longitude = CRADTO.Longitude,
+                FuelPolicy= CRADTO.FuelPolicy,
+                LocationDescription = CRADTO.LocationDescription,
+                CarScheduleId = cretedSchedue.Id, 
+            });
+            return createdPackage;
         }
     }
+    
 }

@@ -8,6 +8,7 @@ using Elagy.Core.Entities;
 using Elagy.Core.Enums;
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace Elagy.BL.Services
     {
         private readonly ISpecialtyAppointmentService _specialtyAppointment;
         private readonly IRoomAppointmentService _roomApointmentService;
-
+        private readonly ICarAppointmentService _carAppointmentService;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
@@ -63,26 +64,12 @@ namespace Elagy.BL.Services
 
 
                 if (request.RoomAppointment!=null)
-                {
                     await _roomApointmentService.BookAppointment(CreatedPackage, request.RoomAppointment);
-                }
 
                 if(request.CarAppointment != null)
-                {
-                     
-
-
-
-
-                }
-
-
-
-
-                 
+                    await _carAppointmentService.BookAppointment(CreatedPackage, request.CarAppointment);
 
                 await _unitOfWork.CompleteAsync();
-
 
                 return _packageResponseDTO;
 
@@ -94,11 +81,6 @@ namespace Elagy.BL.Services
             }
 
 
-        }
-
-        public Task<Package?> GetBookingByIdAsync(int PackageId)
-        {
-            throw new NotImplementedException();
         }
 
         public Task UpdateBookingStatusAsync(int PackageId, BookingStatus newStatus, string? stripeSessionId = null, string? stripePaymentIntentId = null)

@@ -21,5 +21,7 @@ namespace Elagy.Core.Entities
         public int CarScheduleId { get; set; }
         // Navigation property
         public CarSchedule CarSchedule { get; set; }
+
+
     }
 }

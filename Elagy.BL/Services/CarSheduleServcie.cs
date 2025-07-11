@@ -1,7 +1,6 @@
-﻿using AutoMapper;
-using Elagy.Core.DTOs.CarRentalSchedule;
-using Elagy.Core.DTOs.RoomSchedule;
+﻿using Elagy.Core.DTOs.CarRentalSchedule;
 using Elagy.Core.Entities;
+using Elagy.Core.DTOs.RoomSchedule;
 using Elagy.Core.Enums;
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
@@ -11,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 
 namespace Elagy.BL.Services
 {
@@ -75,7 +75,9 @@ namespace Elagy.BL.Services
             
             CarSchedule  createdCarSchedule  = await query.FirstOrDefaultAsync();
 
-            return _map.Map<CarSheduleResponseDTO>(createdCarSchedule);
+            var res= _map.Map<CarSheduleResponseDTO>(createdCarSchedule);
+            res.price = car.PricePerDay;
+            return res;
         }
 
       
@@ -112,7 +114,7 @@ namespace Elagy.BL.Services
             var carAppointments =  _unitOfWork.CarRentalAppointments.AsQueryable()
        .Where(ca => ca.CarScheduleId == carId &&
                     ca.Status != AppointmentStatus.Cancelled &&
-                    DateOnly.FromDateTime(ca.EndingDateTime) >= today)
+                    (ca.EndingDate) >= today)
        .ToListAsync();
 
             var unavailableDates=new HashSet<DateOnly>();
