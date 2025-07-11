@@ -80,29 +80,27 @@ namespace Elagy.APIs.Controllers
         }
 
 
-        //[HttpPost("profile/history/details")]
-        //public async Task<ActionResult> GetPackageDetails(Guid packageId)
-        //{
-        //    var userId = GetCurrentUserId();
-        //    if (userId == null) return Unauthorized();
-        //    if (packageId.Equals(null) || packageId.Equals(Guid.Empty))
-        //    {
-        //        return BadRequest("Invalid package details request.");
-        //    }
-        //    try
-        //    {
-        //        var packageDetails = await _packageService.GetPackageDetails(userId, request.PackageId);
-        //        //if (packageDetails == null)
-        //        //{
-        //        //    return NotFound("Package details not found.");
-        //        //}
-        //        //return Ok(packageDetails);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, $"Internal server error: {ex.Message}");
-        //    }
-        //}
+        [HttpPost("profile/history/details")]
+        public async Task<ActionResult> GetPackageDetails(Guid packageId)
+        {
+            if (packageId.Equals(null) || packageId.Equals(Guid.Empty))
+            {
+                return BadRequest("Invalid package details request.");
+            }
+            try
+            {
+                var packageDetails = await _packageService.GetPackageDetails(packageId);
+                if (packageDetails == null)
+                {
+                    return NotFound("Package details not found.");
+                }
+                return Ok(packageDetails);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
 
 
     }
