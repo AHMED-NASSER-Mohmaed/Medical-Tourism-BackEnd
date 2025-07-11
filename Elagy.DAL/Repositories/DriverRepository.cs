@@ -50,7 +50,7 @@ namespace Elagy.DAL.Repositories
 
         public async Task<CarDriver?> GetCurrentCarAssignmentForDriverAsync(string driverId)
         {
-            return await _context.CarDrivers // Access DbSet directly for CarDriver
+            return await _context.CarDrivers
                 .Include(cd => cd.Car).Include(s=>s.CarRentalAsset).Include(s=>s.Driver) // Include the Car details
                 .Where(cd => cd.DriverId == driverId && cd.IsAssignedCurrent == true && cd.ReleaseDate == null)
                 .FirstOrDefaultAsync();
