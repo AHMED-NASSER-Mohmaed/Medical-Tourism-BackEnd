@@ -149,10 +149,6 @@ namespace Elagy.BL.Services
             }
 
 
-
-
-
-
             if (PacakgeDTO.CarAppointment != null)
             {
                 /* var CarQuery = _unitOfWork.CarSchedule.AsQueryable()

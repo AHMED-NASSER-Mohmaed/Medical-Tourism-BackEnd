@@ -52,6 +52,42 @@ namespace Elagy.APIs.Controllers
                     Quantity = 1,
                 });
 
+                if(booking.RoomAppointment != null)
+                {
+                    lineItems.Add(new SessionLineItemOptions
+                    {
+                        PriceData = new SessionLineItemPriceDataOptions
+                        {
+                            Currency = "usd",
+                            UnitAmount = (long)(booking.RoomAppointment.price* 100), // Convert decimal to cents
+                            ProductData = new SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = "Room Appoinemtn",
+                                Description = "this is a room reservation for ",
+                            },
+                        },
+                        Quantity = 1,
+                    });
+                }
+
+                if(booking.CarAppointment != null)
+                {
+                    lineItems.Add(new SessionLineItemOptions
+                    {
+                        PriceData = new SessionLineItemPriceDataOptions
+                        {
+                            Currency = "usd",
+                            UnitAmount = (long)(booking.CarAppointment.price* 100), // Convert decimal to cents
+                            ProductData = new SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = "Car Appoinemtn",
+                                Description = "this is a car reservation for ",
+                            },
+                        },
+                        Quantity = 1,
+                    });
+                }
+
                 // Step 4: Define Metadata for the Checkout Session
                 var metadata = new Dictionary<string, string>
                 {
@@ -85,7 +121,7 @@ namespace Elagy.APIs.Controllers
                 // Step 8: Return the Checkout Session URL to the frontend
                 return Ok(new CreateCheckoutSessionResponse { CheckoutSessionUrl = session.Url });
 
- 
+                
 
             }
             catch (Exception ex)
