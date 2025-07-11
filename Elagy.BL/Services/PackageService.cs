@@ -1,11 +1,15 @@
 ﻿using AutoMapper;
 using Elagy.Core.DTOs.Booking;
+using Elagy.Core.DTOs.CarAppointment;
+using Elagy.Core.DTOs.CarRentals;
+using Elagy.Core.DTOs.Driver;
 using Elagy.Core.DTOs.Package;
 using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.Entities;
 using Elagy.Core.Enums;
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -109,6 +113,7 @@ namespace Elagy.BL.Services
                 AppointmentDate = PacakgeDTO.SpecialtyAppoinment.Date,
                 AppointmentExistingTime = PacakgeDTO.SpecialtyAppoinment.ExistingTime,
                 AppointmentPrice = PacakgeDTO.SpecialtyAppoinment.price,
+                
             };
 
            
@@ -150,36 +155,97 @@ namespace Elagy.BL.Services
 
             if (PacakgeDTO.CarAppointment != null)
             {
-                var CarQuery = _unitOfWork.CarSchedule.AsQueryable()
-                     .Where(c => PacakgeDTO.CarAppointment.Id == c.Id)
-                     .Include(c => c.Car)
-                     .ThenInclude(c => c.CarRentalAsset)
-                     .Include(c => c.Car.CarDrivers.Where(c=>c.IsAssignedCurrent).FirstOrDefault())
-                     .ThenInclude(c => c.Driver)
-                     .Include(c => c.Car.CarImages)
-                     .Select(cs => new
-                     {
-                         CarId = cs.Car.Id,
-                         CarModelName = cs.Car.ModelName,
-                         CarImageUrl = cs.Car.CarImages.Select(car_image=>car_image.ImageURL).FirstOrDefault(),
-                         CarType = cs.Car.Type,
-                         CarRentalAssetName = cs.Car.CarRentalAsset.Name,
-                         DriverId =   cs.Car.CarDrivers.Select(CD=>CD.DriverId).FirstOrDefault(),
-                         DriverFName = cs.Car.CarDrivers.Select(cd => cd.Driver != null ? cd.Driver.FirstName : null).FirstOrDefault(),
-                         DriverLName =  cs.Car.CarDrivers.Where(cd => cd.IsAssignedCurrent).Select(cd => cd.Driver != null ? cd.Driver.LastName : null).FirstOrDefault() ,
-                         DriverImageUrl =cs.Car.CarDrivers.Where(cd => cd.IsAssignedCurrent).Select(cd => cd.Driver != null ? cd.Driver.ImageURL : null).FirstOrDefault() 
-                     });
+                /* var CarQuery = _unitOfWork.CarSchedule.AsQueryable()
+                             .Where(cs => cs.Id == PacakgeDTO.CarAppointment.CarScheduleId)
+                             .Join(
+                                 _unitOfWork.Cars.AsQueryable(),
+                                 cs => cs.CarId,
+                                 car => car.Id,
+                                 (cs, car) => new { cs, car }
+                             )
+                             .Join(
+                                 _unitOfWork.CarRentalAssets.AsQueryable(),
+                                 temp => temp.car.CarRentalAssetId,
+                                 asset => asset.Id,
+                                 (temp, asset) => new { temp.cs, temp.car, asset }
+                             )
+                             .GroupJoin(
+                                 _unitOfWork.CarDrivers.AsQueryable().Where(cd => cd.IsAssignedCurrent),
+                                 temp => temp.car.Id,
+                                 driver => driver.CarId,
+                                 (temp, drivers) => new
+                                 {
+                                     temp.cs,
+                                     temp.car,
+                                     temp.asset,
+                                     currentDriver = drivers.FirstOrDefault()
+                                 }
+                             )
+                             .GroupJoin(
+                                 _unitOfWork.CarImages.AsQueryable(),
+                                 temp => temp.car.Id,
+                                 CI => CI.CarId,
+                                 (temp, CI) =>new
+                                 {
+                                     temp.cs,
+                                     temp.car,
+                                     temp.asset,
+                                     temp.currentDriver,
+                                     carImage = CI.FirstOrDefault()
+                                 }
+                             )
+                             .Select(x=> new
+                             {
+                                  CarImageURL= x.carImage != null ? x.carImage.ImageURL : string.Empty,
+                                  CarModelName = x.car.ModelName,
+                                  CarRentalAssetName = x.asset.Name,
+                                  DriverId = x.currentDriver != null ? x.currentDriver.DriverId : string.Empty,
+                                  DriverImageURl= x.currentDriver != null ? x.currentDriver.Driver.ImageURL : string.Empty,
+                                  DriverName=x.currentDriver != null ? x.currentDriver.Driver.FirstName + " " + x.currentDriver.Driver.LastName : string.Empty
+
+                             });
 
 
-                var ResultOfCar = CarQuery != null ? await CarQuery.FirstOrDefaultAsync() : null;
+
+                 var ResultOfCar =  await CarQuery.FirstOrDefaultAsync();*/
+
+                var carQuery =
+                from cs in _unitOfWork.CarSchedule.AsQueryable()
+                where cs.Id == PacakgeDTO.CarAppointment.CarScheduleId
+
+                join car in _unitOfWork.Cars.AsQueryable() on cs.CarId equals car.Id
+                join asset in _unitOfWork.CarRentalAssets.AsQueryable() on car.CarRentalAssetId equals asset.Id
+
+                join driver in _unitOfWork.CarDrivers.AsQueryable().Where(cd => cd.IsAssignedCurrent)
+                    on car.Id equals driver.CarId into driverGroup
+                from currentDriver in driverGroup.DefaultIfEmpty()
+
+                join img in _unitOfWork.CarImages.AsQueryable()
+                    on car.Id equals img.CarId into imageGroup
+                from carImage in imageGroup.DefaultIfEmpty()
+
+                select new
+                {
+                    CarImageURL = carImage != null ? carImage.ImageURL : string.Empty,
+                    CarModelName = car.ModelName,
+                    CarRentalAssetName = asset.Name,
+                    DriverId = currentDriver != null ? currentDriver.DriverId : string.Empty,
+                    DriverImageURl = currentDriver != null ? currentDriver.Driver.ImageURL : string.Empty,
+                    DriverName = currentDriver != null
+                        ? currentDriver.Driver.FirstName + " " + currentDriver.Driver.LastName
+                        : string.Empty
+                };
+
+                var ResultOfCar = await carQuery.FirstOrDefaultAsync();
+
 
                 returnObj.CarModel = ResultOfCar?.CarModelName ?? string.Empty;
-                returnObj.CarImageUrl = ResultOfCar.CarImageUrl;
+                returnObj.CarImageUrl = ResultOfCar.CarImageURL;
                 returnObj.rentalCompanyName = ResultOfCar?.CarRentalAssetName ?? string.Empty;
                 returnObj.CarPrice = PacakgeDTO.CarAppointment.price;
-                returnObj.DriverId = ResultOfCar.DriverId;  
-                returnObj.DriverName = ResultOfCar?.DriverFName + " " + ResultOfCar?.DriverLName ?? string.Empty;
-                returnObj.DriverImageUrl = ResultOfCar?.DriverImageUrl ?? string.Empty;
+                returnObj.DriverId = ResultOfCar.DriverId;
+                returnObj.DriverName = ResultOfCar?.DriverName ?? string.Empty;
+                returnObj.DriverImageUrl = ResultOfCar?.DriverImageURl ?? string.Empty;
 
             }
             return returnObj;

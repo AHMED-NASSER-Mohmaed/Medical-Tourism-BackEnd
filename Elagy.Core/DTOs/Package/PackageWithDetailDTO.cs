@@ -31,7 +31,7 @@ namespace Elagy.Core.DTOs.Package
         public string HotelName { get; set; }
         public int HotelGovId { get; set; }
         public RoomCategory RoomType { get; set; }
-         public string RoomImageUrl { get; set; }
+        public string RoomImageUrl { get; set; }
         public ViewType RoomView { get; set; }
         public DateOnly CheckInDate { get; set; }
         public DateOnly CheckOutDate { get; set; }
@@ -41,13 +41,22 @@ namespace Elagy.Core.DTOs.Package
         public string CarImageUrl { get; set; }
         public string rentalCompanyName { get; set; }
         public DateOnly PickupDate { get; set; }
-        public DateTime PickupTime { get;set; }
-        public decimal CarPrice { get;set; }
+        public DateTime PickupTime { get; set; }
+        public decimal CarPrice { get; set; }
 
         public string DriverId { get; set; }
-        public string DriverName { get; set; }    
+        public string DriverName { get; set; }
         public string DriverPhone { get; set; }
-        public string DriverImageUrl{ get; set; } 
+        public string DriverImageUrl { get; set; }
+
+        public decimal TotalPrice
+        {
+            get
+            {
+                return AppointmentPrice + HotelPrice + CarPrice;
+            }
+
+        }
 
     }
 }

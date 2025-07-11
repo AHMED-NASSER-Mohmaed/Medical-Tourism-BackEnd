@@ -62,6 +62,8 @@ namespace Elagy.DAL
 
         public IGenericRepository<CarRentalAssetImage> CarRentalAssetImages { get; private set; }
 
+        public IGenericRepository<CarImage> CarImages { get; private set; }
+
         public UnitOfWork(ApplicationDbContext context)
         {
             //IRepo injection
@@ -99,6 +101,8 @@ namespace Elagy.DAL
             HotelAssetImages=new GenericRepository<HotelAssetImage>(_context);
             HospitalAssetImages=new GenericRepository<HospitalAssetImage>(_context);
             CarRentalAssetImages = new GenericRepository<CarRentalAssetImage>(_context);
+
+            CarImages = new GenericRepository<CarImage>(_context);
 
         }
 
