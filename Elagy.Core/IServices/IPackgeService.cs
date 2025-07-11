@@ -16,6 +16,8 @@ namespace Elagy.Core.IServices
 
         Task<PackageWithDetailDTO> GetPackageDetails(Guid packageId);
 
+        Task<PackageResponseDTO> CancelBooking(string packageId);
+
     }
 
 }

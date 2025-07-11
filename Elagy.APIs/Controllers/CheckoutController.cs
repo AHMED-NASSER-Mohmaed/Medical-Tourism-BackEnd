@@ -130,5 +130,7 @@ namespace Elagy.APIs.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the booking: " + ex.Message);
             }
         }
+
+
     }
 }

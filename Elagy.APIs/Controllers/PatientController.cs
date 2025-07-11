@@ -1,4 +1,5 @@
 ﻿using Elagy.Core.DTOs.Files;
+using Elagy.Core.DTOs.Package;
 using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.User;
 using Elagy.Core.Entities;
@@ -102,6 +103,28 @@ namespace Elagy.APIs.Controllers
             }
         }
 
+
+        [HttpPost("profile/history")]
+        public async Task<ActionResult<PackageResponseDTO>> CancelBooking(string PackageId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(PackageId) || PackageId.Equals(Guid.Empty.ToString()))
+                {
+                    return BadRequest("Invalid package ID.");
+                }
+                var result = await _packageService.CancelBooking(PackageId);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
 
     }
 }

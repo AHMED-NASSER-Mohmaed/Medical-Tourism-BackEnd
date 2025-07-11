@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Elagy.Core.DTOs.Booking;
-using Elagy.Core.DTOs.CarAppointment;
-using Elagy.Core.DTOs.CarRentals;
+ using Elagy.Core.DTOs.CarRentals;
 using Elagy.Core.DTOs.Driver;
 using Elagy.Core.DTOs.Package;
 using Elagy.Core.DTOs.Pagination;
@@ -29,7 +28,63 @@ namespace Elagy.BL.Services
             _unitOfWork = unitOfWork;
             _map = mapper;
         }
-         
+
+        public async Task<PackageResponseDTO> CancelBooking(string packageId)
+        {
+            var Pakage = await _unitOfWork.Packages.AsQueryable()
+                .Where(p => p.Id == Guid.Parse(packageId))
+                .Include(p => p.Appointments)
+                .FirstOrDefaultAsync();
+            if (Pakage == null)
+            {
+                throw new ArgumentException("Package not found. Invalid Package Id", nameof(packageId));
+            }
+            
+            if (Pakage.Status == BookingStatus.Confirmed)
+            {
+                foreach (var appointment in Pakage.Appointments)
+            {
+                if (appointment is SpecialtyAppointment specialtyAppointment)
+                {
+                    if (specialtyAppointment.Date < DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1))
+                    {
+                        throw new ArgumentException("Cannot cancel a past appointment.", nameof(packageId));
+                    }
+
+                }
+                else if (appointment is RoomAppointment roomAppointment)
+                {
+                    if (roomAppointment.CheckInDate < DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1))
+                    {
+                        throw new ArgumentException("Cannot cancel a past appointment.", nameof(packageId));
+                    }
+                }
+                else if (appointment is CarRentalAppointment carAppointment)
+                {
+                    if (carAppointment.StartingDate < DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1))
+                    {
+                        throw new ArgumentException("Cannot cancel a past appointment.", nameof(packageId));
+                    }
+                }
+            }
+
+                Pakage.Status = BookingStatus.Canceled;
+                foreach (var a in Pakage.Appointments)
+                {
+                    a.Status = AppointmentStatus.Cancelled;
+                }
+
+                _unitOfWork.Packages.Update(Pakage);
+                await _unitOfWork.CompleteAsync();
+            }
+            else
+            {
+                throw new ArgumentException("Package is not in a cancellable state.", nameof(packageId));
+            }
+
+
+            return _map.Map<PackageResponseDTO>(Pakage);
+        }
 
         public async Task<Package> CreatePackage(string PatientId)
         {
