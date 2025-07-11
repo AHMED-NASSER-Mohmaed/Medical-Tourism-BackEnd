@@ -103,6 +103,12 @@ builder.Services.AddScoped<IRoomScheduleService, RoomScheduleService>();
 
 builder.Services.AddScoped<IRoomAppointmentService, RoomAppointmentService>();
 
+
+
+builder.Services.AddScoped<ICarScheduleService, CarSheduleServcie>();
+builder.Services.AddScoped<ICarAppointmentService, CarAppoinmtnetService>();
+
+
 builder.Services.AddScoped<SessionService>();
 
 

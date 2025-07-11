@@ -62,20 +62,19 @@ namespace Elagy.BL.Services
             carSchedule.CarId = car.Id;
 
             await _unitOfWork.CarSchedule.AddAsync(carSchedule);
+            await _unitOfWork.CompleteAsync();
 
 
             var query = _unitOfWork.CarSchedule.AsQueryable();
 
-
-
-            query = query.Where(cs => cs.CarId == carScheduleDTO.CarId && cs.StartingDate == carScheduleDTO.StartingDate &&
-                cs.EndingDate == cs.EndingDate);
+            query = query.Where(cs => cs.Id == carSchedule.Id);
 
 
             
             CarSchedule  createdCarSchedule  = await query.FirstOrDefaultAsync();
 
             var res= _map.Map<CarSheduleResponseDTO>(createdCarSchedule);
+
             res.price = car.PricePerDay;
             return res;
         }
@@ -91,7 +90,7 @@ namespace Elagy.BL.Services
 
             var result = await query.ToListAsync();
 
-            return result.Count() != 0 ? true : false;
+            return result.Count() == 0 ? true : false;
         }
 
 

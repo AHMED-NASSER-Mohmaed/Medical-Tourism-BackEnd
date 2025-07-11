@@ -25,12 +25,13 @@ namespace Elagy.BL.Services
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
-        public BookingService(ISpecialtyAppointmentService specialtyAppointment,IMapper mapper,IUnitOfWork unitOfWork, IRoomAppointmentService roomApointmentService)
+        public BookingService(ISpecialtyAppointmentService specialtyAppointment,IMapper mapper,IUnitOfWork unitOfWork, IRoomAppointmentService roomApointmentService,ICarAppointmentService carAppointmentService)
         {
             _specialtyAppointment = specialtyAppointment;
             _roomApointmentService = roomApointmentService;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
+            _carAppointmentService = carAppointmentService;
         }
         public async Task<PackageResponseDTO> CreatePendingBookingAsync(string PatientId , CreateBookingRequest request)
         {
@@ -53,7 +54,23 @@ namespace Elagy.BL.Services
                     throw new ArgumentNullException(nameof(request.SpecialtiyAppointment), "Specialty appointment cannot be null.");
                 }
 
-                Package CreatedPackage= await _specialtyAppointment.BookAppointment(PatientId, request.SpecialtiyAppointment);
+                var today = DateOnly.FromDateTime(DateTime.Now);
+
+
+                if (request.RoomAppointment!=null && request.RoomAppointment.CheckOutDate < today  && 
+                    request.RoomAppointment.CheckOutDate < request.RoomAppointment.CheckInDate)
+                {
+                    throw new ArgumentException("Invalid Hotel reservation Date", nameof(request.RoomAppointment));
+                }
+
+
+                if (request.carAppointment != null && request.carAppointment.StartingDate < today &&
+                   request.carAppointment.EndingDate < request.carAppointment.StartingDate)
+                {
+                    throw new ArgumentException("Invalid Car reservation Date", nameof(request.carAppointment));
+                }
+
+                Package CreatedPackage = await _specialtyAppointment.BookAppointment(PatientId, request.SpecialtiyAppointment);
 
                 SpecialtyAppointmentResponseDTTO _specialtyResponseDto = _mapper.Map<SpecialtyAppointmentResponseDTTO>(CreatedPackage.Appointments[0]);
 
@@ -66,8 +83,8 @@ namespace Elagy.BL.Services
                 if (request.RoomAppointment!=null)
                     await _roomApointmentService.BookAppointment(CreatedPackage, request.RoomAppointment);
 
-                if(request.CarAppointment != null)
-                    await _carAppointmentService.BookAppointment(CreatedPackage, request.CarAppointment);
+                if(request.carAppointment != null)
+                    await _carAppointmentService.BookAppointment(CreatedPackage, request.carAppointment);
 
                 await _unitOfWork.CompleteAsync();
 
