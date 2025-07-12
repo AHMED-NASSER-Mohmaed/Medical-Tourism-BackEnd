@@ -25,7 +25,7 @@ namespace Elagy.Core.DTOs.Pagination
         public DateOnly? FilterStartDate { get; set; }
         public DateOnly? FilterEndDate { get; set; }
         public bool? FilterIsActive { get; set; }// general  status filter except users
-
+        public int? specialtyScheduleId {  get; set; }
         public string? HotelAssetId { get; set; } 
         public RoomCategory? RoomType { get; set; }  //for website filter
         public RoomStatus? RoomStatus { get; set; } //for admin flter

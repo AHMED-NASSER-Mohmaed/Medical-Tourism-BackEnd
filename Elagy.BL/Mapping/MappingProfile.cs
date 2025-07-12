@@ -45,6 +45,9 @@ namespace Elagy.BL.Mapping
                 .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.ServiceAsset.Description))
                 .ForMember(dest => dest.CredentialDocURL, opt => opt.MapFrom(src => src.ServiceAsset.CredentialDocURL))
                 .ForMember(dest => dest.AssetEmail, opt => opt.MapFrom(src => src.ServiceAsset.Email))
+
+
+
                 .ForMember(dest => dest.AssetGovernateId, opt => opt.MapFrom(src => src.ServiceAsset.GovernateId))
                 .ForMember(dest => dest.AssetGovernateName, opt => opt.MapFrom(src => src.ServiceAsset.Governate.Name));
 

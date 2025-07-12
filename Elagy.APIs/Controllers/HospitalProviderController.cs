@@ -2,6 +2,7 @@
 using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Schedule;
 using Elagy.Core.DTOs.User;
+using Elagy.Core.Entities;
 using Elagy.Core.Enums;
 using Elagy.Core.IServices;
 using Microsoft.AspNetCore.Authorization;
@@ -101,15 +102,18 @@ namespace Elagy.APIs.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving schedules.");
             }
         }
+
         [HttpGet("hospital-appointments")]
         public async Task<IActionResult> GetHospitalAppointments([FromQuery] AppointmentStatus? appointmentStatus = null,
-            [FromQuery] DateOnly? Date = null, int? DayofWeekId = null)
+            [FromQuery] DateOnly? Date = null, [FromQuery]int? DayofWeekId = null, [FromQuery] int? specialtyScheduleId=null)
         {
             var hospitalAssetId = GetCurrentUserId();
             PaginationParameters paginationParameters = new PaginationParameters();
             paginationParameters.FilterStartDate = Date;
             paginationParameters.AppointmentStatus= appointmentStatus;
             paginationParameters.FilterDayOfWeekId= DayofWeekId;
+             paginationParameters.specialtyScheduleId= specialtyScheduleId;
+
 
             var result = await _hospitalProviderService.GetHospitalAppointmentsAsync(hospitalAssetId, paginationParameters);
 
@@ -325,7 +329,7 @@ namespace Elagy.APIs.Controllers
         [Authorize(Roles = "HospitalServiceProvider")]
         public async Task<IActionResult> GetAllDisbursement([FromHeader]PaginationParameters pagination) 
         {
-            Console.WriteLine("inside Controller==============================================================================================");
+            Console.WriteLine("inside Controller=======================================================================================");
             var userId = GetCurrentUserId(); // Get current user's ID from token
             Console.WriteLine("After get user");
             Console.WriteLine("userId"+userId);
