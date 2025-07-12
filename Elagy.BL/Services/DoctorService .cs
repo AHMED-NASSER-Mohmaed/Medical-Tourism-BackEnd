@@ -69,9 +69,6 @@ namespace Elagy.BL.Services
                             .ThenInclude(p => p.Governorate)
                                 .ThenInclude(g => g.Country)
                     .Include(a => a.SpecialtySchedule)
-                        .ThenInclude(s => s.HospitalSpecialty)
-                            .ThenInclude(hs => hs.HospitalAsset)
-                    .Include(a => a.SpecialtySchedule.HospitalSpecialty.Specialty)
                     .Where(a => a.SpecialtySchedule.DoctorId == doctorId);
 
                 if (paginationParameters.AppointmentStatus.HasValue)
@@ -82,6 +79,10 @@ namespace Elagy.BL.Services
                 if (paginationParameters.FilterStartDate.HasValue)
                 {
                     query = query.Where(a => a.Date == paginationParameters.FilterStartDate.Value);
+                }
+                if (paginationParameters.FilterDayOfWeekId.HasValue)
+                {
+                    query = query.Where(a => a.SpecialtySchedule.DayOfWeekId == paginationParameters.FilterDayOfWeekId.Value);
                 }
 
                 var totalCount = await query.CountAsync();
@@ -95,13 +96,12 @@ namespace Elagy.BL.Services
                 var result = pagedAppointments.Select(a => new DoctorAppointmentDto
                 {
                     AppointmentId = a.Id,
-                    Date = a.Date,
+                    AppointmetnDate = a.Date,
+                    DayofWeekId=a.SpecialtySchedule.DayOfWeekId,
                     Status = a.Status,
                     PatientName = $"{a.Package?.Patient?.FirstName} {a.Package?.Patient?.LastName}",
                     PatientPhone = a.Package?.Patient?.Phone,
                     PatientCountry = a.Package?.Patient?.Governorate?.Country?.Name,
-                    HospitalName = a.SpecialtySchedule?.HospitalSpecialty?.HospitalAsset?.Name,
-                    Specialty = a.SpecialtySchedule?.HospitalSpecialty?.Specialty?.Name
                 }).ToList();
 
                 return new PagedResponseDto<DoctorAppointmentDto>(

@@ -67,7 +67,8 @@ namespace Elagy.APIs.Controllers
 
         [HttpGet("doctor-appointments")]
         [Authorize(Roles = "Doctor")]
-        public async Task<IActionResult> GetDoctorAppointments([FromQuery] AppointmentStatus? appointmentStatus = null, [FromQuery] DateOnly? Date=null)
+        public async Task<IActionResult> GetDoctorAppointments([FromQuery] AppointmentStatus? appointmentStatus = null,
+            [FromQuery] DateOnly? Date=null,int? DayofWeekId=null)
         {
             var doctorId = GetCurrentUserId();
             if (string.IsNullOrWhiteSpace(doctorId))
@@ -78,6 +79,8 @@ namespace Elagy.APIs.Controllers
                 PaginationParameters paginationParameters=new PaginationParameters();
                 paginationParameters.FilterStartDate = Date;
                 paginationParameters.AppointmentStatus=appointmentStatus;
+                paginationParameters.FilterDayOfWeekId = DayofWeekId;
+
                 var result = await _doctorService.GetDoctorAppointmentsAsync(doctorId, paginationParameters);
 
                 if (result.Items == null || !result.Items.Any())

@@ -2,6 +2,7 @@
 using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Schedule;
 using Elagy.Core.DTOs.User;
+using Elagy.Core.Enums;
 using Elagy.Core.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -100,7 +101,23 @@ namespace Elagy.APIs.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving schedules.");
             }
         }
+        [HttpGet("hospital-appointments")]
+        public async Task<IActionResult> GetHospitalAppointments([FromQuery] AppointmentStatus? appointmentStatus = null,
+            [FromQuery] DateOnly? Date = null, int? DayofWeekId = null)
+        {
+            var hospitalAssetId = GetCurrentUserId();
+            PaginationParameters paginationParameters = new PaginationParameters();
+            paginationParameters.FilterStartDate = Date;
+            paginationParameters.AppointmentStatus= appointmentStatus;
+            paginationParameters.FilterDayOfWeekId= DayofWeekId;
 
+            var result = await _hospitalProviderService.GetHospitalAppointmentsAsync(hospitalAssetId, paginationParameters);
+
+            if (!result.Items.Any())
+                return NotFound("No appointments found for this hospital.");
+
+            return Ok(result);
+        }
         [HttpPost("upload-hospital-images")]
         public async Task<ActionResult<List<AssetImageResponseDto>>> UploadHospitalImages([FromForm] List<IFormFile> hospitalImages)
         {

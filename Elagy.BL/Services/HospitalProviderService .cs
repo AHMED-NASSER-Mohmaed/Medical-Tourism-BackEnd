@@ -282,6 +282,62 @@ namespace Elagy.BL.Services
             }
         }
 
-     
+        public async Task<PagedResponseDto<HospitalAppointmentDto>> GetHospitalAppointmentsAsync(string hospitalAssetId, PaginationParameters paginationParameters)
+       {
+            var query = _unitOfWork.SpecialtyAppointments.AsQueryable()
+                .Include(a => a.Package)
+                    .ThenInclude(p => p.Patient)
+                        .ThenInclude(p => p.Governorate)
+                            .ThenInclude(g => g.Country)
+                .Include(a => a.SpecialtySchedule.HospitalSpecialty.Specialty)
+                .Include(a => a.SpecialtySchedule.Doctor)
+                .Where(a => a.SpecialtySchedule.HospitalSpecialty.HospitalAssetId == hospitalAssetId);
+
+            if (paginationParameters.AppointmentStatus.HasValue)
+            {
+                query = query.Where(a => a.Status == paginationParameters.AppointmentStatus.Value);
+            }
+
+            if (paginationParameters.FilterStartDate.HasValue)
+            {
+                query = query.Where(a => a.Date == paginationParameters.FilterStartDate.Value);
+            }
+            if (paginationParameters.FilterDayOfWeekId.HasValue)
+            {
+                query = query.Where(a => a.SpecialtySchedule.DayOfWeekId == paginationParameters.FilterDayOfWeekId.Value);
+            }
+
+            // Total count for pagination
+            var totalCount = await query.CountAsync();
+
+            var pagedAppointments = await query
+                .OrderByDescending(a => a.Date)
+                .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+                .Take(paginationParameters.PageSize)
+                .ToListAsync();
+
+            var result = pagedAppointments.Select(a => new HospitalAppointmentDto
+            {
+                AppointmentId = a.Id,
+                Date = a.Date,
+                Time = a.SpecialtySchedule.TimeSlotSize,
+                Status = a.Status,
+                DayOfWeekId=a.SpecialtySchedule.DayOfWeekId,
+                PatientName = $"{a.Package?.Patient?.FirstName} {a.Package?.Patient?.LastName}",
+                PatientEmail = a.Package?.Patient?.Email,
+                PatientPhone = a.Package?.Patient?.Phone,
+                PatientCountry = a.Package?.Patient?.Governorate?.Country?.Name,
+                DoctorId = a.SpecialtySchedule?.DoctorId,
+                DoctorName = $"{a.SpecialtySchedule?.Doctor?.FirstName} {a.SpecialtySchedule?.Doctor?.LastName}",
+                Specialty = a.SpecialtySchedule?.HospitalSpecialty?.Specialty?.Name
+            }).ToList();
+
+            return new PagedResponseDto<HospitalAppointmentDto>(
+                result,
+                totalCount,
+                paginationParameters.PageNumber,
+                paginationParameters.PageSize
+            );
+        }
     }
 }
