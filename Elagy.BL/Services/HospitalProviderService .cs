@@ -1,18 +1,19 @@
 ﻿using AutoMapper;
 using Elagy.Core.DTOs.Auth;
+using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Shared;
+using Elagy.Core.DTOs.SpecialtyAppointment;
 using Elagy.Core.DTOs.User;
 using Elagy.Core.Entities;
 using Elagy.Core.Enums;
 using Elagy.Core.Helpers;
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
+using Microsoft.AspNetCore.Http; // Add this line if it's missing
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore; // Crucial for .Include() and .SingleOrDefaultAsync()
-using ServiceProvider = Elagy.Core.Entities.ServiceProvider; // Ensure this is the correct namespace for ServiceProvider
 using Microsoft.Extensions.Logging;
-using Elagy.Core.DTOs.Pagination;
-using Microsoft.AspNetCore.Http; // Add this line if it's missing
+using ServiceProvider = Elagy.Core.Entities.ServiceProvider; // Ensure this is the correct namespace for ServiceProvider
 namespace Elagy.BL.Services
 {
     public class HospitalProviderService : IHospitalProviderService
@@ -198,6 +199,46 @@ namespace Elagy.BL.Services
             await _unitOfWork.CompleteAsync();
 
             return _mapper.Map<List<AssetImageResponseDto>>(imagesToDelete);
+        }
+
+        public async Task<PagedResponseDto<HospitalAppointmentDto>> GetHospitalAppointmentsAsync(
+    string hospitalAssetId,
+    PaginationParameters paginationParameters)
+        {
+            var query = _unitOfWork.SpecialtyAppointments.AsQueryable()
+                .Include(a => a.Package)
+                    .ThenInclude(p => p.Patient)
+                        .ThenInclude(p => p.Governorate)
+                            .ThenInclude(g => g.Country)
+                .Include(a => a.SpecialtySchedule)
+                    .ThenInclude(s => s.HospitalSpecialty)
+                        .ThenInclude(hs => hs.Specialty)
+                .Include(a => a.SpecialtySchedule.Doctor)
+                .Where(a => a.SpecialtySchedule.HospitalSpecialty.HospitalAssetId == hospitalAssetId);
+
+            if (paginationParameters.AppointmentStatus.HasValue)
+            {
+                query = query.Where(a => a.Status == paginationParameters.AppointmentStatus.Value);
+            }
+
+            if (paginationParameters.FilterStartDate.HasValue)
+            {
+                query = query.Where(a => a.Date == paginationParameters.FilterStartDate.Value);
+            }
+            if (paginationParameters.FilterDayOfWeekId.HasValue)
+            {
+                query = query.Where(a => a.SpecialtySchedule.DayOfWeekId == paginationParameters.FilterDayOfWeekId.Value);
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var pagedAppointments = await query
+                .OrderByDescending(a => a.Date)
+                .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+                .Take(paginationParameters.PageSize)
+                .ToListAsync();
+
+
         }
     }
 }
