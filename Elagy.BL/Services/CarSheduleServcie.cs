@@ -116,11 +116,11 @@ namespace Elagy.BL.Services
                              cs.StartingDate >= today)
                 .ToListAsync();
 
-            var carAppointments = await _unitOfWork.CarRentalAppointments.AsQueryable()
+            /*var carAppointments = await _unitOfWork.CarRentalAppointments.AsQueryable()
                                    .Where(ca => ca.CarScheduleId == carId &&
                                                 ca.Status != AppointmentStatus.Cancelled &&
                                                 (ca.EndingDate) >= today)
-                                   .ToListAsync();
+                                   .ToListAsync();*/
 
             // 4. Collect all unavailable dates from both schedules and appointments
             var unavailableDates = new HashSet<DateOnly>();
@@ -134,7 +134,7 @@ namespace Elagy.BL.Services
                 }
             }
 
-            // From appointments
+           /* // From appointments
             foreach (var appointment in carAppointments)
             {
                 var start = appointment.StartingDate;
@@ -145,7 +145,7 @@ namespace Elagy.BL.Services
                     unavailableDates.Add(date);
                 }
             }
-
+*/
             // 5. Return DTO
             return new CarUnavailableDatesDTO
             {

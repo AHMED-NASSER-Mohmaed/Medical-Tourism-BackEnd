@@ -15,7 +15,7 @@ namespace Elagy.Core.Entities
         public DateOnly EndingDate { get; set; } // End date of the rental schedule
         public int CarId { get; set; } // Foreign key for the car associated with this schedule
         public Car Car { get; set; } // Navigation property to the Car entity
-        public ScheduleStatus Status { get; set; } = ScheduleStatus.Pending; // Status of the schedule (e.g., Active, Completed, Cancelled)
+        public ScheduleStatus Status { get; set; } = ScheduleStatus.Confirmed; // Status of the schedule (e.g., Active, Completed, Cancelled)
     }
 
 }

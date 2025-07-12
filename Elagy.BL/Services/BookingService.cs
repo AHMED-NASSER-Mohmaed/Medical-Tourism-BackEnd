@@ -35,7 +35,7 @@ namespace Elagy.BL.Services
         }
         public async Task<PackageResponseDTO> CreatePendingBookingAsync(string PatientId , CreateBookingRequest request)
         {
-             
+            
            if (request == null)
            {
                throw new ArgumentNullException(nameof(request), "Booking request cannot be null.");

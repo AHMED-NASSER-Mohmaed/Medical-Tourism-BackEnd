@@ -90,9 +90,10 @@ namespace Elagy.BL.Services
         public async Task<UnavailableDatesDTO> GetAvailableRoomsSchedules(int RoomId)
         {
 
-      var room = await _unitOfWork.Rooms.AsQueryable().Include(r => r.HotelAsset).FirstOrDefaultAsync(r => r.Id == RoomId);
+            var room = await _unitOfWork.Rooms.AsQueryable().Include(r => r.HotelAsset).
+                       FirstOrDefaultAsync(r => r.Id == RoomId && r.Status==RoomStatus.CleanAndAvailable && r.IsAvailable );
 
-            if (room == null || !room.IsAvailable || room.Status==RoomStatus.UnderMaintenance )
+            if (room == null)
             {
                 throw new ArgumentException("The specified room is not available.");
             }
@@ -107,11 +108,11 @@ namespace Elagy.BL.Services
                 .ToListAsync();
 
 
-            var roomAppointments = await _unitOfWork.RoomAppointments.AsQueryable()
+/*            var roomAppointments = await _unitOfWork.RoomAppointments.AsQueryable()
                 .Where(ra => ra.RoomId == RoomId &&
                              ra.Status != AppointmentStatus.Cancelled &&
                              ra.CheckOutDate >= today) 
-                .ToListAsync();
+                .ToListAsync();*/
 
 
             var unavailableDates = new HashSet<DateOnly>();
@@ -127,7 +128,7 @@ namespace Elagy.BL.Services
             }
 
 
-            foreach (var appointment in roomAppointments)
+/*            foreach (var appointment in roomAppointments)
             {
                 var startDate = appointment.CheckInDate < today ? today : appointment.CheckInDate;
 
@@ -135,7 +136,7 @@ namespace Elagy.BL.Services
                 {
                     unavailableDates.Add(date);
                 }
-            }
+            }*/
 
             return new UnavailableDatesDTO
             {
