@@ -63,6 +63,9 @@ namespace Elagy.DAL
         public IGenericRepository<CarRentalAssetImage> CarRentalAssetImages { get; private set; }
 
         public IGenericRepository<CarImage> CarImages { get; private set; }
+        //public IGenericRepository<Disbursement> Disbursements { get; private set; }
+
+        public IDisbursementRepository Disbursements {get; private set; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -104,6 +107,8 @@ namespace Elagy.DAL
 
             CarImages = new GenericRepository<CarImage>(_context);
 
+
+            Disbursements = new DisbursementRepository(_context);
         }
 
         public async Task<int> CompleteAsync()

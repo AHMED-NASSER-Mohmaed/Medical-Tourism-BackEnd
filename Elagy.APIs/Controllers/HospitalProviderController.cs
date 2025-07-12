@@ -5,6 +5,8 @@ using Elagy.Core.DTOs.User;
 using Elagy.Core.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ReportProHtmlToPdf.IServices;
+using ReportProHtmlToPdf.Model;
 using System.Threading.Tasks;
 
 namespace Elagy.APIs.Controllers
@@ -16,16 +18,19 @@ namespace Elagy.APIs.Controllers
     {
         private readonly IHospitalProviderService _hospitalProviderService;
         private readonly ISpecialtyScheduleService _scheduleService;
+        private readonly IReportProHtmlToPdf _reportProHtmlToPdf;
 
         public HospitalProviderController(
+            IReportProHtmlToPdf reportProHtmlToPdf,
             IImageProfile profileImageService,
              ISpecialtyScheduleService scheduleService,
-            IHospitalProviderService hospitalProviderService,  
-            ILogger<HospitalProviderController> logger)   
-            : base(profileImageService, logger)                                       
+            IHospitalProviderService hospitalProviderService,
+            ILogger<HospitalProviderController> logger)
+            : base(profileImageService, logger)
         {
             _hospitalProviderService = hospitalProviderService;
             _scheduleService = scheduleService;
+            _reportProHtmlToPdf = reportProHtmlToPdf;
         }
 
 
@@ -67,7 +72,7 @@ namespace Elagy.APIs.Controllers
             [FromQuery] int PageSize = 10,
             [FromQuery] string? SearchTerm = null,
             [FromQuery] int? FilterDayOfWeekId = null,
-            [FromQuery] bool? FilterIsActive = null) 
+            [FromQuery] bool? FilterIsActive = null)
         {
             var hospitalId = GetCurrentUserId();
             if (hospitalId == null) return Unauthorized("Hospital ID could not be determined from your token.");
@@ -165,17 +170,17 @@ namespace Elagy.APIs.Controllers
                 var result = await _scheduleService.CreateScheduleAsync(createDto, hospitalId);
                 return CreatedAtAction(nameof(GetScheduleById), new { scheduleId = result.Id }, result);
             }
-            catch (ArgumentException ex) 
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
-            catch (UnauthorizedAccessException ex) 
+            catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ex.Message); 
+                return Forbid(ex.Message);
             }
-            catch (InvalidOperationException ex) 
+            catch (InvalidOperationException ex)
             {
-                return Conflict(ex.Message); 
+                return Conflict(ex.Message);
             }
             catch (Exception ex)
             {
@@ -205,15 +210,15 @@ namespace Elagy.APIs.Controllers
             {
                 return NotFound(ex.Message);
             }
-            catch (ArgumentException ex) 
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
-            catch (UnauthorizedAccessException ex) 
+            catch (UnauthorizedAccessException ex)
             {
                 return Forbid(ex.Message);
             }
-            catch (InvalidOperationException ex) 
+            catch (InvalidOperationException ex)
             {
                 return Conflict(ex.Message);
             }
@@ -237,7 +242,7 @@ namespace Elagy.APIs.Controllers
             {
                 _logger.LogInformation($"Received request to change status for schedule ID: {scheduleId} to {newIsActiveStatus}.");
                 var result = await _scheduleService.ChangeScheduleStatusAsync(scheduleId, newIsActiveStatus, hospitalId);
-                if (result == null) 
+                if (result == null)
                 {
                     return NotFound($"Schedule with ID {scheduleId} not found.");
                 }
@@ -251,7 +256,7 @@ namespace Elagy.APIs.Controllers
             {
                 return Forbid(ex.Message);
             }
-            catch (InvalidOperationException ex) 
+            catch (InvalidOperationException ex)
             {
                 return Conflict(ex.Message);
             }
@@ -299,6 +304,86 @@ namespace Elagy.APIs.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving the schedule.");
             }
         }
+        [HttpGet("disbursement")]
+        [Authorize(Roles = "HospitalServiceProvider")]
+        public async Task<IActionResult> GetAllDisbursement([FromHeader]PaginationParameters pagination) 
+        {
+            Console.WriteLine("inside Controller==============================================================================================");
+            var userId = GetCurrentUserId(); // Get current user's ID from token
+            Console.WriteLine("After get user");
+            Console.WriteLine("userId"+userId);
+            if (userId == null) return Unauthorized();
+            try
+            {
+                // Assuming you have a method to get disbursement details
+                var disbursementDetails = await _hospitalProviderService.GetDisbursement(userId, pagination);
+                if (disbursementDetails == null)
+                {
+                    return NotFound("Disbursement details not found for the user.");
+                }
+                return Ok(disbursementDetails);
+            }
+            catch (Exception ex) 
+            {
+
+                _logger.LogError(ex, $"Error getting disbursement");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving the schedule.");
+            }
+
+        }
+
+        [HttpGet("disbursement/{id}")]
+        public async Task<IActionResult> GetDisbursementByID(int id) 
+        {
+            try 
+            {
+                Console.WriteLine("in controller DisID"+ id);
+                var userId = GetCurrentUserId();
+                if (userId == null) return Unauthorized();
+                var disbursement = await _hospitalProviderService.GetDisbursementWithDetails(id, userId);
+                Console.WriteLine("before send Response =====================================================");
+                //foreach (var item in disbursement.DisbursementItems)
+                //{
+                //    Console.WriteLine($"Item ID: {item.Id}, Amount: {item.Amount}");
+
+                //    Console.WriteLine($"itemAppointement : {item.Appointment.Id } - {item.Appointment.MeetingUrl} - {item.Appointment.Date}");
+                //    Console.WriteLine("Finish FirstItem");
+                //}
+                Console.WriteLine("send");
+                return Ok(disbursement);
+
+            }
+            catch(Exception ex) 
+            {
+                _logger.LogError(ex, $"Error getting disbursement");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving the schedule.");
+            }
+        }
+
+        [HttpGet("disbursement/Report/{id}")]
+
+        public async Task<IActionResult> PrintReport(int id) 
+        {
+            try 
+            {
+                var userId = GetCurrentUserId();
+                if (userId == null) return Unauthorized();
+                var disbursement = await _hospitalProviderService.GetDisbursementWithDetails( id, userId);
+
+               
+                var templatePath = "/Views/Reports/DisbursementHospitalReport.cshtml";  // keep this path correct
+                var printPdf = await _reportProHtmlToPdf.RenderToPdfAsync(templatePath, disbursement);
+
+
+                return File(printPdf.Pdf, printPdf.ContentType, printPdf.FileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting disbursement");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while retrieving the schedule.");
+            }
+        }
+        
 
     }
 }

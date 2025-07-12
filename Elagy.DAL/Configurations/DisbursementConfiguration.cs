@@ -27,9 +27,9 @@ namespace Elagy.Infrastructure.Configurations
             builder.Property(d => d.PaymentMethod)
                    .HasMaxLength(100)
                    .IsRequired();
- 
 
-            // Relationship with DisbursementItems
+
+          //  Relationship with DisbursementItems
             builder.HasMany(d => d.DisbursementItems)
                    .WithOne(di => di.Disbursement)
                    .HasForeignKey(di => di.DisbursementId)

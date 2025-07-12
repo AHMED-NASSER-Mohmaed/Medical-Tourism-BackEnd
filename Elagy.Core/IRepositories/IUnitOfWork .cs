@@ -2,6 +2,7 @@
 using Elagy.Core.IServices;
 using System.Threading.Tasks;
 using DayOfWeek = Elagy.Core.Entities.DayOfWeek;
+ 
 
 namespace Elagy.Core.IRepositories
 {
@@ -32,7 +33,10 @@ namespace Elagy.Core.IRepositories
         ICarRepository Cars { get; }
         IDriverRepository Drivers { get; }
         ICarDriverRepository CarDrivers { get; }
+
+        IDisbursementRepository Disbursements { get; }
         ///////////////////////////
+        ///
         
         //nasser
         IGenericRepository<RoomSchedule> RoomSchedule { get; }

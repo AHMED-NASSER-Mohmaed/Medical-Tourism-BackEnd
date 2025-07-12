@@ -19,6 +19,10 @@ using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Stripe;
 using Stripe.Checkout;
+using ReportProPDF;
+using Elagy.DAL.Repositories;
+using System.Text.Json.Serialization;
+using HtmlRendererAsPdf.Services;
 
 
 
@@ -27,6 +31,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
@@ -133,7 +138,13 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>(); // Your custom wr
 // stripe secrete key setting 
 StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
-
+// RegisterSerialization
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
 
 
 
@@ -253,8 +264,12 @@ builder.Services.AddRateLimiter(rateLimiterOptions =>
     };
 });
 
+builder.Services.AddControllersWithViews();
 
 
+// build Report Service
+builder.Services.AddReportProPDF();
+builder.Services.AddReportHtmlToAsPdf();
 
 var app = builder.Build();
 

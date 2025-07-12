@@ -4,6 +4,8 @@ using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.Shared;
 using Elagy.Core.DTOs.SpecialtyAppointment;
 using Elagy.Core.DTOs.User;
+using Elagy.Core.DTOs.Disbursement;
+
 using Elagy.Core.Entities;
 using Elagy.Core.Enums;
 using Elagy.Core.Helpers;
@@ -13,7 +15,12 @@ using Microsoft.AspNetCore.Http; // Add this line if it's missing
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore; // Crucial for .Include() and .SingleOrDefaultAsync()
 using Microsoft.Extensions.Logging;
-using ServiceProvider = Elagy.Core.Entities.ServiceProvider; // Ensure this is the correct namespace for ServiceProvider
+using Elagy.Core.DTOs.Pagination;
+using Microsoft.AspNetCore.Http; // Add this line if it's missing
+using Elagy.Core.DTOs.Pagination;
+using QuestPDF.Fluent;
+using Microsoft.CodeAnalysis.Operations;
+using Microsoft.AspNetCore.Mvc; // Add this line if it's missing
 namespace Elagy.BL.Services
 {
     public class HospitalProviderService : IHospitalProviderService
@@ -60,6 +67,7 @@ namespace Elagy.BL.Services
                                             .Include(sp => sp.ServiceAsset)
                                             .SingleOrDefaultAsync(sp => sp.Id == providerId);
 
+            
             if (provider == null || provider.ServiceAsset == null || provider.ServiceAsset.AssetType != AssetType.Hospital)
             {
                 _logger.LogWarning($"Failed to update: Hospital Provider with ID {providerId} or its asset not found/invalid type.");
@@ -200,45 +208,80 @@ namespace Elagy.BL.Services
 
             return _mapper.Map<List<AssetImageResponseDto>>(imagesToDelete);
         }
-
-        public async Task<PagedResponseDto<HospitalAppointmentDto>> GetHospitalAppointmentsAsync(
-    string hospitalAssetId,
-    PaginationParameters paginationParameters)
+        public async Task<PagedResponseDto<DisplayDisbursement>> GetDisbursement(string ProviderId,PaginationParameters paginationParams)
         {
-            var query = _unitOfWork.SpecialtyAppointments.AsQueryable()
-                .Include(a => a.Package)
-                    .ThenInclude(p => p.Patient)
-                        .ThenInclude(p => p.Governorate)
-                            .ThenInclude(g => g.Country)
-                .Include(a => a.SpecialtySchedule)
-                    .ThenInclude(s => s.HospitalSpecialty)
-                        .ThenInclude(hs => hs.Specialty)
-                .Include(a => a.SpecialtySchedule.Doctor)
-                .Where(a => a.SpecialtySchedule.HospitalSpecialty.HospitalAssetId == hospitalAssetId);
+            Console.WriteLine("inside Service");
+            //var provider = await _unitOfWork.ServiceProviders.AsQueryable()
+            //                                .Include(sp => sp.ServiceAsset)
+            //                                .SingleOrDefaultAsync(sp => sp.Id == ProviderId);
 
-            if (paginationParameters.AppointmentStatus.HasValue)
+            Console.WriteLine("after get Provider");
+            //Console.WriteLine("ProviderID"+provider.AssetId);
+
+
+            //if (provider == null) 
+            //{
+            //    _logger.LogWarning($"Hospital Provider with ID {ProviderId} not found.");
+            //    return new PagedResponseDto<DisplayDisbursement>(Enumerable.Empty<DisplayDisbursement>(), 0, paginationParams.PageNumber, paginationParams.PageSize);
+            //}
+            
+            var disbursements = await _unitOfWork.Disbursements.GetAllHospitalDisbursement(ProviderId);
+            Console.WriteLine("After get Disbursements");
+            foreach (var item in disbursements) 
             {
-                query = query.Where(a => a.Status == paginationParameters.AppointmentStatus.Value);
+                Console.WriteLine("disID"+item.PaymentMethod);
             }
 
-            if (paginationParameters.FilterStartDate.HasValue)
-            {
-                query = query.Where(a => a.Date == paginationParameters.FilterStartDate.Value);
-            }
-            if (paginationParameters.FilterDayOfWeekId.HasValue)
-            {
-                query = query.Where(a => a.SpecialtySchedule.DayOfWeekId == paginationParameters.FilterDayOfWeekId.Value);
-            }
-
-            var totalCount = await query.CountAsync();
-
-            var pagedAppointments = await query
-                .OrderByDescending(a => a.Date)
-                .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
-                .Take(paginationParameters.PageSize)
-                .ToListAsync();
+            var totalCount = disbursements.Count();
+            var pagedDisbursements = await disbursements
+                                    .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
+                                    .Take(paginationParams.PageSize)
+                                    .ToListAsync();
+            var DisbursementDtos = _mapper.Map<IEnumerable<DisplayDisbursement>>(pagedDisbursements);
+            return new PagedResponseDto<DisplayDisbursement>(
+                DisbursementDtos,
+                    totalCount,
+                    paginationParams.PageNumber,
+                    paginationParams.PageSize
+                    );
 
 
         }
+        public async Task<DisbursementHospitalDTO> GetDisbursementWithDetails(int disbursementId, string ProviderId) 
+        {
+            try
+            {
+                //var provider = await _unitOfWork.ServiceProviders.AsQueryable()
+                //                            .Include(sp => sp.ServiceAsset)
+                //                            .SingleOrDefaultAsync(sp => sp.Id == ProviderId);
+
+                //if (provider == null)
+                //{
+                //    _logger.LogWarning($"Hospital Provider with ID {ProviderId} not found.");
+                //    return new DisplayDisbursement();
+                //}
+                Console.WriteLine(disbursementId);
+                var disbursement = await _unitOfWork.Disbursements.GetHospitalDisbursementById(disbursementId);
+                Console.WriteLine("After get Repo==============================================================");
+                Console.WriteLine("Dis"+disbursement.Id);
+                //foreach (var item in disbursement.DisbursementItems)
+                //{
+                //    Console.WriteLine("DisItem" + item.AppointmentId);
+                //    Console.WriteLine("Appointment" + item.Appointment.price);
+                //    Console.WriteLine("schedule" + (item.Appointment as SpecialtyAppointment).SpecialtySchedule.Doctor.FirstName);
+
+                //}
+
+               // var disbursementDto = _mapper.Map<DisplayDisbursement>(disbursement);
+
+                return disbursement;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+     
     }
 }

@@ -41,6 +41,9 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
     public DbSet<HospitalAssetImage> HospitalAssetImages { get; set; }
     public DbSet<HotelAssetImage> HotelAssetImages { get; set; }
 
+    public DbSet<Disbursement> disbursements { get; set; }
+
+
 
 
     // public DbSet<ImageKitTempFile> ImageKitTempFiles { get; set; } // If you still have this entity
@@ -84,6 +87,7 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
 
         builder.ApplyConfiguration(new HotelAssetImageConfiguration());
         builder.ApplyConfiguration(new HospitalAssetConfiguration());
+   
 
 
         // builder.ApplyConfiguration(new ImageKitTempFileConfiguration()); // If you still have this entity

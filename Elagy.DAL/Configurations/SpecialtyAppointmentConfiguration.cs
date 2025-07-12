@@ -12,6 +12,6 @@ public class SpecialtyAppointmentConfiguration : IEntityTypeConfiguration<Specia
         builder.HasOne(s => s.SpecialtySchedule)
                .WithMany(s => s.Appointments)
                .HasForeignKey(s => s.SpecialtyScheduleId)
-               .OnDelete(DeleteBehavior.Restrict); // ✅
+               .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -13,6 +13,9 @@ using ServiceProvider = Elagy.Core.Entities.ServiceProvider; // Ensure this is t
 
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http; // Add this line if it's missing
+using Microsoft.Extensions.Logging;
+using Elagy.Core.DTOs.Pagination;
+using Elagy.Core.DTOs.Disbursement; // Add this line if it's missing
 namespace Elagy.BL.Services
 {
     public class CarRentalProviderService : ICarRentalProviderService
@@ -198,6 +201,16 @@ namespace Elagy.BL.Services
             await _unitOfWork.CompleteAsync();
 
             return _mapper.Map<List<AssetImageResponseDto>>(images);
+        }
+
+        public Task<PagedResponseDto<DisplayCarRentalDisbursement>> GetAllDisbursement(string providerId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<DisplayCarRentalDisbursement> GetDisbursementWithDetails(int id, string ProviderId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

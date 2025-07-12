@@ -23,11 +23,13 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
         builder.HasOne(a => a.Package)
                .WithMany(p => p.Appointments)
                .HasForeignKey(a => a.PackageId)
-               .OnDelete(DeleteBehavior.Restrict); 
+               .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(a => a.DisbursementItem)
-               .WithOne(d => d.Appointment)
-               .HasForeignKey<Appointment>(a => a.DisbursementItemId)
-               .OnDelete(DeleteBehavior.Restrict);  
+        //builder.HasOne(a => a.DisbursementItem)
+        //       .WithOne(d => d.Appointment)
+        //       .HasForeignKey<Appointment>(a => a.DisbursementItemId)
+        //       .OnDelete(DeleteBehavior.Restrict);
+
+
     }
 }

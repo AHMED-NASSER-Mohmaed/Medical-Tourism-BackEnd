@@ -20,6 +20,8 @@ namespace Elagy.Core.Entities
 
 
         public int AppointmentId { get; set; } // Foreign key to the Appointment entity
+
         public Appointment Appointment { get; set; } // Navigation property to the Appointment entity
+
     }
 }

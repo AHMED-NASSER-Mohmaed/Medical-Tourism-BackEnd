@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Elagy.Core.DTOs.CarlSchedule;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +12,7 @@ namespace Elagy.Core.DTOs.RoomSchedule
         public int RoomId { get; set; }
         public string HotelId { get; set; }
         public string HotelName { get; set; }
-        public IEnumerable<DateOnly> UnavailableDates { get; set; }
+        public List<Periode> UnavailableDates { get; set; }
 
     }
 }

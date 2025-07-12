@@ -154,19 +154,31 @@ namespace Elagy.APIs.Controllers
         [Authorize(Roles = "HospitalServiceProvider")]
         public async Task<IActionResult> CreateDoctor([FromForm] DoctorCreateDto createDto, IFormFile? licenseDocumentFile, IFormFile? profileImageFile)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var hospitalId = GetCurrentUserId(); // Get hospital ID from the authenticated user's token
-            if (hospitalId == null) return Unauthorized("Hospital ID could not be determined from your token.");
 
             try
             {
+                Console.WriteLine("checkdata");
+                Console.WriteLine(createDto);
+            }
+            catch (Exception) 
+            {
+            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            
+            var hospitalId = GetCurrentUserId(); // Get hospital ID from the authenticated user's token
+            if (hospitalId == null) return Unauthorized("Hospital ID could not be determined from your token.");
+            Console.WriteLine("after Check id"+hospitalId);
+            try
+            {
+                Console.WriteLine("inside try repo");
                 var result = await _doctorService.CreateDoctorAsync(createDto, hospitalId, licenseDocumentFile, profileImageFile);
      
                 return CreatedAtAction(nameof(GetDoctorById), new { doctorId = result.Id }, result);
             }
             catch (ArgumentException ex) // For invalid HospitalSpecialtyId, GovernorateId, CountryId etc.
             {
+                Console.WriteLine("inside Bad REquest");
                 return BadRequest(ex.Message);
             }
             catch (InvalidOperationException ex)

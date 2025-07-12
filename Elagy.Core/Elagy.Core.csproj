@@ -10,6 +10,13 @@
     <PackageReference Include="Imagekit" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.6" />
+    <PackageReference Include="ReportProHtmlToPdf" Version="2025.1.1" />
+    <PackageReference Include="ReportProPDF" Version="2025.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DTOs\Reports\" />
+    <Folder Include="Reports\" />
   </ItemGroup>
 
 </Project>

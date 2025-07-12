@@ -1,0 +1,457 @@
+@model Elagy.Core.DTOs.Disbursement.DisbursementHospitalDTO
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Disbursement Report - @Model.Id</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #fff;
+            font-size: 12px;
+        }
+
+        .container {
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Section */
+        .report-header {
+            border-bottom: 3px solid #2c5aa0;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .company-info h1 {
+            color: #2c5aa0;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .company-info p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .report-title {
+            text-align: right;
+        }
+
+        .report-title h2 {
+            color: #2c5aa0;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .report-title p {
+            color: #666;
+            font-size: 12px;
+        }
+
+        /* Summary Section */
+        .summary-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-item .label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .summary-item .value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2c5aa0;
+        }
+
+        .summary-item .total-amount {
+            color: #28a745;
+            font-size: 20px;
+        }
+
+        /* Items Section */
+        .items-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c5aa0;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        .items-table th {
+            background: #2c5aa0;
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .items-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: top;
+        }
+
+        .items-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .items-table tr:hover {
+            background-color: #e3f2fd;
+        }
+
+        /* Status badges */
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .status-completed { background: #d4edda; color: #155724; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+        .status-scheduled { background: #d1ecf1; color: #0c5460; }
+        .status-default { background: #e2e3e5; color: #383d41; }
+
+        /* Type badges */
+        .type-badge {
+            padding: 2px 6px;
+            background: #e9ecef;
+            border-radius: 6px;
+            font-size: 9px;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        /* Price formatting */
+        .price {
+            font-weight: 600;
+            color: #28a745;
+            text-align: right;
+        }
+
+        /* Doctor info */
+        .doctor-info {
+            font-size: 10px;
+            color: #666;
+        }
+
+        .doctor-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .doctor-id {
+            font-style: italic;
+            color: #999;
+        }
+
+        /* Footer */
+        .report-footer {
+            border-top: 2px solid #e9ecef;
+            padding-top: 20px;
+            margin-top: 40px;
+            text-align: center;
+            color: #666;
+            font-size: 10px;
+        }
+
+        /* Print specific styles */
+        @@media print {
+            body {
+                font-size: 11px;
+            }
+
+            .container {
+                max-width: none;
+                margin: 0;
+                padding: 15px;
+            }
+
+            .report-header {
+                page-break-inside: avoid;
+            }
+
+            .summary-section {
+                page-break-inside: avoid;
+            }
+
+            .items-table {
+                page-break-inside: auto;
+            }
+
+            .items-table tr {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Responsive adjustments */
+        @@media (max-width: 768px) {
+            .header-content
+
+        {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .report-title {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .items-table {
+            font-size: 10px;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="report-header">
+            <div class="header-content">
+                <div class="company-info">
+                    <h1>Healthcare System</h1>
+                    <p>Medical Services & Disbursements</p>
+                </div>
+                <div class="report-title">
+                    <h2>Disbursement Report</h2>
+                    <p>Generated on @DateTime.Now.ToString("MMMM dd, yyyy")</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="summary-section">
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="label">Disbursement ID</div>
+                    <div class="value">@Model.Id</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Disbursement Date</div>
+                    <div class="value">@Model.DisbursementDateMonth.ToString("MMM yyyy")</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Total Amount</div>
+                    <div class="value total-amount">@Model.TotalAmount.ToString("C")</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Section -->
+        <div class="items-section">
+            <h3 class="section-title">Disbursement Items (@Model.DisbursementItems.Count items)</h3>
+
+            @if (Model.DisbursementItems != null && Model.DisbursementItems.Any())
+            {
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">#</th>
+                            <th style="width: 10%;">Item ID</th>
+                            <th style="width: 10%;">Appointment</th>
+                            <th style="width: 10%;">Price</th>
+                            <th style="width: 10%;">Status</th>
+                            <th style="width: 10%;">Type</th>
+                            <th style="width: 20%;">Specialty</th>
+                            <th style="width: 25%;">Doctor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.DisbursementItems.Count; i++)
+                        {
+                            var item = Model.DisbursementItems[i];
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td>@item.Id</td>
+                                <td>
+                                    @if (item.Appointment != null)
+                                    {
+                                        @item.Appointment.Id
+                                    }
+                                    else
+                                    {
+                                        <span style="color: #dc3545; font-style: italic;">No appointment</span>
+                                    }
+                                </td>
+                                <td class="price">
+                                    @if (item.Appointment != null)
+                                    {
+                                        @item.Appointment.price.ToString("C")
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Appointment != null)
+                                    {
+                                        var statusClass = item.Appointment.Status switch
+                                        {
+                                            1 => "status-completed",
+                                            2 => "status-pending",
+                                            3 => "status-cancelled",
+                                            4 => "status-scheduled",
+                                            _ => "status-default"
+                                        };
+                                        var statusText = item.Appointment.Status switch
+                                        {
+                                            1 => "Completed",
+                                            2 => "Pending",
+                                            3 => "Cancelled",
+                                            4 => "Scheduled",
+                                            _ => "Unknown"
+                                        };
+                                        <span class="status-badge @statusClass">@statusText</span>
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Appointment != null)
+                                    {
+                                        var typeText = item.Appointment.Type switch
+                                        {
+                                            1 => "Consultation",
+                                            2 => "Follow-up",
+                                            3 => "Emergency",
+                                            4 => "Surgery",
+                                            _ => "Other"
+                                        };
+                                        <span class="type-badge">@typeText</span>
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Appointment?.SpecialtySchedule != null)
+                                    {
+                                        @item.Appointment.SpecialtySchedule.Specialty
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Appointment?.SpecialtySchedule?.Doctor != null)
+                                    {
+                                        <div class="doctor-info">
+                                            <div class="doctor-name">@item.Appointment.SpecialtySchedule.Doctor.Name</div>
+                                            <div class="doctor-id">ID: @item.Appointment.SpecialtySchedule.Doctor.Id</div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div style="text-align: center; padding: 40px; color: #666; font-style: italic;">
+                    No disbursement items found.
+                </div>
+            }
+        </div>
+
+        <!-- Summary Footer -->
+        <div class="summary-section">
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="label">Total Items</div>
+                    <div class="value">@(Model.DisbursementItems?.Count ?? 0)</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Generated At</div>
+                    <div class="value">@Model.GeneratedAt.ToString("MMM dd, yyyy HH:mm")</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Grand Total</div>
+                    <div class="value total-amount">@Model.TotalAmount.ToString("C")</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="report-footer">
+            <p>This report was generated automatically by the Healthcare Management System.</p>
+            <p>For questions or concerns, please contact the billing department.</p>
+        </div>
+    </div>
+</body>
+</html>
