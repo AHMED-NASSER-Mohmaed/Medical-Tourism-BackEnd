@@ -1,4 +1,5 @@
-﻿using Elagy.Core.Entities;
+﻿using Elagy.Core.DTOs.Disbursement;
+using Elagy.Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Elagy.Core.IRepositories
     public interface IDisbursementRepository : IGenericRepository<Disbursement>
     {
         Task<IQueryable<Disbursement>> GetAllHospitalDisbursement(string AssetId);
-        Task<Disbursement> GetHospitalDisbursementById(int disbursementId);
+        Task<DisbursementHospitalDTO> GetHospitalDisbursementById(int disbursementId);
 
 
         Task<IQueryable<Disbursement>> GetAllHotelDisbursement(string AssetId);

@@ -17,7 +17,8 @@ using Elagy.Core.DTOs.Pagination;
 using Microsoft.AspNetCore.Http; // Add this line if it's missing
 using Elagy.Core.DTOs.Pagination;
 using QuestPDF.Fluent;
-using Microsoft.CodeAnalysis.Operations; // Add this line if it's missing
+using Microsoft.CodeAnalysis.Operations;
+using Microsoft.AspNetCore.Mvc; // Add this line if it's missing
 namespace Elagy.BL.Services
 {
     public class HospitalProviderService : IHospitalProviderService
@@ -208,20 +209,26 @@ namespace Elagy.BL.Services
         public async Task<PagedResponseDto<DisplayDisbursement>> GetDisbursement(string ProviderId,PaginationParameters paginationParams)
         {
             Console.WriteLine("inside Service");
-            var provider = await _unitOfWork.ServiceProviders.AsQueryable()
-                                            .Include(sp => sp.ServiceAsset)
-                                            .SingleOrDefaultAsync(sp => sp.Id == ProviderId);
+            //var provider = await _unitOfWork.ServiceProviders.AsQueryable()
+            //                                .Include(sp => sp.ServiceAsset)
+            //                                .SingleOrDefaultAsync(sp => sp.Id == ProviderId);
 
-            Console.WriteLine("after get Provider"); 
+            Console.WriteLine("after get Provider");
+            //Console.WriteLine("ProviderID"+provider.AssetId);
 
-            if (provider == null) 
-            {
-                _logger.LogWarning($"Hospital Provider with ID {ProviderId} not found.");
-                return new PagedResponseDto<DisplayDisbursement>(Enumerable.Empty<DisplayDisbursement>(), 0, paginationParams.PageNumber, paginationParams.PageSize);
-            }
+
+            //if (provider == null) 
+            //{
+            //    _logger.LogWarning($"Hospital Provider with ID {ProviderId} not found.");
+            //    return new PagedResponseDto<DisplayDisbursement>(Enumerable.Empty<DisplayDisbursement>(), 0, paginationParams.PageNumber, paginationParams.PageSize);
+            //}
             
-            var disbursements = await _unitOfWork.Disbursements.GetAllHospitalDisbursement(provider.AssetId.ToString());
+            var disbursements = await _unitOfWork.Disbursements.GetAllHospitalDisbursement(ProviderId);
             Console.WriteLine("After get Disbursements");
+            foreach (var item in disbursements) 
+            {
+                Console.WriteLine("disID"+item.PaymentMethod);
+            }
 
             var totalCount = disbursements.Count();
             var pagedDisbursements = await disbursements
@@ -238,24 +245,34 @@ namespace Elagy.BL.Services
 
 
         }
-        public async Task<DisplayDisbursement> GetDisbursementWithDetails(int disbursementId, string ProviderId) 
+        public async Task<DisbursementHospitalDTO> GetDisbursementWithDetails(int disbursementId, string ProviderId) 
         {
             try
             {
-                var provider = await _unitOfWork.ServiceProviders.AsQueryable()
-                                            .Include(sp => sp.ServiceAsset)
-                                            .SingleOrDefaultAsync(sp => sp.Id == ProviderId);
+                //var provider = await _unitOfWork.ServiceProviders.AsQueryable()
+                //                            .Include(sp => sp.ServiceAsset)
+                //                            .SingleOrDefaultAsync(sp => sp.Id == ProviderId);
 
-                if (provider == null)
-                {
-                    _logger.LogWarning($"Hospital Provider with ID {ProviderId} not found.");
-                    return new DisplayDisbursement();
-                }
+                //if (provider == null)
+                //{
+                //    _logger.LogWarning($"Hospital Provider with ID {ProviderId} not found.");
+                //    return new DisplayDisbursement();
+                //}
+                Console.WriteLine(disbursementId);
                 var disbursement = await _unitOfWork.Disbursements.GetHospitalDisbursementById(disbursementId);
+                Console.WriteLine("After get Repo==============================================================");
+                Console.WriteLine("Dis"+disbursement.Id);
+                //foreach (var item in disbursement.DisbursementItems)
+                //{
+                //    Console.WriteLine("DisItem" + item.AppointmentId);
+                //    Console.WriteLine("Appointment" + item.Appointment.price);
+                //    Console.WriteLine("schedule" + (item.Appointment as SpecialtyAppointment).SpecialtySchedule.Doctor.FirstName);
 
-                var disbursementDto = _mapper.Map<DisplayDisbursement>(disbursement);
+                //}
 
-                return disbursementDto;
+               // var disbursementDto = _mapper.Map<DisplayDisbursement>(disbursement);
+
+                return disbursement;
             }
             catch (Exception ex)
             {
@@ -263,6 +280,6 @@ namespace Elagy.BL.Services
             }
         }
 
-
+     
     }
 }

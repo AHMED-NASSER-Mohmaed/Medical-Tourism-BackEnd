@@ -18,7 +18,7 @@ namespace Elagy.Core.DTOs.Disbursement
        // public string AssetId { get; set; }
        
 
-        public Collection<IDisplayDisbursementItems> DisbursementItems { get; set; } = new Collection<IDisplayDisbursementItems>();
+        public Collection<DisplayHospitalDisbursementItems> DisbursementItems { get; set; } = new Collection<DisplayHospitalDisbursementItems>();
 
 
 

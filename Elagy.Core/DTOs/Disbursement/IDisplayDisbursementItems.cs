@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Elagy.Core.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,7 @@ namespace Elagy.Core.DTOs.Disbursement
         public int Id { get; set; }
         public DateTime CreatedAt { get; set; }
         public decimal Amount { get; set; } // Amount of the disbursement item
-      
+        public AppointmentType Type { get; set; }
+        public AppointmentStatus Status { get; set; } 
     }
 }

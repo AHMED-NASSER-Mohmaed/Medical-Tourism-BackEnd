@@ -26,11 +26,11 @@ namespace Elagy.Infrastructure.Configurations
                    .HasForeignKey(di => di.DisbursementId)
                    .OnDelete(DeleteBehavior.Cascade);
 
-            // Relationship with Appointment
             builder.HasOne(di => di.Appointment)
-                   .WithMany() // or .WithMany(a => a.DisbursementItems) if defined in Appointment
-                   .HasForeignKey(di => di.AppointmentId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                       .WithOne()
+                       .HasForeignKey<DisbursementItem>(di => di.AppointmentId)
+                       .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }

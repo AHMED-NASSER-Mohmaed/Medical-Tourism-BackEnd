@@ -17,7 +17,7 @@ namespace Elagy.Core.IServices
         Task<List<AssetImageResponseDto>> UploadHospitalAssetImages(string hospitalId, List<IFormFile> hospitalImages);
         Task<List<AssetImageResponseDto>> DeleteHospitalAssetImagesByIds(string hospitalId, List<string> imageIds);
         Task<PagedResponseDto<DisplayDisbursement>> GetDisbursement(string ProviderId, PaginationParameters paginationParams);
-        Task<DisplayDisbursement> GetDisbursementWithDetails(int disbursementId, string ProviderId);
+        Task<DisbursementHospitalDTO> GetDisbursementWithDetails(int disbursementId, string ProviderId);
 
     }
 }

@@ -6,6 +6,7 @@ using ReportProPDF.IServices;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using ReportProHtmlToPdf.IServices;
 namespace Elagy.APIs.Controllers
 {
 
@@ -15,6 +16,7 @@ namespace Elagy.APIs.Controllers
     public class ReportController : ControllerBase
     {
         private readonly IReportPro _reportProPDFService;
+       
         public ReportController(IReportPro reportService)
         {
             _reportProPDFService = reportService;

@@ -87,6 +87,7 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
 
         builder.ApplyConfiguration(new HotelAssetImageConfiguration());
         builder.ApplyConfiguration(new HospitalAssetConfiguration());
+   
 
 
         // builder.ApplyConfiguration(new ImageKitTempFileConfiguration()); // If you still have this entity
