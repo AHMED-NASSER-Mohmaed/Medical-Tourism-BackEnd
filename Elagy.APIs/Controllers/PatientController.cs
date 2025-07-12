@@ -18,8 +18,6 @@ namespace Elagy.APIs.Controllers
         private readonly IImageProfile _pofileImageService;
         private readonly IPackgeService _packageService;
         
-
-
         public PatientController(IPatientService patientService, IImageProfile pofileImageService,ILogger<PatientController>logger,IPackgeService packge)
         :base(pofileImageService,logger)
         {
@@ -27,9 +25,6 @@ namespace Elagy.APIs.Controllers
             _pofileImageService = pofileImageService;
             _packageService = packge;
         }
-
- 
-
 
         [HttpGet("profile")]
         public async Task<ActionResult<PatientDto>> GetProfile()
