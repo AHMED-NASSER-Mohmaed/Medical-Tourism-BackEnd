@@ -37,9 +37,9 @@ namespace Elagy.Core.DTOs.Package
             {
                 var toDday = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1);
 
-                if (this.SpecialtyAppoinment.Date > DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1)
-                    || ( this.RoomAppointment!=null && this.RoomAppointment.CheckInDate > toDday ) 
-                    || ( this.CarAppointment!=null && this.CarAppointment.StartingDate > toDday)
+                if (this.SpecialtyAppoinment.Date < DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1)
+                    || ( this.RoomAppointment!=null && this.RoomAppointment.CheckInDate < toDday ) 
+                    || ( this.CarAppointment!=null && this.CarAppointment.StartingDate < toDday)
                     )
                     return  false;
 
