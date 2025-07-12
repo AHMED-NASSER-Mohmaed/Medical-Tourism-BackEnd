@@ -14,7 +14,6 @@ namespace Elagy.Core.IServices
     {
 
         Task<PackageResponseDTO> CreatePendingBookingAsync(string PatientId,CreateBookingRequest request);
-        Task<Package?> GetBookingByIdAsync(int PackageId);
         Task UpdateBookingStatusAsync(int PackageId, BookingStatus newStatus, string? stripeSessionId = null, string? stripePaymentIntentId = null);
 
     }

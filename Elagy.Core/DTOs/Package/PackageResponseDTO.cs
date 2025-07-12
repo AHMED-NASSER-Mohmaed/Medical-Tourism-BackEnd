@@ -18,10 +18,40 @@ namespace Elagy.Core.DTOs.Package
         public DateTime CreatedAt { get; set; }
         public DateTime? PaymentConfirmedAt { get; set; }//when hock is called and payment is confirmed
 
-        public decimal TatalAmount { get; set; }
+        public decimal TatalAmount { get
+            {
+                decimal total = 0;
+                if (SpecialtyAppoinment != null)
+                    total += SpecialtyAppoinment.price;
+                if (RoomAppointment != null)
+                    total += RoomAppointment.price;
+                if (CarAppointment != null)
+                    total += CarAppointment.price;
+                return total;
+            } 
+        }
+
+        public bool CanCancel
+        {
+            get
+            {
+                var toDday = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1);
+
+                if (this.SpecialtyAppoinment.Date < DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1)
+                    || ( this.RoomAppointment!=null && this.RoomAppointment.CheckInDate < toDday ) 
+                    || ( this.CarAppointment!=null && this.CarAppointment.StartingDate < toDday)
+                    )
+                    return  false;
+
+                return true;
+            }
+
+        } //if the package can be cancelled or not}
+
         public BookingStatus Status { get; set; }
 
         public string PatientId { get; set; }
+
 
         public SpecialtyAppointmentResponseDTTO SpecialtyAppoinment { get; set; }
 

@@ -14,7 +14,9 @@ namespace Elagy.Core.IServices
         Task<Package> CreatePackage(string _patientId);
         Task<PagedResponseDto<PackageResponseDTO>> getPackages(string _patientId, PaginationParameters pp);
 
-        //Task<> GetPackageDetails(Guid packageId, string patientId);
+        Task<PackageWithDetailDTO> GetPackageDetails(Guid packageId);
+
+        Task<PackageResponseDTO> CancelBooking(string packageId);
 
     }
 

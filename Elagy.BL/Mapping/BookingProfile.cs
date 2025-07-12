@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Elagy.Core.DTOs.CarAppointment;
 using Elagy.Core.DTOs.Package;
 using Elagy.Core.DTOs.SpecialtyAppointment;
 using Elagy.Core.Entities;
@@ -20,15 +21,16 @@ namespace Elagy.BL.Mapping
             CreateMap<SpecialtyAppointment, SpecialtyAppointmentResponseDTTO>();
 
             // Mapping from Packae to PackageResponseDTO
-            CreateMap<Package,PackageResponseDTO>()
+            CreateMap<Package, PackageResponseDTO>()
                 .ForMember(dest => dest.SpecialtyAppoinment, opt => opt.MapFrom(src => src.Appointments.FirstOrDefault(a => a is SpecialtyAppointment) as SpecialtyAppointment))
                 .ForMember(dest => dest.RoomAppointment, opt => opt.MapFrom(src => src.Appointments.FirstOrDefault(a => a is RoomAppointment) as RoomAppointment))
                 .ForMember(dest => dest.CarAppointment, opt => opt.MapFrom(src => src.Appointments.FirstOrDefault(a => a is CarRentalAppointment) as CarRentalAppointment));
 
 
+            CreateMap<CarRentalAppointment, CarAppointmentResponseDTO>();
 
 
-                 
+
         }
 
     }

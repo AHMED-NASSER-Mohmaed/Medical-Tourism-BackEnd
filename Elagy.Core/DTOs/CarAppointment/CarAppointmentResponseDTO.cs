@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Elagy.Core.Entities;
+using Elagy.Core.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +10,23 @@ namespace Elagy.Core.DTOs.CarAppointment
 {
     public class CarAppointmentResponseDTO
     {
+        public int Id { get; set; }
+
+        public decimal price { get; set; }
+
+        public AppointmentType Type { get; set; }
+
+        public AppointmentStatus Status { get; set; }
+        public Guid PackageId { get; set; }
+
+        public DateOnly  StartingDate { get; set; }
+        public DateOnly EndingDate { get; set; }
+
+        public float Latitude { get; set; }
+        public float Longitude { get; set; }
+        public string LocationDescription { get; set; } 
+        public fuel_policy FuelPolicy { get; set; } 
+        public int CarScheduleId { get; set; }
+
     }
 }
