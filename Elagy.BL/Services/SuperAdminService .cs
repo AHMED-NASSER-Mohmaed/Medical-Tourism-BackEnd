@@ -261,6 +261,9 @@ namespace Elagy.BL.Services
             // Ensure ApplyUserFilters handles the filtering correctly on IQueryable<User>
             query = ApplyUserFilters(query.Cast<User>(), RquestParams.SearchTerm, RquestParams.UserStatus).OfType<Patient>(); // Apply filters, cast back to Patient
 
+            query = query.Include(p => p.Governorate)
+                .ThenInclude(g => g.Country); // Eager load Governorate and Country for better performance
+
             // --- CRITICAL STEP: Get the total count AFTER all filters are applied ---
             var totalCount = await query.CountAsync(); // calculation against DB
 

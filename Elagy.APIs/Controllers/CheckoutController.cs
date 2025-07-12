@@ -4,6 +4,7 @@ using Elagy.Core.IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Stripe.Checkout;
+using static System.Net.WebRequestMethods;
 
 
 namespace Elagy.APIs.Controllers
@@ -102,7 +103,10 @@ namespace Elagy.APIs.Controllers
                     PaymentMethodTypes = new List<string> { "card" },
                     LineItems = lineItems,
                     Mode = "payment",
-                     SuccessUrl = "http://localhost:4200/payment-success={CHECKOUT_SESSION_ID}&bookingId=123",
+
+                     //SuccessUrl = "https://localhost:4200/payment-success={CHECKOUT_SESSION_ID}&bookingId=123",
+
+                     SuccessUrl = "http://localhost:4200/payment-success?sessionId={CHECKOUT_SESSION_ID}",
                      CancelUrl = "https://yourdomain.com/payment-cancelled?bookingId=123",
 
                     //$"{_successUrl}?session_id={{CHECKOUT_SESSION_ID}}&bookingId={booking.Id}",
