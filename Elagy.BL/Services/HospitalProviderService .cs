@@ -292,6 +292,7 @@ namespace Elagy.BL.Services
                 .Include(a => a.SpecialtySchedule.HospitalSpecialty.Specialty)
                 .Include(a => a.SpecialtySchedule.Doctor)
                 .Where(a => a.SpecialtySchedule.HospitalSpecialty.HospitalAssetId == hospitalAssetId);
+            DateOnly today = DateOnly.FromDateTime(DateTime.Now);
 
             if (paginationParameters.AppointmentStatus.HasValue)
             {
@@ -306,6 +307,12 @@ namespace Elagy.BL.Services
             {
                 query = query.Where(a => a.SpecialtySchedule.DayOfWeekId == paginationParameters.FilterDayOfWeekId.Value);
             }
+
+            if (paginationParameters.specialtyScheduleId.HasValue)
+            {
+                query = query.Where(a => a.SpecialtySchedule.Id ==paginationParameters.specialtyScheduleId.Value && a.Date>= today);
+            }
+        
 
             // Total count for pagination
             var totalCount = await query.CountAsync();
