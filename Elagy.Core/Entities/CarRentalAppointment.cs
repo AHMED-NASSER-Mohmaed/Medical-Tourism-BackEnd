@@ -9,17 +9,19 @@ namespace Elagy.Core.Entities
 {
     public class CarRentalAppointment:Appointment
     {
-        public DateTime StartingDateTime { get; set; }
-        public DateTime EndingDateTime { get; set; }
+        public DateOnly StartingDate { get; set; }
+        public DateOnly EndingDate { get; set; }
 
         //pickup location
         public float Latitude { get; set; }
         public float Longitude { get; set; }
-        public string LocationDescription { get; set; } // Detailed description of the pickup location
-        public fuel_policy FuelPolicy { get; set; } // Enum for fuel policy
+        public string LocationDescription { get; set; }  
+        public fuel_policy FuelPolicy { get; set; }  
         //forgien key
         public int CarScheduleId { get; set; }
         // Navigation property
         public CarSchedule CarSchedule { get; set; }
+
+
     }
 }

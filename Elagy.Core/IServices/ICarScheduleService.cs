@@ -1,11 +1,9 @@
-﻿using Elagy.Core.DTOs.CarRentalSchedule;
-using Elagy.Core.DTOs.RoomSchedule;
-using Elagy.Core.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using Elagy.Core.DTOs.CarlSchedule;
+using Elagy.Core.DTOs.CarRentalSchedule;
+
+
+
 
 namespace Elagy.Core.IServices
 {
@@ -14,7 +12,7 @@ namespace Elagy.Core.IServices
         Task<bool> IsAvilable(DateOnly Start, DateOnly End, int CarId);
         Task<CarSheduleResponseDTO> CreateCarSchedule(CreateCarScheduleDTO carScheduleDTO);
 
-        Task<UnavailableDatesDTO> GetAvailableCarsSchedules(int carId);
+        Task<CarUnavailableDatesDTO> GetAvailableCarsSchedules(int carId);
 
     }
 }

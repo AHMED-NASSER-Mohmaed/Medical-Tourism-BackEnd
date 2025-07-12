@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace Elagy.Core.DTOs.CarAppoinment
 {
-    public class CarRentalAppoinmentDTO
+    public class createCarRentalAppoinmentDTO
     {
-        public DateTime StartingDateTime { get; set; }
-        public DateTime EndingDateTime { get; set; }
+        public DateOnly StartingDate { get; set; }
+        public DateOnly EndingDate { get; set; }
         public float Latitude { get; set; }
         public float Longitude { get; set; }
         public string LocationDescription { get; set; } 

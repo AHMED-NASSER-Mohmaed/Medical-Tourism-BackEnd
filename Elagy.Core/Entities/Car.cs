@@ -1,4 +1,5 @@
-﻿using Elagy.Core.Enums;
+﻿using Elagy.Core.Const;
+using Elagy.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -14,7 +15,6 @@ namespace Elagy.Core.Entities
         [Required] public string FactoryMake { get; set; } 
         [Required] public string ModelName { get; set; }
         [Required] public int ModelYear { get; set; }
-
         [Required] public CarType Type { get; set; } 
         [Required] public int Capacity { get; set; } 
 

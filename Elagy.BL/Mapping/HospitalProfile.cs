@@ -54,8 +54,8 @@ namespace Elagy.BL.Mapping
                 .ForMember(dest => dest.EmailConfirmed, opt => opt.MapFrom(src => true))
                 .ForMember(dest => dest.PhoneNumberConfirmed, opt => opt.MapFrom(src => true))
                 .ForMember(dest => dest.TwoFactorEnabled, opt => opt.MapFrom(src => true))
-                .ForMember(dest => dest.LockoutEnabled, opt => opt.MapFrom(src => true))
-                .ForMember(dest => dest.AccessFailedCount, opt => opt.MapFrom(src => 0))
+                .ForMember(dest => dest.LockoutEnabled, opt => opt.MapFrom(src => false))
+                .ForMember(dest => dest.AccessFailedCount, opt => opt.MapFrom(src => 20))
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email)) // UserName is usually same as Email for Identity
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Status.Active)) // Doctor starts as Active
                 .ForMember(dest => dest.UserType, opt => opt.MapFrom(src => UserType.Doctor))

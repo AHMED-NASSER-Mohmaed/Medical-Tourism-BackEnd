@@ -14,13 +14,82 @@ namespace Elagy.APIs.Controllers
     public class DoctorsController : ProfileImageBaseController // Inherits from your BaseApiController
     {
         private readonly IDoctorService _doctorService;
+        private readonly ISpecialtyScheduleService _SpecialtyScheduleService;
+
         private readonly ILogger<DoctorsController> _logger;
 
-        public DoctorsController(IDoctorService doctorService, IImageProfile _imageProfile,ILogger<DoctorsController> logger)
+        public DoctorsController(IDoctorService doctorService, IImageProfile _imageProfile,ILogger<DoctorsController> logger, ISpecialtyScheduleService SpecialtyScheduleService)
         :base(_imageProfile,logger) 
         {
             _doctorService = doctorService;
             _logger = logger;
+            _SpecialtyScheduleService= SpecialtyScheduleService;
+        }
+        [HttpGet("Doctor-Profile")]
+        [Authorize(Roles = "Doctor")]
+        public async Task<IActionResult> GetDoctorById()
+        {
+            var doctorId = GetCurrentUserId();
+            if (string.IsNullOrWhiteSpace(doctorId)) return BadRequest("Doctor ID cannot be empty.");
+            try
+            {
+                var result = await _doctorService.GetDoctorByIdAsync(doctorId);
+                if (result == null) return NotFound("Doctor not found.");
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting doctor by ID: {doctorId}.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the doctor.");
+            }
+        }
+
+        [HttpGet("Doctor-Schedules")]
+        [Authorize(Roles = "Doctor")]
+        public async Task<IActionResult> GetDoctorSchedulesById([FromQuery] int? DayofWeek = null)
+        {
+            var doctorId = GetCurrentUserId();
+            if (string.IsNullOrWhiteSpace(doctorId)) return BadRequest("Doctor ID cannot be empty.");
+            try
+            {
+                PaginationParameters paginationParameters = new PaginationParameters();
+                paginationParameters.FilterDayOfWeekId=DayofWeek;
+                var result = await _SpecialtyScheduleService.GetAvailableSchedulesByDoctorIdAsync(doctorId, paginationParameters);
+                if (result == null) return NotFound("Doctor not found.");
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting doctor by ID: {doctorId}.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the doctor.");
+            }
+        }
+
+        [HttpGet("doctor-appointments")]
+        [Authorize(Roles = "Doctor")]
+        public async Task<IActionResult> GetDoctorAppointments([FromQuery] AppointmentStatus? appointmentStatus = null, [FromQuery] DateOnly? Date=null)
+        {
+            var doctorId = GetCurrentUserId();
+            if (string.IsNullOrWhiteSpace(doctorId))
+                return BadRequest("Doctor ID is required.");
+
+            try
+            {
+                PaginationParameters paginationParameters=new PaginationParameters();
+                paginationParameters.FilterStartDate = Date;
+                paginationParameters.AppointmentStatus=appointmentStatus;
+                var result = await _doctorService.GetDoctorAppointmentsAsync(doctorId, paginationParameters);
+
+                if (result.Items == null || !result.Items.Any())
+                    return NotFound("No appointments found for this doctor.");
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error fetching doctor appointments for ID: {doctorId}");
+                return StatusCode(500, "An error occurred while retrieving appointments.");
+            }
         }
 
         // --- PUBLIC/WEBSITE ENDPOINTS ---
@@ -125,8 +194,8 @@ namespace Elagy.APIs.Controllers
 
         // GET: api/Doctors/{doctorId}
 
-        [HttpGet("{doctorId}")]
-        [Authorize(Roles = "HospitalServiceProvider")] 
+        [HttpGet("hosital-admin/{doctorId}")]
+        [Authorize(Roles = "HospitalServiceProvider,Doctor")] 
         public async Task<IActionResult> GetDoctorById(string doctorId)
         {
             if (string.IsNullOrWhiteSpace(doctorId)) return BadRequest("Doctor ID cannot be empty.");

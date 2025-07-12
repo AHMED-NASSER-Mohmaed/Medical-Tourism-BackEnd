@@ -32,6 +32,8 @@ namespace Elagy.BL.Mapping
 
             CreateMap<CarCreateDto, Car>()
                .ForMember(dest => dest.Id, opt => opt.Ignore())
+
+
                .ForMember(dest => dest.IsAvailable, opt => opt.MapFrom(src => true))
                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => CarStatus.Available))
                .ForMember(dest => dest.CarImages, opt => opt.Ignore())
@@ -44,12 +46,16 @@ namespace Elagy.BL.Mapping
             // CarUpdateDto to Car Entity
             CreateMap<CarUpdateDto, Car>()
                     .ForMember(dest => dest.Id, opt => opt.Ignore())
+
+
                     .ForMember(dest => dest.CarImages, opt => opt.Ignore())
                     .ForMember(dest => dest.CarRentalAsset, opt => opt.Ignore())
                     .ForMember(dest => dest.CarDrivers, opt => opt.Ignore());
 
             CreateMap<Car, CarResponseDto>()
             .ForMember(dest => dest.CarRentalAssetName, opt => opt.MapFrom(src => src.CarRentalAsset.Name))
+
+
             .ForMember(dest => dest.CarImages, opt => opt.MapFrom(src => src.CarImages));
 
             // --- CarDriver-Specific Mappings ---

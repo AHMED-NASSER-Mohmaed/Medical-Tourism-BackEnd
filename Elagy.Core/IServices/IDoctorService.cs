@@ -32,6 +32,7 @@ namespace Elagy.Core.IServices
         // hospital id is token from [jwt token], doctor id from params
         Task<DoctorProfileDto> DeleteDoctorAsync(string doctorId, string hospitalId);
         Task<DoctorProfileDto?> GetDoctorByIdAsync(string doctorId);
+        Task<PagedResponseDto<DoctorAppointmentDto>> GetDoctorAppointmentsAsync(string doctorId,PaginationParameters paginationParameters);
 
         Task<IEnumerable<DoctorBookingCountDto>> GetTop3DoctorsByBookings();
 

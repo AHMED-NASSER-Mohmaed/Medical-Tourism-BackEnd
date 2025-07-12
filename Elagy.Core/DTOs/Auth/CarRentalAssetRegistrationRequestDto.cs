@@ -9,7 +9,8 @@ namespace Elagy.Core.DTOs.Auth
 
         //[Required(ErrorMessage = "Please provide the operational areas for the car rental service.")]
         //public Governorate[] OperationalAreas { get; set; } // Geographic areas where car rental operates
-
+        [Range(1,5)]
+        public int? StarRating { get; set; }
 
         public FuelType[] FuelTypes { get; set; }
 

@@ -61,6 +61,8 @@ namespace Elagy.DAL
         public IGenericRepository<HospitalAssetImage> HospitalAssetImages { get; private set; }
 
         public IGenericRepository<CarRentalAssetImage> CarRentalAssetImages { get; private set; }
+
+        public IGenericRepository<CarImage> CarImages { get; private set; }
         //public IGenericRepository<Disbursement> Disbursements { get; private set; }
 
         public IDisbursementRepository Disbursements {get; private set; }
@@ -102,6 +104,8 @@ namespace Elagy.DAL
             HotelAssetImages=new GenericRepository<HotelAssetImage>(_context);
             HospitalAssetImages=new GenericRepository<HospitalAssetImage>(_context);
             CarRentalAssetImages = new GenericRepository<CarRentalAssetImage>(_context);
+
+            CarImages = new GenericRepository<CarImage>(_context);
 
 
             Disbursements = new DisbursementRepository(_context);

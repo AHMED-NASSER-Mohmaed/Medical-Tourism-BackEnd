@@ -22,8 +22,8 @@ namespace Elagy.Core.DTOs.Pagination
         public string? FilterDoctorId { get; set; }
 
         public int? FilterDayOfWeekId { get; set; }
-        public DateTime? FilterStartDate { get; set; }
-        public DateTime? FilterEndDate { get; set; }
+        public DateOnly? FilterStartDate { get; set; }
+        public DateOnly? FilterEndDate { get; set; }
         public bool? FilterIsActive { get; set; }// general  status filter except users
 
         public string? HotelAssetId { get; set; } 
@@ -39,6 +39,7 @@ namespace Elagy.Core.DTOs.Pagination
         public int? MinOccupancy { get; set; } 
         public int? MaxOccupancy { get; set; } 
         public int? FilterGovernorateId { get; set; } //filter service providers by location for website 
+        public AppointmentStatus? AppointmentStatus { get; set; }
 
 
 

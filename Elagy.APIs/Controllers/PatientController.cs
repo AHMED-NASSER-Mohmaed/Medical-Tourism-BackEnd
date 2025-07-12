@@ -1,4 +1,5 @@
 ﻿using Elagy.Core.DTOs.Files;
+using Elagy.Core.DTOs.Package;
 using Elagy.Core.DTOs.Pagination;
 using Elagy.Core.DTOs.User;
 using Elagy.Core.Entities;
@@ -80,30 +81,50 @@ namespace Elagy.APIs.Controllers
         }
 
 
-        //[HttpPost("profile/history/details")]
-        //public async Task<ActionResult> GetPackageDetails(Guid packageId)
-        //{
-        //    var userId = GetCurrentUserId();
-        //    if (userId == null) return Unauthorized();
-        //    if (packageId.Equals(null) || packageId.Equals(Guid.Empty))
-        //    {
-        //        return BadRequest("Invalid package details request.");
-        //    }
-        //    try
-        //    {
-        //        var packageDetails = await _packageService.GetPackageDetails(userId, request.PackageId);
-        //        //if (packageDetails == null)
-        //        //{
-        //        //    return NotFound("Package details not found.");
-        //        //}
-        //        //return Ok(packageDetails);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, $"Internal server error: {ex.Message}");
-        //    }
-        //}
+        [HttpPost("profile/history/details")]
+        public async Task<ActionResult> GetPackageDetails(Guid packageId)
+        {
+            if (packageId.Equals(null) || packageId.Equals(Guid.Empty))
+            {
+                return BadRequest("Invalid package details request.");
+            }
+            try
+            {
+                var packageDetails = await _packageService.GetPackageDetails(packageId);
+                if (packageDetails == null)
+                {
+                    return NotFound("Package details not found.");
+                }
+                return Ok(packageDetails);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
 
+
+        [HttpPost("profile/history")]
+        public async Task<ActionResult<PackageResponseDTO>> CancelBooking(string PackageId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(PackageId) || PackageId.Equals(Guid.Empty.ToString()))
+                {
+                    return BadRequest("Invalid package ID.");
+                }
+                var result = await _packageService.CancelBooking(PackageId);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
 
     }
 }

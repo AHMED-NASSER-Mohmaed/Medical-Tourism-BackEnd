@@ -19,7 +19,6 @@ namespace Elagy.Core.DTOs.CarRentals
         public CarType? Type { get; set; }
         [Range(1, 10, ErrorMessage = "Capacity must be between 1 and 10 passengers.")]
         public int? Capacity { get; set; }
-
         [Range(0.01, (double)decimal.MaxValue, ErrorMessage = "Price must be greater than 0.")]
         public decimal? PricePerDay { get; set; }
         public TransmissionType? Transmission { get; set; }

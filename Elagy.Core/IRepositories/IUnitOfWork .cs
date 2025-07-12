@@ -51,7 +51,7 @@ namespace Elagy.Core.IRepositories
         IGenericRepository<HospitalAssetImage> HospitalAssetImages { get; }
         IGenericRepository<CarRentalAssetImage> CarRentalAssetImages { get; }
 
-
+        IGenericRepository<CarImage> CarImages { get; }
 
 
 

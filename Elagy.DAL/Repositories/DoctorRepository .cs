@@ -18,7 +18,8 @@ namespace Elagy.DAL.Repositories
          private IQueryable<Doctor> GetDoctorsWithAllDetails()
         {
             return _dbSet
-                .Include(d => d.Governorate)
+                .Include(d => d.Schedules).
+                Include(d => d.Governorate)
                     .ThenInclude(g => g.Country) 
                 .Include(d => d.HospitalSpecialty)
                     .ThenInclude(hs => hs.HospitalAsset)

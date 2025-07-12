@@ -17,7 +17,7 @@ namespace Elagy.Core.Entities
         //------ Hospital ---- Hotle ----- CarRental
         public AppointmentType Type { get; set; }
 
-        public AppointmentStatus Status { get; set; } = AppointmentStatus.Pending;
+        public AppointmentStatus Status { get; set; } = AppointmentStatus.Completed;
         public Guid PackageId { get; set; } 
         public Package Package { get; set; } 
 

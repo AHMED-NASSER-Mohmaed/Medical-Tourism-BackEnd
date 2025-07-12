@@ -57,7 +57,66 @@ namespace Elagy.BL.Services
             }
         }
 
+        public async Task<PagedResponseDto<DoctorAppointmentDto>> GetDoctorAppointmentsAsync(
+            string doctorId,
+            PaginationParameters paginationParameters)
+        {
+            try
+            {
+                var query = _unitOfWork.SpecialtyAppointments.AsQueryable()
+                    .Include(a => a.Package)
+                        .ThenInclude(p => p.Patient)
+                            .ThenInclude(p => p.Governorate)
+                                .ThenInclude(g => g.Country)
+                    .Include(a => a.SpecialtySchedule)
+                        .ThenInclude(s => s.HospitalSpecialty)
+                            .ThenInclude(hs => hs.HospitalAsset)
+                    .Include(a => a.SpecialtySchedule.HospitalSpecialty.Specialty)
+                    .Where(a => a.SpecialtySchedule.DoctorId == doctorId);
 
+                if (paginationParameters.AppointmentStatus.HasValue)
+                {
+                    query = query.Where(a => a.Status == paginationParameters.AppointmentStatus.Value);
+                }
+
+                if (paginationParameters.FilterStartDate.HasValue)
+                {
+                    query = query.Where(a => a.Date == paginationParameters.FilterStartDate.Value);
+                }
+
+                var totalCount = await query.CountAsync();
+
+                var pagedAppointments = await query
+                    .OrderBy(a => a.Date)
+                    .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+                    .Take(paginationParameters.PageSize)
+                    .ToListAsync();
+
+                var result = pagedAppointments.Select(a => new DoctorAppointmentDto
+                {
+                    AppointmentId = a.Id,
+                    Date = a.Date,
+                    Status = a.Status,
+                    PatientName = $"{a.Package?.Patient?.FirstName} {a.Package?.Patient?.LastName}",
+                    PatientPhone = a.Package?.Patient?.Phone,
+                    PatientCountry = a.Package?.Patient?.Governorate?.Country?.Name,
+                    HospitalName = a.SpecialtySchedule?.HospitalSpecialty?.HospitalAsset?.Name,
+                    Specialty = a.SpecialtySchedule?.HospitalSpecialty?.Specialty?.Name
+                }).ToList();
+
+                return new PagedResponseDto<DoctorAppointmentDto>(
+                    result,
+                    totalCount,
+                    paginationParameters.PageNumber,
+                    paginationParameters.PageSize
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to retrieve appointments for doctor ID: {doctorId}");
+                throw new ApplicationException("An error occurred while retrieving doctor appointments.");
+            }
+        }
         public async Task<PagedResponseDto<DoctorProfileDto>> GetDoctorsBySpecialtyIdForAdminDashboardAsync(
     int specialtyId, PaginationParameters paginationParameters)
         {
@@ -251,9 +310,6 @@ namespace Elagy.BL.Services
                 doctor.UserType = UserType.Doctor;
                 doctor.EmailConfirmed = true;
                 doctor.PhoneNumberConfirmed = true;
-                doctor.TwoFactorEnabled = true;
-                doctor.LockoutEnabled = true;
-                doctor.AccessFailedCount = 5;
                 doctor.PhoneNumber = createDto.Phone; 
 
                 // 5. Create the user with IdentityUserManager.
@@ -530,8 +586,9 @@ namespace Elagy.BL.Services
                 }
 
                 var doctors = await _unitOfWork.Doctors.GetDoctorsByHospitalSpecialtyIdAsync(hospitalSpecialty.Id); // Only active doctors
+                var filteredDoctors = doctors.Where(d => d.Schedules != null && d.Schedules.Any());
 
-                IQueryable<Doctor> query = doctors.AsQueryable();
+                IQueryable<Doctor> query = filteredDoctors.AsQueryable();
                 if (!string.IsNullOrWhiteSpace(paginationParameters.SearchTerm))
                 {
                     string term = paginationParameters.SearchTerm.Trim();
@@ -540,7 +597,7 @@ namespace Elagy.BL.Services
                         d.LastName.Contains(term)
                     );
                 }
-
+                
                 var totalCount = query.Count();
 
                 var pagedDoctors =  query
