@@ -19,13 +19,13 @@ namespace Elagy.Core.DTOs.Auth
         public string LocationDescription { get; set; }
 
         [Required]
-        public int AssetGovernorateId { get; set; }
-
-
-        [Required]
         public float Latitude { get; set; }
         [Required]
         public float Longitude { get; set; }
+
+
+        [Required]
+        public int AssetGovernorateId { get; set; }
 
         public string[] Facilities { get; set; }
 

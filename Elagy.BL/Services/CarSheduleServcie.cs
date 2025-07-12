@@ -5,13 +5,14 @@ using Elagy.Core.Enums;
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
 using Microsoft.EntityFrameworkCore;
-using System;
+ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Elagy.Core.DTOs.CarlSchedule;
+using Microsoft.AspNetCore.Builder;
 
 namespace Elagy.BL.Services
 {
@@ -116,25 +117,28 @@ namespace Elagy.BL.Services
                              cs.StartingDate >= today)
                 .ToListAsync();
 
-            var carAppointments = await _unitOfWork.CarRentalAppointments.AsQueryable()
+            /*var carAppointments = await _unitOfWork.CarRentalAppointments.AsQueryable()
                                    .Where(ca => ca.CarScheduleId == carId &&
                                                 ca.Status != AppointmentStatus.Cancelled &&
                                                 (ca.EndingDate) >= today)
-                                   .ToListAsync();
+                                   .ToListAsync();*/
 
             // 4. Collect all unavailable dates from both schedules and appointments
-            var unavailableDates = new HashSet<DateOnly>();
+            List<Periode> unavailableDates = new List<Periode>();
 
             // From schedules
             foreach (var schedule in carSchedules)
             {
-                for (var date = schedule.StartingDate; date <= schedule.EndingDate; date = date.AddDays(1))
-                {
-                    unavailableDates.Add(date);
-                }
+                /* for (var date = schedule.StartingDate; date <= schedule.EndingDate; date = date.AddDays(1))
+                 {
+                     unavailableDates.Add(date);
+                 }*/
+
+                unavailableDates.Add(new Periode { StartingDate = schedule.StartingDate, EndingDate= schedule.EndingDate });
+
             }
 
-            // From appointments
+           /* // From appointments
             foreach (var appointment in carAppointments)
             {
                 var start = appointment.StartingDate;
@@ -145,7 +149,7 @@ namespace Elagy.BL.Services
                     unavailableDates.Add(date);
                 }
             }
-
+*/
             // 5. Return DTO
             return new CarUnavailableDatesDTO
             {
@@ -153,7 +157,7 @@ namespace Elagy.BL.Services
                 CarModel = car.ModelName,
                 CarRentalId = car.CarRentalAssetId,
                 CarRentalName = car.CarRentalAsset.Name,
-                UnavailableDates = unavailableDates.OrderBy(d => d).ToList() // ✅ no semicolon
+                UnavailableDates = unavailableDates
             };
         }
     }
