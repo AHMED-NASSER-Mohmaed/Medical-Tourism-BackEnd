@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Elagy.Core.DTOs.CarlSchedule;
 using Elagy.Core.DTOs.RoomSchedule;
 using Elagy.Core.Entities;
 using Elagy.Core.Enums;
@@ -9,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.ConstrainedExecution;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -85,8 +87,6 @@ namespace Elagy.BL.Services
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////
-        ///
-
         public async Task<UnavailableDatesDTO> GetAvailableRoomsSchedules(int RoomId)
         {
 
@@ -115,16 +115,15 @@ namespace Elagy.BL.Services
                 .ToListAsync();*/
 
 
-            var unavailableDates = new HashSet<DateOnly>();
+            var unavailableDates = new List<Periode>();
 
             foreach (var schedule in roomSchedules)
             {
-                var startDate = schedule.StartDate < today ? today : schedule.StartDate;
-
-                for (var date = startDate; date <= schedule.EndDate; date = date.AddDays(1))
+                unavailableDates.Add(new Periode
                 {
-                    unavailableDates.Add(date);
-                }
+                    StartingDate = schedule.StartDate,
+                    EndingDate = schedule.EndDate
+                });
             }
 
 
@@ -143,7 +142,7 @@ namespace Elagy.BL.Services
                 RoomId=RoomId,
                 HotelId=room.HotelAsset.Id,
                 HotelName=room.HotelAsset.Name,
-                UnavailableDates=unavailableDates.Where(date=>date>today).OrderBy(date=>date).ToList(),
+                UnavailableDates=unavailableDates
             };
 
         }

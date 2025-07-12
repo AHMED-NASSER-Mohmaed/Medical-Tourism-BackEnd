@@ -5,13 +5,14 @@ using Elagy.Core.Enums;
 using Elagy.Core.IRepositories;
 using Elagy.Core.IServices;
 using Microsoft.EntityFrameworkCore;
-using System;
+ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Elagy.Core.DTOs.CarlSchedule;
+using Microsoft.AspNetCore.Builder;
 
 namespace Elagy.BL.Services
 {
@@ -123,15 +124,18 @@ namespace Elagy.BL.Services
                                    .ToListAsync();*/
 
             // 4. Collect all unavailable dates from both schedules and appointments
-            var unavailableDates = new HashSet<DateOnly>();
+            List<Periode> unavailableDates = new List<Periode>();
 
             // From schedules
             foreach (var schedule in carSchedules)
             {
-                for (var date = schedule.StartingDate; date <= schedule.EndingDate; date = date.AddDays(1))
-                {
-                    unavailableDates.Add(date);
-                }
+                /* for (var date = schedule.StartingDate; date <= schedule.EndingDate; date = date.AddDays(1))
+                 {
+                     unavailableDates.Add(date);
+                 }*/
+
+                unavailableDates.Add(new Periode { StartingDate = schedule.StartingDate, EndingDate= schedule.EndingDate });
+
             }
 
            /* // From appointments
@@ -153,7 +157,7 @@ namespace Elagy.BL.Services
                 CarModel = car.ModelName,
                 CarRentalId = car.CarRentalAssetId,
                 CarRentalName = car.CarRentalAsset.Name,
-                UnavailableDates = unavailableDates.OrderBy(d => d).ToList() // ✅ no semicolon
+                UnavailableDates = unavailableDates
             };
         }
     }
