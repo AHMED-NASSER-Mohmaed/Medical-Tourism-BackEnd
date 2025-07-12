@@ -11,21 +11,21 @@ namespace Elagy.Core.DTOs.Doctor
     public class DoctorUpdateDto
     {
 
-        [Required(ErrorMessage = "First name is required.")]
-        [StringLength(100)]
-        public string FirstName { get; set; }
 
-        [Required(ErrorMessage = "Last name is required.")]
         [StringLength(100)]
-        public string LastName { get; set; }
+        public string? FirstName { get; set; }
 
-        [EmailAddress(ErrorMessage = "Invalid email format.")]
+
+        [StringLength(100)]
+        public string? LastName { get; set; }
+
+
         public string? Email { get; set; }
 
         [StringLength(20)]
         public string? PhoneNumber { get; set; }
 
-        public Gender Gender { get; set; }
+        public Gender? Gender { get; set; }
 
         public int GovernorateId { get; set; }
         public int CountryId { get; set; }
@@ -35,23 +35,18 @@ namespace Elagy.Core.DTOs.Doctor
         public string? Address { get; set; } // Full address as a single string
         public string? City { get; set; }
 
-        [Required(ErrorMessage = "Medical License Number is required.")]
-        [StringLength(50)]
-        public string MedicalLicenseNumber { get; set; }
 
-        [Range(0, 70, ErrorMessage = "Years of experience must be between 0 and 70.")]
-        public int YearsOfExperience { get; set; }
+        [StringLength(50)]
+        public string? MedicalLicenseNumber { get; set; }
+
+        public int? YearsOfExperience { get; set; }
 
         [StringLength(1000)]
-        public string Bio { get; set; }
+        public string? Bio { get; set; }
 
         [StringLength(100)]
-        public string Qualification { get; set; }
+        public string? Qualification { get; set; }
 
-
-
-        // Admin might need to re-assign a doctor to a different specialty within the hospital
-        [Required(ErrorMessage = "Hospital Specialty ID is required.")]
         public int HospitalSpecialtyId { get; set; } // id => dose it map to hospital id + clinic id 
 
 
