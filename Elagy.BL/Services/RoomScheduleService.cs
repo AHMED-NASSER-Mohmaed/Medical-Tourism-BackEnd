@@ -78,8 +78,8 @@ namespace Elagy.BL.Services
         {
             IQueryable<RoomSchedule>  query = _unitOfWork.RoomSchedule.AsQueryable();
 
-            query= query.Where(rs => (roomId == rs.RoomId)&& (StartDate >= rs.StartDate && StartDate<=rs.EndDate )||
-                        (EndDate >= rs.StartDate && EndDate <= rs.EndDate));
+            query= query.Where(rs => (roomId == rs.RoomId) &&  ( ( StartDate >= rs.StartDate && StartDate <= rs.EndDate )||
+                        (EndDate >= rs.StartDate && EndDate <= rs.EndDate) ));
 
             var result = await query.ToListAsync();
 
