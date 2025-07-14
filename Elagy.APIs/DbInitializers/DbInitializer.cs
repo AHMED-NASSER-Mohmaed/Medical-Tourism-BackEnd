@@ -12,8 +12,6 @@ namespace Elagy.APIs.Initializers
 {
     public static class DbInitializer
     {
- 
-
         public static async Task SeedRoles(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ILogger logger)
         {
             logger.LogInformation("Starting role seeding...");
@@ -44,91 +42,91 @@ namespace Elagy.APIs.Initializers
         {
 
 
-        //    if (!await context.Specialties.AnyAsync())
-        //    {
-        //        var specialties = new List<Specialty>
-        //{
-        //    new Specialty { Name = "Cardiology", Description = "Heart and cardiovascular system" },
-        //    new Specialty { Name = "Neurology", Description = "Nervous system disorders" },
-        //    new Specialty { Name = "Dermatology", Description = "Skin-related conditions" },
-        //    new Specialty { Name = "Pediatrics", Description = "Child healthcare" },
-        //    new Specialty { Name = "Orthopedics", Description = "Musculoskeletal system" },
-        //    new Specialty { Name = "Psychiatry", Description = "Mental health treatment" },
-        //    new Specialty { Name = "Gynecology", Description = "Women's reproductive health" },
-        //    new Specialty { Name = "Ophthalmology", Description = "Eye care and vision" },
-        //    new Specialty { Name = "Urology", Description = "Urinary and male reproductive systems" },
-        //    new Specialty { Name = "General Surgery", Description = "Broad surgical specialty" }
-        //};
+            if (!await context.Specialties.AnyAsync())
+            {
+                var specialties = new List<Specialty>
+        {
+            new Specialty { Name = "Cardiology", Description = "Heart and cardiovascular system" },
+            new Specialty { Name = "Neurology", Description = "Nervous system disorders" },
+            new Specialty { Name = "Dermatology", Description = "Skin-related conditions" },
+            new Specialty { Name = "Pediatrics", Description = "Child healthcare" },
+            new Specialty { Name = "Orthopedics", Description = "Musculoskeletal system" },
+            new Specialty { Name = "Psychiatry", Description = "Mental health treatment" },
+            new Specialty { Name = "Gynecology", Description = "Women's reproductive health" },
+            new Specialty { Name = "Ophthalmology", Description = "Eye care and vision" },
+            new Specialty { Name = "Urology", Description = "Urinary and male reproductive systems" },
+            new Specialty { Name = "General Surgery", Description = "Broad surgical specialty" }
+        };
 
-        //        await context.Specialties.AddRangeAsync(specialties);
-        //        await context.SaveChangesAsync();
-        //        logger.LogInformation("Starting static data seeding...");
+                await context.Specialties.AddRangeAsync(specialties);
+                await context.SaveChangesAsync();
+                logger.LogInformation("Starting static data seeding...");
 
                 // List of Arab countries and their governorates (major administrative divisions)
-            //    var arabCountries = new Dictionary<string, List<string>>
-            //{
-            //    { "Egypt", new List<string> { "Cairo", "Alexandria", "Aswan", "Asyut", "Beheira", "Beni Suef", "Dakahlia", "Damietta", "Faiyum", "Gharbia", "Giza", "Ismailia", "Kafr El Sheikh", "Luxor", "Matruh", "Minya", "Monufia", "New Valley", "North Sinai", "Port Said", "Qalyubia", "Qena", "Red Sea", "Sharqia", "Sohag", "South Sinai", "Suez" } },
-            //    { "Saudi Arabia", new List<string> { "Riyadh", "Makkah", "Madinah", "Eastern Province", "Qassim", "Asir", "Tabuk", "Hail", "Northern Borders", "Jazan", "Najran", "Al Bahah", "Al Jawf" } },
-            //    { "United Arab Emirates", new List<string> { "Abu Dhabi", "Dubai", "Sharjah", "Ajman", "Umm Al Quwain", "Ras Al Khaimah", "Fujairah" } },
-            //    { "Jordan", new List<string> { "Amman", "Irbid", "Zarqa", "Balqa", "Madaba", "Mafraq", "Jerash", "Ajloun", "Karak", "Tafilah", "Ma'an", "Aqaba" } },
-            //    { "Lebanon", new List<string> { "Beirut", "Mount Lebanon", "North", "South", "Beqaa", "Nabatieh", "Akkar", "Baalbek-Hermel" } },
-            //    { "Syria", new List<string> { "Damascus", "Aleppo", "Homs", "Hama", "Latakia", "Tartus", "Idlib", "Al-Hasakah", "Deir ez-Zor", "Raqqa", "Daraa", "As-Suwayda", "Quneitra", "Rif Dimashq" } },
-            //    { "Iraq", new List<string> { "Baghdad", "Basra", "Nineveh", "Erbil", "Sulaymaniyah", "Diyala", "Anbar", "Kirkuk", "Babil", "Najaf", "Dhi Qar", "Wasit", "Maysan", "Muthanna", "Qadisiyyah", "Karbala", "Saladin", "Dohuk" } },
-            //    { "Kuwait", new List<string> { "Al Asimah", "Hawalli", "Farwaniya", "Ahmadi", "Jahra", "Mubarak Al-Kabeer" } },
-            //    { "Qatar", new List<string> { "Doha", "Al Rayyan", "Al Wakrah", "Umm Salal", "Al Khor", "Al Shamal", "Al Daayen", "Al Shahaniya" } },
-            //    { "Bahrain", new List<string> { "Capital", "Muharraq", "Northern", "Southern" } },
-            //    { "Oman", new List<string> { "Muscat", "Dhofar", "Musandam", "Al Batinah North", "Al Batinah South", "Al Dakhiliyah", "Al Wusta", "Al Sharqiyah North", "Al Sharqiyah South", "Al Dhahirah", "Al Buraymi" } },
-            //    { "Palestine", new List<string> { "West Bank", "Gaza Strip", "Jerusalem", "Hebron", "Nablus", "Ramallah", "Bethlehem", "Jenin", "Tulkarm", "Qalqilya", "Salfit", "Tubas", "Jericho", "Rafah", "Khan Yunis", "Deir al-Balah", "North Gaza" } },
-            //    { "Sudan", new List<string> { "Khartoum", "Gezira", "Red Sea", "River Nile", "Northern", "Kassala", "Blue Nile", "White Nile", "North Kordofan", "South Kordofan", "West Kordofan", "North Darfur", "South Darfur", "East Darfur", "West Darfur", "Central Darfur", "Sennar" } },
-            //    { "Libya", new List<string> { "Tripoli", "Benghazi", "Misrata", "Zawiya", "Sabha", "Sirte", "Derna", "Al Bayda", "Al Marj", "Ghat", "Nalut", "Jufra", "Murzuq", "Wadi al Shatii", "Wadi al Hayaa", "Al Kufrah" } },
-            //    { "Algeria", new List<string> { "Algiers", "Oran", "Constantine", "Annaba", "Blida", "Batna", "Setif", "Sidi Bel Abbes", "Tlemcen", "Bejaia", "Tizi Ouzou", "Mostaganem", "Skikda", "Biskra", "Tiaret", "Bechar", "Chlef", "Djelfa", "El Oued", "Bouira", "M'sila", "Mascara", "Ouargla", "Relizane", "Tamanrasset", "Tebessa", "Ain Defla", "Ain Temouchent", "Adrar", "Laghouat", "Guelma", "Saida", "Tipaza", "Mila", "Naama", "Khenchela", "Souk Ahras", "Tindouf", "El Bayadh", "Illizi", "Bordj Bou Arreridj", "Boumerdes", "El Tarf", "Tissemsilt", "El M'Ghair", "El Menia", "Ouled Djellal", "Bordj Baji Mokhtar", "Beni Abbes", "Timimoun", "Touggourt", "Djanet", "In Salah", "In Guezzam" } },
-            //    { "Morocco", new List<string> { "Casablanca-Settat", "Rabat-Salé-Kénitra", "Fès-Meknès", "Marrakesh-Safi", "Tanger-Tetouan-Al Hoceima", "Souss-Massa", "Beni Mellal-Khénifra", "Oriental", "Drâa-Tafilalet", "Guelmim-Oued Noun", "Laâyoune-Sakia El Hamra", "Dakhla-Oued Ed-Dahab" } },
-            //    { "Tunisia", new List<string> { "Tunis", "Ariana", "Ben Arous", "Manouba", "Nabeul", "Zaghouan", "Bizerte", "Beja", "Jendouba", "Kef", "Siliana", "Sousse", "Monastir", "Mahdia", "Sfax", "Kairouan", "Kasserine", "Sidi Bouzid", "Gabes", "Medenine", "Tataouine", "Gafsa", "Tozeur", "Kebili" } },
-            //    { "Mauritania", new List<string> { "Adrar", "Assaba", "Brakna", "Dakhlet Nouadhibou", "Gorgol", "Guidimaka", "Hodh Ech Chargui", "Hodh El Gharbi", "Inchiri", "Nouakchott-Nord", "Nouakchott-Ouest", "Nouakchott-Sud", "Tagant", "Tiris Zemmour", "Trarza" } },
-            //    { "Comoros", new List<string> { "Grande Comore", "Anjouan", "Mohéli" } },
-            //    { "Djibouti", new List<string> { "Djibouti", "Ali Sabieh", "Arta", "Dikhil", "Obock", "Tadjourah" } },
-            //    { "Somalia", new List<string> { "Banadir", "Bari", "Bay", "Galguduud", "Gedo", "Hiiraan", "Lower Juba", "Middle Juba", "Mudug", "Nugal", "Sanaag", "Shabeellaha Dhexe", "Shabeellaha Hoose", "Sool", "Togdheer", "Woqooyi Galbeed", "Awdal" } },
-            //    { "Yemen", new List<string> { "Aden", "Abyan", "Al Bayda", "Al Hudaydah", "Al Jawf", "Al Mahrah", "Al Mahwit", "Amran", "Dhamar", "Hadhramaut", "Hajjah", "Ibb", "Lahij", "Ma'rib", "Raymah", "Saada", "Sanaa", "Shabwah", "Socotra", "Taiz" } }
-            //};
+                var arabCountries = new Dictionary<string, List<string>>
+            {
+                { "Egypt", new List<string> { "Cairo", "Alexandria", "Aswan", "Asyut", "Beheira", "Beni Suef", "Dakahlia", "Damietta", "Faiyum", "Gharbia", "Giza", "Ismailia", "Kafr El Sheikh", "Luxor", "Matruh", "Minya", "Monufia", "New Valley", "North Sinai", "Port Said", "Qalyubia", "Qena", "Red Sea", "Sharqia", "Sohag", "South Sinai", "Suez" } },
+                { "Saudi Arabia", new List<string> { "Riyadh", "Makkah", "Madinah", "Eastern Province", "Qassim", "Asir", "Tabuk", "Hail", "Northern Borders", "Jazan", "Najran", "Al Bahah", "Al Jawf" } },
+                { "United Arab Emirates", new List<string> { "Abu Dhabi", "Dubai", "Sharjah", "Ajman", "Umm Al Quwain", "Ras Al Khaimah", "Fujairah" } },
+                { "Jordan", new List<string> { "Amman", "Irbid", "Zarqa", "Balqa", "Madaba", "Mafraq", "Jerash", "Ajloun", "Karak", "Tafilah", "Ma'an", "Aqaba" } },
+                { "Lebanon", new List<string> { "Beirut", "Mount Lebanon", "North", "South", "Beqaa", "Nabatieh", "Akkar", "Baalbek-Hermel" } },
+                { "Syria", new List<string> { "Damascus", "Aleppo", "Homs", "Hama", "Latakia", "Tartus", "Idlib", "Al-Hasakah", "Deir ez-Zor", "Raqqa", "Daraa", "As-Suwayda", "Quneitra", "Rif Dimashq" } },
+                { "Iraq", new List<string> { "Baghdad", "Basra", "Nineveh", "Erbil", "Sulaymaniyah", "Diyala", "Anbar", "Kirkuk", "Babil", "Najaf", "Dhi Qar", "Wasit", "Maysan", "Muthanna", "Qadisiyyah", "Karbala", "Saladin", "Dohuk" } },
+                { "Kuwait", new List<string> { "Al Asimah", "Hawalli", "Farwaniya", "Ahmadi", "Jahra", "Mubarak Al-Kabeer" } },
+                { "Qatar", new List<string> { "Doha", "Al Rayyan", "Al Wakrah", "Umm Salal", "Al Khor", "Al Shamal", "Al Daayen", "Al Shahaniya" } },
+                { "Bahrain", new List<string> { "Capital", "Muharraq", "Northern", "Southern" } },
+                { "Oman", new List<string> { "Muscat", "Dhofar", "Musandam", "Al Batinah North", "Al Batinah South", "Al Dakhiliyah", "Al Wusta", "Al Sharqiyah North", "Al Sharqiyah South", "Al Dhahirah", "Al Buraymi" } },
+                { "Palestine", new List<string> { "West Bank", "Gaza Strip", "Jerusalem", "Hebron", "Nablus", "Ramallah", "Bethlehem", "Jenin", "Tulkarm", "Qalqilya", "Salfit", "Tubas", "Jericho", "Rafah", "Khan Yunis", "Deir al-Balah", "North Gaza" } },
+                { "Sudan", new List<string> { "Khartoum", "Gezira", "Red Sea", "River Nile", "Northern", "Kassala", "Blue Nile", "White Nile", "North Kordofan", "South Kordofan", "West Kordofan", "North Darfur", "South Darfur", "East Darfur", "West Darfur", "Central Darfur", "Sennar" } },
+                { "Libya", new List<string> { "Tripoli", "Benghazi", "Misrata", "Zawiya", "Sabha", "Sirte", "Derna", "Al Bayda", "Al Marj", "Ghat", "Nalut", "Jufra", "Murzuq", "Wadi al Shatii", "Wadi al Hayaa", "Al Kufrah" } },
+                { "Algeria", new List<string> { "Algiers", "Oran", "Constantine", "Annaba", "Blida", "Batna", "Setif", "Sidi Bel Abbes", "Tlemcen", "Bejaia", "Tizi Ouzou", "Mostaganem", "Skikda", "Biskra", "Tiaret", "Bechar", "Chlef", "Djelfa", "El Oued", "Bouira", "M'sila", "Mascara", "Ouargla", "Relizane", "Tamanrasset", "Tebessa", "Ain Defla", "Ain Temouchent", "Adrar", "Laghouat", "Guelma", "Saida", "Tipaza", "Mila", "Naama", "Khenchela", "Souk Ahras", "Tindouf", "El Bayadh", "Illizi", "Bordj Bou Arreridj", "Boumerdes", "El Tarf", "Tissemsilt", "El M'Ghair", "El Menia", "Ouled Djellal", "Bordj Baji Mokhtar", "Beni Abbes", "Timimoun", "Touggourt", "Djanet", "In Salah", "In Guezzam" } },
+                { "Morocco", new List<string> { "Casablanca-Settat", "Rabat-Salé-Kénitra", "Fès-Meknès", "Marrakesh-Safi", "Tanger-Tetouan-Al Hoceima", "Souss-Massa", "Beni Mellal-Khénifra", "Oriental", "Drâa-Tafilalet", "Guelmim-Oued Noun", "Laâyoune-Sakia El Hamra", "Dakhla-Oued Ed-Dahab" } },
+                { "Tunisia", new List<string> { "Tunis", "Ariana", "Ben Arous", "Manouba", "Nabeul", "Zaghouan", "Bizerte", "Beja", "Jendouba", "Kef", "Siliana", "Sousse", "Monastir", "Mahdia", "Sfax", "Kairouan", "Kasserine", "Sidi Bouzid", "Gabes", "Medenine", "Tataouine", "Gafsa", "Tozeur", "Kebili" } },
+                { "Mauritania", new List<string> { "Adrar", "Assaba", "Brakna", "Dakhlet Nouadhibou", "Gorgol", "Guidimaka", "Hodh Ech Chargui", "Hodh El Gharbi", "Inchiri", "Nouakchott-Nord", "Nouakchott-Ouest", "Nouakchott-Sud", "Tagant", "Tiris Zemmour", "Trarza" } },
+                { "Comoros", new List<string> { "Grande Comore", "Anjouan", "Mohéli" } },
+                { "Djibouti", new List<string> { "Djibouti", "Ali Sabieh", "Arta", "Dikhil", "Obock", "Tadjourah" } },
+                { "Somalia", new List<string> { "Banadir", "Bari", "Bay", "Galguduud", "Gedo", "Hiiraan", "Lower Juba", "Middle Juba", "Mudug", "Nugal", "Sanaag", "Shabeellaha Dhexe", "Shabeellaha Hoose", "Sool", "Togdheer", "Woqooyi Galbeed", "Awdal" } },
+                { "Yemen", new List<string> { "Aden", "Abyan", "Al Bayda", "Al Hudaydah", "Al Jawf", "Al Mahrah", "Al Mahwit", "Amran", "Dhamar", "Hadhramaut", "Hajjah", "Ibb", "Lahij", "Ma'rib", "Raymah", "Saada", "Sanaa", "Shabwah", "Socotra", "Taiz" } }
+            };
 
                 // Seed Countries
-            //    foreach (var country in arabCountries.Keys)
-            //    {
-            //        if (!await context.Countries.AnyAsync(c => c.Name == country))
-            //        {
-            //            context.Countries.Add(new Country { Name = country });
-            //        }
-            //    }
-            //    await context.SaveChangesAsync();
+                foreach (var country in arabCountries.Keys)
+                {
+                    if (!await context.Countries.AnyAsync(c => c.Name == country))
+                    {
+                        context.Countries.Add(new Country { Name = country });
+                    }
+                }
+                await context.SaveChangesAsync();
 
-            //    // Fetch all countries from DB for ID mapping
-            //    var dbCountries = await context.Countries.ToListAsync();
-            //    var countryNameToId = dbCountries.ToDictionary(c => c.Name, c => c.Id);
+                // Fetch all countries from DB for ID mapping
+                var dbCountries = await context.Countries.ToListAsync();
+                var countryNameToId = dbCountries.ToDictionary(c => c.Name, c => c.Id);
 
-            //    // Seed Governorates
-            //    foreach (var kvp in arabCountries)
-            //    {
-            //        var countryName = kvp.Key;
-            //        var governorates = kvp.Value;
-            //        if (!countryNameToId.TryGetValue(countryName, out int countryId))
-            //        {
-            //            logger.LogError($"Country '{countryName}' not found in DB after seeding.");
-            //            continue;
-            //        }
+                // Seed Governorates
+                foreach (var kvp in arabCountries)
+                {
+                    var countryName = kvp.Key;
+                    var governorates = kvp.Value;
+                    if (!countryNameToId.TryGetValue(countryName, out int countryId))
+                    {
+                        logger.LogError($"Country '{countryName}' not found in DB after seeding.");
+                        continue;
+                    }
 
-            //        foreach (var gov in governorates)
-            //        {
-            //            if (!await context.Governaties.AnyAsync(g => g.Name == gov && g.CountryId == countryId))
-            //            {
-            //                context.Governaties.Add(new Governorate { Name = gov, CountryId = countryId });
-            //            }
-            //        }
-            //    }
-            //    await context.SaveChangesAsync();
+                    foreach (var gov in governorates)
+                    {
+                        if (!await context.Governaties.AnyAsync(g => g.Name == gov && g.CountryId == countryId))
+                        {
+                            context.Governaties.Add(new Governorate { Name = gov, CountryId = countryId });
+                        }
+                    }
+                }
+                await context.SaveChangesAsync();
 
-            //    logger.LogInformation("Static data seeding for all Arab countries and their governorates completed.");
+                logger.LogInformation("Static data seeding for all Arab countries and their governorates completed.");
 
-            //}
+            }
         }
       
         public static async Task SeedSuperAdminAsync(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ILogger logger)

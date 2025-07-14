@@ -87,8 +87,8 @@ namespace Elagy.BL.Services
         {
             IQueryable<CarSchedule> query = _unitOfWork.CarSchedule.AsQueryable();
 
-            query = query.Where(cs => (carId == cs.CarId) && (StartDate >= cs.StartingDate && StartDate <= cs.EndingDate) ||
-                        (EndDate >= cs.StartingDate && EndDate <= cs.EndingDate));
+            query = query.Where(cs => (carId == cs.CarId) &&  ( (StartDate >= cs.StartingDate && StartDate <= cs.EndingDate) ||
+                        (EndDate >= cs.StartingDate && EndDate <= cs.EndingDate) ));
 
             var result = await query.ToListAsync();
 
