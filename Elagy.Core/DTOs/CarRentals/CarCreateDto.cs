@@ -26,7 +26,7 @@ namespace Elagy.Core.DTOs.CarRentals
 
 
         [Required(ErrorMessage = "Capacity is required.")]
-        [Range(1, 10, ErrorMessage = "Capacity must be between 1 and 10 passengers.")]
+        [Range(1, 12, ErrorMessage = "Capacity must be between 1 and 10 passengers.")]
         public int Capacity { get; set; }
 
         // DEFINITIVE: PlateNumber and Color are NOT included here.

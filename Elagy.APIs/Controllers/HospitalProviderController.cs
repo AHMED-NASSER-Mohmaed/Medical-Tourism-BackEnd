@@ -105,13 +105,12 @@ namespace Elagy.APIs.Controllers
 
         [HttpGet("hospital-appointments")]
         public async Task<IActionResult> GetHospitalAppointments([FromQuery] AppointmentStatus? appointmentStatus = null,
-            [FromQuery] DateOnly? Date = null, [FromQuery]int? DayofWeekId = null, [FromQuery] int? specialtyScheduleId=null)
+            [FromQuery] DateOnly? Date = null, [FromQuery] int? specialtyScheduleId=null)
         {
             var hospitalAssetId = GetCurrentUserId();
             PaginationParameters paginationParameters = new PaginationParameters();
             paginationParameters.FilterStartDate = Date;
             paginationParameters.AppointmentStatus= appointmentStatus;
-            paginationParameters.FilterDayOfWeekId= DayofWeekId;
              paginationParameters.specialtyScheduleId= specialtyScheduleId;
 
 
