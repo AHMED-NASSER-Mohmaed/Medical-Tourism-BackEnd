@@ -43,6 +43,7 @@ public class ApplicationDbContext : IdentityDbContext<User> // Assuming your Use
 
     public DbSet<Disbursement> disbursements { get; set; }
 
+    public DbSet<Appointment> appointments { get; set; }
 
 
 

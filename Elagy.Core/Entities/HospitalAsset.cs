@@ -8,5 +8,5 @@
                 public ICollection<HospitalAssetImage>? HospitalAssetImages { get; set; }
 
 
-    }
+        }
 }

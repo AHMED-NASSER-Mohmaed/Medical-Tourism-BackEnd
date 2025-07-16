@@ -114,8 +114,8 @@ builder.Services.AddScoped<IRoomAppointmentService, RoomAppointmentService>();
 
 builder.Services.AddScoped<ICarScheduleService, CarSheduleServcie>();
 builder.Services.AddScoped<ICarAppointmentService, CarAppoinmtnetService>();
-
-
+builder.Services.AddScoped<IMLTrainingService,MlTrainingService>();
+builder.Services.AddScoped<IMLRecommendtionService, MLRecommendationService>();
 builder.Services.AddScoped<SessionService>();
 
 

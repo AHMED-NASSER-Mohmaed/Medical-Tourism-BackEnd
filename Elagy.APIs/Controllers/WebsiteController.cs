@@ -27,6 +27,7 @@ namespace Elagy.APIs.Controllers
         private readonly ICarService _carservice;
         private readonly IRoomScheduleService _RoomscheduleService;
         private readonly IServiceProvidersWebsiteService _serviceproviderwebsite;
+        private readonly IMLRecommendtionService _mlRecommendtionService;
         public WebsiteController(
             IHospitalProviderService hospitalProviderService,
             ICarRentalProviderService carRentalProviderService,
@@ -39,7 +40,8 @@ namespace Elagy.APIs.Controllers
             ICarService carservice,
             IRoomScheduleService roomscheduleService,
             IServiceProvidersWebsiteService serviceproviderwebsite,
-            ICarScheduleService carScheduleService)
+            ICarScheduleService carScheduleService,
+            IMLRecommendtionService mlRecommendtionService)
         {
             _hospitalProviderService = hospitalProviderService;
             _carRentalProviderService = carRentalProviderService;
@@ -52,6 +54,7 @@ namespace Elagy.APIs.Controllers
             _RoomscheduleService = roomscheduleService;
             _serviceproviderwebsite = serviceproviderwebsite;
             _carScheduleService = carScheduleService;
+            _mlRecommendtionService = mlRecommendtionService;
         }
 
 
@@ -70,8 +73,19 @@ namespace Elagy.APIs.Controllers
             Filter.UserStatus = UserStatus;
             Filter.FilterGovernorateId = governertaeId;
 
-            var providers = await _serviceproviderwebsite.GetCarRentalProvidersForAdminDashboardAsync(Filter);
-            return Ok(providers);
+            var userId = GetCurrentUserId();
+
+            if (userId != null)
+            {
+
+                var providers = await _mlRecommendtionService.RecommendetionCarRentalForUser(Filter,userId);
+                return Ok(providers);
+            }
+            else
+            {
+                var providers = await _serviceproviderwebsite.GetCarRentalProvidersForAdminDashboardAsync(Filter);
+                return Ok(providers);
+            }
         }
 
 
@@ -151,8 +165,21 @@ namespace Elagy.APIs.Controllers
             Filter.SearchTerm = SearchTerm;
             Filter.FilterGovernorateId = GovernerateId;
 
-            var providers = await _serviceproviderwebsite.GetHotelProvidersForAdminDashboardAsync(Filter);
-            return Ok(providers);
+            var userId = GetCurrentUserId();
+
+            if (userId != null)
+            {
+                var providers = await _mlRecommendtionService.RecommendetionHotelsForUser(Filter,userId);
+                return Ok(providers);
+            }
+            else
+            {
+
+                var providers = await _serviceproviderwebsite.GetHotelProvidersForAdminDashboardAsync(Filter);
+                return Ok(providers);
+            }
+
+           
         }
 
         [HttpGet("Rooms-Website/{hotellId}")]
@@ -265,9 +292,21 @@ namespace Elagy.APIs.Controllers
             Filter.SpecialtyId = specialtyId;
             Filter.FilterGovernorateId = GovernerateId;
 
+            string userId= GetCurrentUserId();
+            if (userId != null)
+            {
+                Console.WriteLine("getRecommendition");
+                var providers = await _mlRecommendtionService.RecommendedHospitalForUser(Filter,userId);
+                return Ok(providers);
 
-            var providers = await _serviceproviderwebsite.GetHospitalProvidersForAdminDashboardAsync(Filter);
-            return Ok(providers);
+            }
+            else
+            {
+                var providers = await _serviceproviderwebsite.GetHospitalProvidersForAdminDashboardAsync(Filter);
+                return Ok(providers);
+            }
+
+            
         }
 
         [HttpGet("Specilties")]

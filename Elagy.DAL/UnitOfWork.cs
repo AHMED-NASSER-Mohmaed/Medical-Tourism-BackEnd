@@ -67,6 +67,8 @@ namespace Elagy.DAL
 
         public IDisbursementRepository Disbursements {get; private set; }
 
+        public IMLRepository MLAppointments { get; set; }
+
         public UnitOfWork(ApplicationDbContext context)
         {
             //IRepo injection
@@ -109,6 +111,7 @@ namespace Elagy.DAL
 
 
             Disbursements = new DisbursementRepository(_context);
+            MLAppointments = new MLRepository(_context);
         }
 
         public async Task<int> CompleteAsync()

@@ -53,7 +53,7 @@ namespace Elagy.Core.IRepositories
 
         IGenericRepository<CarImage> CarImages { get; }
 
-
+        IMLRepository MLAppointments { get; }
 
         Task<int> CompleteAsync();
     }
