@@ -303,10 +303,6 @@ namespace Elagy.BL.Services
             {
                 query = query.Where(a => a.Date == paginationParameters.FilterStartDate.Value);
             }
-            if (paginationParameters.FilterDayOfWeekId.HasValue)
-            {
-                query = query.Where(a => a.SpecialtySchedule.DayOfWeekId == paginationParameters.FilterDayOfWeekId.Value);
-            }
 
             if (paginationParameters.specialtyScheduleId.HasValue)
             {
