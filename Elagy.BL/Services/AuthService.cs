@@ -122,7 +122,7 @@ namespace Elagy.BL.Services
 
             // Send email confirmation
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var confirmationLink = $"http://localhost:4200/auth/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(token)}"; // IMPORTANT: Use actual frontend URL
+            var confirmationLink = $"https://medical-tourism-front-end-ycxv.vercel.app/auth/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(token)}"; // IMPORTANT: Use actual frontend URL
             await _emailService.SendEmailAsync(user.Email, "Confirm Your Email", $"Please confirm your account by clicking this link: <a href='{confirmationLink}'>link</a>");
 
             _logger.LogInformation($"User {user.Email} registered successfully. Confirmation email sent.");
@@ -489,7 +489,7 @@ namespace Elagy.BL.Services
             }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var resetLink = $"http://localhost:4200/auth/reset-password?userId={user.Id}&token={Uri.EscapeDataString(token)}";
+            var resetLink = $"https://medical-tourism-front-end-ycxv.vercel.app/auth/reset-password?userId={user.Id}&token={Uri.EscapeDataString(token)}";
             await _emailService.SendEmailAsync(user.Email, "Reset Your Password", $"Please reset your password by clicking this link: <a href='{resetLink}'>link</a>");
 
             _logger.LogInformation($"Password reset link sent to {user.Email}.");
@@ -561,7 +561,7 @@ namespace Elagy.BL.Services
             }
 
             var token = await _userManager.GenerateChangeEmailTokenAsync(user, model.NewEmail);
-            var confirmationLink = $"http://localhost:4200/auth/confirm-new-email?userId={user.Id}&newEmail={Uri.EscapeDataString(model.NewEmail)}&token={Uri.EscapeDataString(token)}";
+            var confirmationLink = $"https://medical-tourism-front-end-ycxv.vercel.app/auth/confirm-new-email?userId={user.Id}&newEmail={Uri.EscapeDataString(model.NewEmail)}&token={Uri.EscapeDataString(token)}";
 
             await _emailService.SendEmailAsync(model.NewEmail, "Confirm Your New Email Address", $"Please confirm your new email by clicking this link: <a href='{confirmationLink}'>link</a>");
 
