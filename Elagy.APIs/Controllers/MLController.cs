@@ -27,7 +27,7 @@ namespace Elagy.APIs.Controllers
                     return BadRequest("Model training failed.");
                 }
 
-                return Ok("✅ Model trained successfully!");
+                return Ok(new { message = "✅ Model trained successfully!" });
             }
             catch (Exception ex)
             {
