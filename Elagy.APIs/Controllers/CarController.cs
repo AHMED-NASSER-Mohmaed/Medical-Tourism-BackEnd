@@ -32,10 +32,7 @@ namespace Elagy.APIs.Controllers
            [FromQuery] CarStatus? CarStatus = null,
            [FromQuery] bool? FilterIsActive = null,
            [FromQuery] decimal? MinPrice = null,
-           [FromQuery] decimal? MaxPrice = null,
-           [FromQuery] int? MinOccupancy = null,
-           [FromQuery] int? MaxOccupancy = null,
-           [FromQuery] int? FilterGovernorateId = null)
+           [FromQuery] decimal? MaxPrice = null)
         {
             var carRentalAssetId = GetCurrentUserId();
             if (carRentalAssetId == null) return Unauthorized("Car Rental Admin ID could not be determined from your token.");
@@ -54,9 +51,6 @@ namespace Elagy.APIs.Controllers
                     FilterIsActive = FilterIsActive,
                     MinPrice = MinPrice,
                     MaxPrice = MaxPrice,
-                    MinOccupancy = MinOccupancy,
-                    MaxOccupancy = MaxOccupancy,
-                    FilterGovernorateId = FilterGovernorateId
                 };
 
                 _logger.LogInformation($"Received request for cars for Car Rental Asset ID: {carRentalAssetId} (Admin Dashboard).");
@@ -73,13 +67,7 @@ namespace Elagy.APIs.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetAvailableCarsForWebsite(string carRentalId,
            [FromQuery] int PageNumber = 1,
-           [FromQuery] int PageSize = 10,
-           [FromQuery] string? SearchTerm = null,
-           [FromQuery] CarType? CarType = null,
-           [FromQuery] decimal? MinPrice = null,
-           [FromQuery] decimal? MaxPrice = null,
-           [FromQuery] int? MinOccupancy = null,
-           [FromQuery] int? MaxOccupancy = null)
+           [FromQuery] int PageSize = 10)
         {
             if (PageNumber < 1 || PageSize < 1) return BadRequest("PageNumber and PageSize must be greater than 0.");
 
@@ -88,13 +76,7 @@ namespace Elagy.APIs.Controllers
                 var paginationParams = new PaginationParameters
                 {
                     PageNumber = PageNumber,
-                    PageSize = PageSize,
-                    SearchTerm = SearchTerm,
-                    CarType = CarType,
-                    MinPrice = MinPrice,
-                    MaxPrice = MaxPrice,
-                    MinOccupancy = MinOccupancy,
-                    MaxOccupancy = MaxOccupancy,
+                    PageSize = PageSize
                 };
 
                 _logger.LogInformation($"Received request for available cars for website. Page: {PageNumber}, Size: {PageSize}.");
