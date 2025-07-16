@@ -76,6 +76,10 @@ namespace Elagy.BL.Services
                 .ThenInclude(g => g.Country)  // Eager load ServiceAsset if needed for AssetType filter and mapping
                 .Where(sp => sp.ServiceAsset != null && sp.ServiceAsset.AssetType == AssetType.CarRental); // Filter for CarRental assets
 
+            if (paginationParameters.FilterGovernorateId.HasValue)
+            {
+                query = query.Where(sp => sp.ServiceAsset.GovernateId == paginationParameters.FilterGovernorateId.Value);
+            }
 
             // 3. Apply additional dynamic filters (searchQuery, userStatus) using the helper function
             query = ApplyServiceProviderFilters(query, paginationParameters.SearchTerm, paginationParameters.UserStatus);
